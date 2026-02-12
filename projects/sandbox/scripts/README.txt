@@ -1,0 +1,1 @@
+Carpeta donde se guardaran los scripts del proyecto, incluyendo el script de creación de proyecto y el build.tcl

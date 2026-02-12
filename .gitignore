@@ -1,0 +1,16 @@
+# No subir los proyectos Vivado generados
+projects/*/project/
+projects/*/*.runs/
+projects/*/*.cache/
+projects/*/*.sim/
+projects/*/*.hw/
+projects/*/*.ip_user_files/
+
+# Logs y temporales
+*.jou
+*.log
+*.str
+*.wdb
+
+# Proyectos Vivado
+*.xpr
