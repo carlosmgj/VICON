@@ -1,5 +1,5 @@
 ###########################################################
-##  MSEEI 2024-2025           
+##  MSEEI 2024-2025
 ##  Basys3 General Purpose I/O
 ###########################################################
 
@@ -109,3 +109,14 @@ set_property CONFIG_VOLTAGE 3.3 [current_design]
 set_property CFGBVS VCCO [current_design]
 ###########################################################
 
+
+set_property PACKAGE_PIN U18 [get_ports {BTN[0]}]
+set_property PACKAGE_PIN T18 [get_ports {BTN[1]}]
+set_property PACKAGE_PIN T17 [get_ports {BTN[2]}]
+set_property PACKAGE_PIN U17 [get_ports {BTN[3]}]
+set_property PACKAGE_PIN W19 [get_ports {BTN[4]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {BTN[4]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {BTN[3]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {BTN[2]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {BTN[1]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {BTN[0]}]
