@@ -1,8 +1,17 @@
-###########################################################
-##  MSEEI 2024-2025
-##  Basys3 General Purpose I/O
-###########################################################
-
+## @file Basys3_GPIO.xdc
+# @brief Archivo de restricciones I/O para la Basys3 (MSEEI 2024-2025)
+# @section Diagrama Conexiones
+#
+# <img src="https://digilent.com/reference/_media/basys3-_basic_io_block_diagram.png?w=600&tok=2661a2"  width="300" />
+# @warning En la guia indica para el xdc (No estan en orden con el diagrama):
+# - BTN[0]=BTNC;
+# - BTN[1]=BTNU;
+# - BTN[2]=BTNR;
+# - BTN[3]=BTND;
+# - BTN[4]=BTNL;
+#
+# @section author_ Author
+# Carlos Manuel Gomez Jimenez, DNI: 76037985P
 
 ## 	Switches
 
@@ -120,3 +129,9 @@ set_property IOSTANDARD LVCMOS33 [get_ports {BTN[3]}]
 set_property IOSTANDARD LVCMOS33 [get_ports {BTN[2]}]
 set_property IOSTANDARD LVCMOS33 [get_ports {BTN[1]}]
 set_property IOSTANDARD LVCMOS33 [get_ports {BTN[0]}]
+
+# -----------------------------------------------
+# Configuracion de la senal de reloj (aun no lo creamos como reloj porque no se ha visto en este modulo)
+# -----------------------------------------------
+set_property PACKAGE_PIN W5 [get_ports CLK]
+set_property IOSTANDARD LVCMOS33 [get_ports CLK]
