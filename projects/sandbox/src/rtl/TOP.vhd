@@ -2,6 +2,7 @@
 --! Archivo fuente VHDL.
 --! \mainpage Proyecto SECUENCIAL
 --! \section title1 Descripcion
+--! \image html diagram.svg "Diagrama lógico"
 --! Pasos a realizar:
 --! Primer diseno secuencial con:
 --! - Parametrizacion del diseno
