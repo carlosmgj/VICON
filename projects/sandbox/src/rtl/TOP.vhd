@@ -21,9 +21,16 @@
 --! El codigo fuente se encuentra en <A HREF=_t_o_p_8vhd_source.html><B> TOP.vhd Annotated source </B></A>
 --! \section constraints Constraints
 --! El archivo de constraints se puede encontrar en \ref Basys3_GPIO.xdc
+--! \section reports Informes
+--! Tal y como pide la guia, los informes de interes se pueden encontrar en \ref Informe_E/S  y en \ref Informe_Utilizacion
 --! \section author Author
 --! Carlos Manuel Gomez Jimenez, DNI: 76037985P
 
+
+--! \page Informe_E/S 
+--! \include io_report.txt
+--! \page Informe_Utilizacion
+--! \include synthesis_utilization.txt
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -71,34 +78,24 @@ architecture Behavioral of TOP is
     
 
 begin
---! Asignamos cada LED a su interruptor correspondiente, indicando con la luz que el SW esta a 1.
+-- Asignamos cada LED a su interruptor correspondiente, indicando con la luz que el SW esta a 1.
 LED<=SW;
---! Asignamos cada boton (exceptuando el boton central) al anodo de cada digito. 
---! BTNL=DIGIT1, BTND=DIGIT2, BTNR=DIGIT3, BTNU=DIGIT4 (Digitos contados de izquierda a derecha)
+-- Asignamos cada boton (exceptuando el boton central) al anodo de cada digito. 
+-- BTNL=DIGIT1, BTND=DIGIT2, BTNR=DIGIT3, BTNU=DIGIT4 (Digitos contados de izquierda a derecha)
 AN<= not BTN(4 downto 1);
 
---! Multiplexor 4 a 1
---! En los requisitos no se contempla que se puedan pulsar m?s de un boton a la vez, la aproximacion asumida es la siguiente 
---! pone el digito 4 en todos los que se activen si hay mas de uno
---! OPC1:
+-- Multiplexor 4 a 1
+-- En los requisitos no se contempla que se puedan pulsar m?s de un boton a la vez, la aproximacion asumida es la siguiente 
+-- pone el digito 4 en todos los que se activen si hay mas de uno
 with BTN(4 downto 1) select
 COMB_CONN <= SW_DIGIT_1 when "1000",
              SW_DIGIT_2 when "0100",
              SW_DIGIT_3 when "0010",
              SW_DIGIT_4 when others;
---! OPC2:
---! Realmente con los 4 botones que tenemos como "selector", podriamos hacer un mux de 16 a 1. 
---! Asumimos que es v?lido ?nicamente cuando se pulsa un boton al mismo tiempo.
---! Cuando no sea asi, se mostrar? una F en todos los displays que hablite cada boton.
--- with BTN(4 downto 1) select
--- COMB_CONN <= SW_DIGIT_1 when "1000",
---              SW_DIGIT_2 when "0100",
---              SW_DIGIT_3 when "0010",
---              SW_DIGIT_4 when "0001",
---              "1111" when others;
 
---! Conversor de HEX a 7 segmentos utilizando la tabla de verdad.
---! El orden esta invertido ya que CAT(0) corresponde al a que es ahora el bit menos significativo.             
+
+-- Conversor de HEX a 7 segmentos utilizando la tabla de verdad.
+-- El orden esta invertido ya que CAT(0) corresponde al a que es ahora el bit menos significativo.             
 with COMB_CONN(3 downto 0) select
 CAT_NO_DP <= "1000000" when "0000",
              "1111001" when "0001",
@@ -120,8 +117,8 @@ CAT_NO_DP <= "1000000" when "0000",
              "0000110" when "1110",
              "0001110" when others;
 
---! Asignamos a los catodos el valor de la senal. (Se podria asignar directamente en el with select)
+-- Asignamos a los catodos el valor de la senal. (Se podria asignar directamente en el with select)
 CAT(6 downto 0)<= CAT_NO_DP;     
---! El punto apagado en todos.
+-- El punto apagado en todos.
 CAT(7)<='1';
 end Behavioral;
