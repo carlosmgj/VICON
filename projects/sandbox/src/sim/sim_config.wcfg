@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="TOP_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="TOP" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="265000000fs"></ZoomStartTime>
+      <ZoomEndTime time="1025000001fs"></ZoomEndTime>
+      <Cursor1Time time="530000000fs"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="231"></NameColumnWidth>
+      <ValueColumnWidth column_width="146"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="12" />
+   <wvobject fp_name="/TOP/CLK" type="logic">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">CLK</obj_property>
+      <obj_property name="ObjectShortName">CLK</obj_property>
+      <obj_property name="label">CLK</obj_property>
+      <obj_property name="CustomSignalColor">#FFA500</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/TOP/N" type="other">
+      <obj_property name="ElementShortName">N</obj_property>
+      <obj_property name="ObjectShortName">N</obj_property>
+   </wvobject>
+   <wvobject fp_name="/TOP/BTN[0]" type="logic">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">[0]</obj_property>
+      <obj_property name="ObjectShortName">[0]</obj_property>
+      <obj_property name="label">RESET</obj_property>
+      <obj_property name="CustomSignalColor">#FF0000</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="group67" type="group">
+      <obj_property name="label">INPUTS</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject fp_name="/TOP/SW" type="array">
+         <obj_property name="ElementShortName">SW[15:0]</obj_property>
+         <obj_property name="ObjectShortName">SW[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/TOP/BTN" type="array">
+         <obj_property name="ElementShortName">BTN[4:0]</obj_property>
+         <obj_property name="ObjectShortName">BTN[4:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="group69" type="group">
+      <obj_property name="label">FSM</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject fp_name="/TOP/state_next" type="other">
+         <obj_property name="ElementShortName">state_next</obj_property>
+         <obj_property name="ObjectShortName">state_next</obj_property>
+      </wvobject>
+      <wvobject fp_name="/TOP/state_reg" type="other">
+         <obj_property name="ElementShortName">state_reg</obj_property>
+         <obj_property name="ObjectShortName">state_reg</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="/TOP/BTN[4]" type="logic">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">[4]</obj_property>
+      <obj_property name="ObjectShortName">[4]</obj_property>
+      <obj_property name="label">A[BTN(4)]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/TOP/BTN[2]" type="logic">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">[2]</obj_property>
+      <obj_property name="ObjectShortName">[2]</obj_property>
+      <obj_property name="label">B[BTN(2)]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/TOP/LED[0]" type="logic">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">[0]</obj_property>
+      <obj_property name="ObjectShortName">[0]</obj_property>
+      <obj_property name="label">Y0</obj_property>
+   </wvobject>
+   <wvobject fp_name="/TOP/LED[1]" type="logic">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">[1]</obj_property>
+      <obj_property name="ObjectShortName">[1]</obj_property>
+      <obj_property name="label">Y1</obj_property>
+   </wvobject>
+   <wvobject fp_name="/TOP/state_reg" type="other">
+      <obj_property name="ElementShortName">state_reg</obj_property>
+      <obj_property name="ObjectShortName">state_reg</obj_property>
+   </wvobject>
+   <wvobject fp_name="/TOP/state_next" type="other">
+      <obj_property name="ElementShortName">state_next</obj_property>
+      <obj_property name="ObjectShortName">state_next</obj_property>
+   </wvobject>
+   <wvobject fp_name="group68" type="group">
+      <obj_property name="label">OUTPUTS</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject fp_name="/TOP/LED" type="array">
+         <obj_property name="ElementShortName">LED[15:0]</obj_property>
+         <obj_property name="ObjectShortName">LED[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/TOP/CAT" type="array">
+         <obj_property name="ElementShortName">CAT[7:0]</obj_property>
+         <obj_property name="ObjectShortName">CAT[7:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/TOP/AN" type="array">
+         <obj_property name="ElementShortName">AN[3:0]</obj_property>
+         <obj_property name="ObjectShortName">AN[3:0]</obj_property>
+      </wvobject>
+   </wvobject>
+</wave_config>
