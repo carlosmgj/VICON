@@ -1,20 +1,20 @@
 --! \file TOP.vhd
 --! Archivo fuente VHDL.
---! \mainpage Proyecto FSM
---! \section title1 Descripcion
+--! \mainpage Proyecto SECUENCIAL
 --! \image html diagram.svg "Diagrama logico"
---! \note Duracion aproximada 90 minutos
---!
+--! \section title1 Descripcion
 --! Pasos a realizar:
---! - Modelado de una FSM
---! - Introducción a la simulación de un modelo VHDL
+--! Primer diseno secuencial con:
+--! - Parametrizacion del diseno
+--! - Conexion con MUX del EC21
+--! - Diseno Jerarquico
 --! \note El formato de comentario incluye ! para poder realizar documentacion dinamica con Doxygen. 
 --! \section Uso
 --! Acceder a la documentacion abriendo el archivo <b>index.html</b> dentro de la carpeta ./docs/html. <br>
 --! En cada archivo (File), es posible acceder a su codigo fuente mostrado sin todos los comentarios pulsando en "Go to source code".
 --! \section source Codigo fuente
 --! La documentacion del codigo fuente se encuentra en \ref TOP.vhd
---! El codigo fuente se encuentra en <A HREF=_t_o_p_8vhd_source.html><B> TOP.vhd Annotated source </B></A>.
+--! El codigo fuente se encuentra en <A HREF=_t_o_p_8vhd_source.html><B> TOP.vhd Annotated source </B></A> y en <A HREF=_c_d4_r_e_8vhd_source.html><B> CD4RE.vhd Annotated source </B></A>
 --! \section constraints Constraints
 --! El archivo de constraints se puede encontrar en \ref Basys3_GPIO.xdc
 --! \section reports Informes
@@ -65,74 +65,122 @@ end TOP;
 
 --! Arquitectura de TOP.
 architecture Behavioral of TOP is
-    --signal namesignal: type (max downto min);
-    --! Tipo enumerado que representa los distintos estados de la FSM
-    type STATES is (s0,s1,s2);
-    --! Registro para almacenar el estado actual de la FSM
-    signal state_reg, state_next: STATES;
-    --! La señal de reset (RST) la controlamos con BTN(0)
-    alias RST: STD_LOGIC is SW(0);
-    --! La señal de entrada A la controlamos con BTN(4)
-    alias A: STD_LOGIC is BTN(4);
-    --! La señal de entrada B la controlamos con BTN(2)
-    alias B: STD_LOGIC is BTN(2);
-    --! La señal de salida Y0 la conectaremos a LED(0)
-    alias Y0: STD_LOGIC is LED(0);
-    --! La señal de salida Y1 la conectaremos a LED(1)
-    alias Y1: STD_LOGIC is LED(1);
     
+     --! Vector declaration for counter
+    signal COUNTER: NATURAL range 0 to N-1 := 0;
+    --! primer grupo mas significativo de 4 bits del free-running que que definen el numero del TERCER digito (AN(1)) de izda a dcha.
+    --! Cuatro interruptores (del SW8 al SW11) que definen el numero del SEGUNDO digito (AN(2)) de izda a dcha.
+    signal SW_DIGIT_2: STD_LOGIC_VECTOR (3 downto 0);
+    --! Cuatro interruptores (del SW12 al SW15) que definen el numero del PRIMER digito (AN(3)) de izda a dcha.
+    alias SW_DIGIT_1: STD_LOGIC_VECTOR (3 downto 0) is SW(15 downto 12);
+    --! Siete catodos (de A a G) que representan los siete segmentos de los displays
+    signal CAT_NO_DP: STD_LOGIC_VECTOR (6 downto 0);
+    --! Senal usada para conectar entre si dos modulos combinacionales internos
+    signal COMB_CONN: STD_LOGIC_VECTOR (3 downto 0);
     
-    
-    
-begin
--- LED(5) se encenderá cuando estamos en el estado S0.
-LED(5) <= '1' when state_reg = s0 else '0';
--- LED(6) se encenderá cuando estamos en el estado S1.
-LED(6) <= '1' when state_reg = s1 else '0';
--- LED(7) se encenderá cuando estamos en el estado S2.
-LED(7) <= '1' when state_reg = s2 else '0';
--- El resto de LED no los utilizaremos (los mantendremos apagados)
--- Los dígitos del display deben permanecer TODOS apagados
-AN<= (others => '1');
------------- LOGICA SECUENCIAL
+    -- Senales necesarias para la nueva instancia 
+    signal MCLK,locked,MRST: STD_LOGIC;
+    alias reset_in: STD_LOGIC is BTN(0);
+    -- Nueva senal de habilitacion
+    signal BCD_EN: STD_LOGIC;
 
--- state register
-
-process(CLK,RST)
 begin
-    --RESET ASINCRONO
-    if RST ='1' then state_reg <= s0;
-    --ESTADO ACTUAL REGISTRADO
-    elsif rising_edge(CLK) then
-        state_reg <= state_next;
-    end if;                
+
+------------------------------------------------------------------------------------------
+-- Instanciacion de MMCM
+------------------------------------------------------------------------------------------
+miMMCM: entity WORK.clk_wiz_0
+port map (
+    clk_in1 => CLK,
+    reset => reset_in,
+    clk_out1 => MCLK,
+    locked => locked
+);
+
+------------------------------------------------------------------------------------------
+-- Instanciacion del modulo CD4RE
+-- Reloj heredado del MSB del contador free-running
+-- Reset y EN conectados como indica la especificacion.
+------------------------------------------------------------------------------------------
+U0: entity WORK.CD4RE
+port map (
+    C => MCLK, 
+    R => MRST,
+    CE => BCD_EN, 
+    Q => SW_DIGIT_2, 
+    TC => open,
+    CEO => open
+);
+
+------------------------------------------------------------------------------------------
+-- Contador Free Running SIN INICIALIZACION
+------------------------------------------------------------------------------------------
+process(MCLK)
+    begin
+        if rising_edge(MCLK) then
+            -- No se habla del reset del contador free-running, pero si no se hace no se reinicia la cuenta al resetear.
+            -- if reset_in = '1' or counter = N-1 then 
+            if counter = N-1 then 
+                -- Reiniciamos el contador al alcanzar el maximo
+                counter <= 0;
+            else
+                -- Incrementamos el contador
+                counter <= counter + 1;
+            end if;
+        end if;
 end process;
 
--- next state logic
+--Enable dura el ciclo de reloj que dura el contador en el numero maximo
+BCD_EN <= '1' when counter = N-1 else '0';
 
-process (state_reg, A, B)
-begin
-    -- IMPORTANTE: ESTADO POR DEFECTO EN EL MISMO SITIO SI NO SE CUMPLEN LAS CONDICIONES
-    state_next <= state_reg;
-    case state_reg is
-    when s0 =>
-        if (A='1' AND B='1') then
-            state_next <= s2;
-        elsif (A='1' AND B = '0') then
-            state_next <= s1;
-        end if;
-    when s1 =>
-        if (A='1') then
-            state_next <= s0;
-        end if;
-    when s2 => state_next <= s0;     
-    end case;
-end process;
+-- La se?al LOCKED la visualizaremos en el punto del display -CAT(7)-
+CAT(7) <= not locked;
+-- Asignacion de MRST como indica en la guia, cuando no est? locked el MMCM.
+MRST <= not locked;
 
+--! Asignamos boton izdo y boton de abajo al anodo de los digitos 1 y 2. 
+--! BTNL=DIGIT1, BTND=DIGIT2, BTNR=DIGIT3, BTNU=DIGIT4 (Digitos contados de izquierda a derecha)
+AN(3 downto 2)<= not BTN(4 downto 3);
+--! AN0 y AN1 los mantendremos apagados
+AN(1 downto 0)<= (others=>'1');
 
--- Moore output logic
-Y1 <= '1' when (state_reg = s0 or state_reg = s1) else '0';
--- Mealy output logic
-Y0 <= '1' when a='1' and b='1' and state_reg = s0 else '0';
+--! Multiplexor
+--! En los requisitos no se contempla que se puedan pulsar m?s de un boton a la vez, la aproximacion asumida es la siguiente 
+--! pone el contador en los dos si se pulsan los dos botones a la vez
+--! OPC1:
+with BTN(4 downto 1) select
+COMB_CONN <= SW_DIGIT_1 when "1000",
+             SW_DIGIT_2 when others;
 
+--! Conversor de HEX a 7 segmentos utilizando la tabla de verdad.
+--! El orden esta invertido ya que CAT(0) corresponde al a que es ahora el bit menos significativo.             
+with COMB_CONN(3 downto 0) select
+CAT_NO_DP <= "1000000" when "0000",
+             "1111001" when "0001",
+             "0100100" when "0010",
+             "0110000" when "0011",
+             -----
+             "0011001" when "0100",
+             "0010010" when "0101",
+             "0000010" when "0110",
+             "1111000" when "0111",
+             -----
+             "0000000" when "1000",
+             "0010000" when "1001",
+             "0001000" when "1010",
+             "0000011" when "1011",
+             ------
+             "1000110" when "1100",
+             "0100001" when "1101",
+             "0000110" when "1110",
+             "0001110" when others;
+
+--! Asignamos a los catodos el valor de la senal de salida del conversor.
+CAT(6 downto 0)<= CAT_NO_DP;     
+LED<=(others=>'0');
+
+    
 end Behavioral;
+
+
+ 
