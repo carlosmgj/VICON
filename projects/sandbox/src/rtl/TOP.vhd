@@ -14,7 +14,7 @@
 --! En cada archivo (File), es posible acceder a su codigo fuente mostrado sin todos los comentarios pulsando en "Go to source code".
 --! \section source Codigo fuente
 --! La documentacion del codigo fuente se encuentra en \ref TOP.vhd
---! El codigo fuente se encuentra en <A HREF=_t_o_p_8vhd_source.html><B> TOP.vhd Annotated source </B></A> y en <A HREF=_c_d4_r_e_8vhd_source.html><B> CD4RE.vhd Annotated source </B></A>
+--! El codigo fuente se encuentra en <A HREF=_t_o_p_8vhd_source.html><B> TOP.vhd Annotated source </B></A>.
 --! \section constraints Constraints
 --! El archivo de constraints se puede encontrar en \ref Basys3_GPIO.xdc
 --! \section reports Informes
@@ -65,10 +65,74 @@ end TOP;
 
 --! Arquitectura de TOP.
 architecture Behavioral of TOP is
-    --! Vector declaration for counter
     --signal namesignal: type (max downto min);
+    --! Tipo enumerado que representa los distintos estados de la FSM
+    type STATES is (s0,s1,s2);
+    --! Registro para almacenar el estado actual de la FSM
+    signal state_reg, state_next: STATES;
+    --! La señal de reset (RST) la controlamos con BTN(0)
+    alias RST: STD_LOGIC is SW(0);
+    --! La señal de entrada A la controlamos con BTN(4)
+    alias A: STD_LOGIC is BTN(4);
+    --! La señal de entrada B la controlamos con BTN(2)
+    alias B: STD_LOGIC is BTN(2);
+    --! La señal de salida Y0 la conectaremos a LED(0)
+    alias Y0: STD_LOGIC is LED(0);
+    --! La señal de salida Y1 la conectaremos a LED(1)
+    alias Y1: STD_LOGIC is LED(1);
+    
+    
     
     
 begin
+-- LED(5) se encenderá cuando estamos en el estado S0.
+LED(5) <= '1' when state_reg = s0 else '0';
+-- LED(6) se encenderá cuando estamos en el estado S1.
+LED(6) <= '1' when state_reg = s1 else '0';
+-- LED(7) se encenderá cuando estamos en el estado S2.
+LED(7) <= '1' when state_reg = s2 else '0';
+-- El resto de LED no los utilizaremos (los mantendremos apagados)
+-- Los dígitos del display deben permanecer TODOS apagados
+AN<= (others => '1');
+------------ LOGICA SECUENCIAL
+
+-- state register
+
+process(CLK,RST)
+begin
+    --RESET ASINCRONO
+    if RST ='1' then state_reg <= s0;
+    --ESTADO ACTUAL REGISTRADO
+    elsif rising_edge(CLK) then
+        state_reg <= state_next;
+    end if;                
+end process;
+
+-- next state logic
+
+process (state_reg, A, B)
+begin
+    -- IMPORTANTE: ESTADO POR DEFECTO EN EL MISMO SITIO SI NO SE CUMPLEN LAS CONDICIONES
+    state_next <= state_reg;
+    case state_reg is
+    when s0 =>
+        if (A='1' AND B='1') then
+            state_next <= s2;
+        elsif (A='1' AND B = '0') then
+            state_next <= s1;
+        end if;
+    when s1 =>
+        if (A='1') then
+            state_next <= s0;
+        end if;
+    when s2 => state_next <= s0;     
+    end case;
+end process;
+
+
+-- Moore output logic
+Y1 <= '1' when (state_reg = s0 or state_reg = s1) else '0';
+-- Mealy output logic
+Y0 <= '1' when a='1' and b='1' and state_reg = s0 else '0';
 
 end Behavioral;
