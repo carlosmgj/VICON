@@ -133,7 +133,9 @@ set_property IOSTANDARD LVCMOS33 [get_ports {BTN[0]}]
 # -----------------------------------------------
 # Configuracion de la senal de reloj (aun no lo creamos como reloj porque no se ha visto en este modulo)
 # -----------------------------------------------
-set_property PACKAGE_PIN W5 [get_ports CLK]
-set_property IOSTANDARD LVCMOS33 [get_ports CLK]
+# -----------------------------------------------
+# Configuracion de la senal de reloj
+# -----------------------------------------------
+set_property PACKAGE_PIN W5 [get_ports MCLK]
+set_property IOSTANDARD LVCMOS33 [get_ports MCLK]
 
-create_clock -period 10.000 -name CLK -waveform {0.000 5.000} [get_ports CLK]

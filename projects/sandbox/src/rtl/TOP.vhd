@@ -45,10 +45,10 @@ entity TOP is
     Generic (
         --! \brief Tamano del vector contador calculado como se muestra en \ref CalculoN. 
         --! Parametro que se define en la entidad de un modulo y permite personalizar ciertos aspectos del diseno sin cambiar el codigo interno. Es como una "variable de configuracion" para el modulo.
-        N: NATURAL := 26 
+        N: NATURAL := 17 
         );
           --! Clock Input
-    Port (CLK: in STD_LOGIC;
+    Port (MCLK: in STD_LOGIC;
           --! Entrada de los 16 interruptores de tipo std_logic_vector, ordenado siendo el 15 el MSB.
           SW: in STD_LOGIC_VECTOR (15 downto 0);
           --! \brief Entrada de los 5 botones de tipo std_logic_vector, ordenado siendo el 4 el MSB.
@@ -65,121 +65,21 @@ end TOP;
 
 --! Arquitectura de TOP.
 architecture Behavioral of TOP is
-    
-     --! Vector declaration for counter
-    signal COUNTER: NATURAL range 0 to N-1 := 0;
-    --! primer grupo mas significativo de 4 bits del free-running que que definen el numero del TERCER digito (AN(1)) de izda a dcha.
-    --! Cuatro interruptores (del SW8 al SW11) que definen el numero del SEGUNDO digito (AN(2)) de izda a dcha.
-    signal SW_DIGIT_2: STD_LOGIC_VECTOR (3 downto 0);
-    --! Cuatro interruptores (del SW12 al SW15) que definen el numero del PRIMER digito (AN(3)) de izda a dcha.
-    alias SW_DIGIT_1: STD_LOGIC_VECTOR (3 downto 0) is SW(15 downto 12);
-    --! Siete catodos (de A a G) que representan los siete segmentos de los displays
-    signal CAT_NO_DP: STD_LOGIC_VECTOR (6 downto 0);
-    --! Senal usada para conectar entre si dos modulos combinacionales internos
-    signal COMB_CONN: STD_LOGIC_VECTOR (3 downto 0);
-    
-    -- Senales necesarias para la nueva instancia 
-    signal MCLK,locked,MRST: STD_LOGIC;
-    alias reset_in: STD_LOGIC is BTN(0);
-    -- Nueva senal de habilitacion
-    signal BCD_EN: STD_LOGIC;
-
+    signal DDi:STD_LOGIC_VECTOR (15 downto 0); --! Señal que define los valores visualizados en el DISPLAY. No es necesaria, se podria conectar SW directamente a DD de DISPLAY.
 begin
+    --! Instancia del modulo DISPLAY, con el nombre "display_inst". Se conectan las entradas y salidas de TOP a las correspondientes de DISPLAY.
+    Instancia_display: entity work.DISPLAY
+        Generic Map (N => N) --! Se asigna el valor del parametro N de TOP al parametro N de DISPLAY.
+        Port Map (
+            C => MCLK, --! Se conecta la entrada MCLK de TOP a la entrada C de DISPLAY.
+            DD => SW, --! Se conecta la entrada SW de TOP a la entrada DD de DISPLAY.
+            CAT => CAT, --! Se conecta la salida CAT de DISPLAY a la salida CAT de TOP.
+            AN => AN --! Se conecta la salida AN de DISPLAY a la salida AN de TOP.
+        );
 
-------------------------------------------------------------------------------------------
--- Instanciacion de MMCM
-------------------------------------------------------------------------------------------
-miMMCM: entity WORK.clk_wiz_0
-port map (
-    clk_in1 => CLK,
-    reset => reset_in,
-    clk_out1 => MCLK,
-    locked => locked
-);
+    LED <= SW; --! Se asigna el valor de los interruptores SW a los LEDs, de modo que cada LED se enciende cuando su correspondiente interruptor está en alto.
+    DDi <= SW; --! Se asigna el valor de los interruptores SW a la señal DDi, que se utiliza como entrada para el módulo DISPLAY. Esto permite que los valores mostrados en los displays correspondan a los interruptores seleccionados.
 
-------------------------------------------------------------------------------------------
--- Instanciacion del modulo CD4RE
--- Reloj heredado del MSB del contador free-running
--- Reset y EN conectados como indica la especificacion.
-------------------------------------------------------------------------------------------
-U0: entity WORK.CD4RE
-port map (
-    C => MCLK, 
-    R => MRST,
-    CE => BCD_EN, 
-    Q => SW_DIGIT_2, 
-    TC => open,
-    CEO => open
-);
-
-------------------------------------------------------------------------------------------
--- Contador Free Running SIN INICIALIZACION
-------------------------------------------------------------------------------------------
-process(MCLK)
-    begin
-        if rising_edge(MCLK) then
-            -- No se habla del reset del contador free-running, pero si no se hace no se reinicia la cuenta al resetear.
-            -- if reset_in = '1' or counter = N-1 then 
-            if counter = N-1 then 
-                -- Reiniciamos el contador al alcanzar el maximo
-                counter <= 0;
-            else
-                -- Incrementamos el contador
-                counter <= counter + 1;
-            end if;
-        end if;
-end process;
-
---Enable dura el ciclo de reloj que dura el contador en el numero maximo
-BCD_EN <= '1' when counter = N-1 else '0';
-
--- La se?al LOCKED la visualizaremos en el punto del display -CAT(7)-
-CAT(7) <= not locked;
--- Asignacion de MRST como indica en la guia, cuando no est? locked el MMCM.
-MRST <= not locked;
-
---! Asignamos boton izdo y boton de abajo al anodo de los digitos 1 y 2. 
---! BTNL=DIGIT1, BTND=DIGIT2, BTNR=DIGIT3, BTNU=DIGIT4 (Digitos contados de izquierda a derecha)
-AN(3 downto 2)<= not BTN(4 downto 3);
---! AN0 y AN1 los mantendremos apagados
-AN(1 downto 0)<= (others=>'1');
-
---! Multiplexor
---! En los requisitos no se contempla que se puedan pulsar m?s de un boton a la vez, la aproximacion asumida es la siguiente 
---! pone el contador en los dos si se pulsan los dos botones a la vez
---! OPC1:
-with BTN(4 downto 1) select
-COMB_CONN <= SW_DIGIT_1 when "1000",
-             SW_DIGIT_2 when others;
-
---! Conversor de HEX a 7 segmentos utilizando la tabla de verdad.
---! El orden esta invertido ya que CAT(0) corresponde al a que es ahora el bit menos significativo.             
-with COMB_CONN(3 downto 0) select
-CAT_NO_DP <= "1000000" when "0000",
-             "1111001" when "0001",
-             "0100100" when "0010",
-             "0110000" when "0011",
-             -----
-             "0011001" when "0100",
-             "0010010" when "0101",
-             "0000010" when "0110",
-             "1111000" when "0111",
-             -----
-             "0000000" when "1000",
-             "0010000" when "1001",
-             "0001000" when "1010",
-             "0000011" when "1011",
-             ------
-             "1000110" when "1100",
-             "0100001" when "1101",
-             "0000110" when "1110",
-             "0001110" when others;
-
---! Asignamos a los catodos el valor de la senal de salida del conversor.
-CAT(6 downto 0)<= CAT_NO_DP;     
-LED<=(others=>'0');
-
-    
 end Behavioral;
 
 
