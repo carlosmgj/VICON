@@ -5,6 +5,12 @@
 
 % REFERENCIAR IMAGENES: \autoref
 
+\RequirePackage{silence}
+\WarningFilter{soulutf8}{This package is obsolete}
+\WarningFilter{scrreprt}{Usage of package `titlesec' together}
+\WarningFilter{titlesec}{Non standard sectioning command}
+\WarningFilter{scrreprt}{Usage of package `tocloft' together}
+
 %----------------------------------------------------------------------------------------
 %	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
 %---------------------------------------------------------------------------------------- 
@@ -18,6 +24,7 @@ spanish, % Languages
 \input{classicthesis-config}
 
 \begin{document}
+
 	\frenchspacing % Reduces space after periods to make text more compact
 	\raggedbottom % Makes all pages the height of the text on that page
 	\selectlanguage{spanish} % Select your default language - e.g. american or ngerman
@@ -27,9 +34,9 @@ spanish, % Languages
 	
 	\pagenumbering{roman} % Roman page numbering prior to the start of the thesis content (i, ii, iii, etc)
 	\pagestyle{plain} % Suppress headers for the pre-content pages
-	%1\include{FrontBackMatter/Titlepage} % Main title page
-	\includepdf[pages=-]{gfx/thesis-front-cover.pdf}
-	%1\include{FrontBackMatter/Titleback} % Back of the title page
+	\include{FrontBackMatter/Titlepage} % Main title page
+	%\includepdf[pages=-]{gfx/thesis-front-cover.pdf}
+	\include{FrontBackMatter/Titleback} % Back of the title page
 	%1\cleardoublepage\include{FrontBackMatter/Dedication} % Dedication page
 	%1\cleardoublepage\include{FrontBackMatter/Foreword} % Uncomment and create a Foreword.tex to include a foreword
 	\newpage
@@ -114,11 +121,13 @@ spanish, % Languages
 	%----------------------------------------------------------------------------------------
 	%	THESIS CONTENT - APPENDICES
 	%----------------------------------------------------------------------------------------
-	\cleardoublepage\include{FrontBackMatter/Bibliography} % Bibliography
+    \nocite{*}
+	\cleardoublepage
+    \include{FrontBackMatter/Bibliography} % Bibliography
 	\appendix
 	\pagenumbering{gobble}
 	%1\part{Appendix} % New part of the thesis for the appendix
-	%\include{Chapters/Chapter0A} % Appendix A
+    %\include{Chapters/Chapter0A} % Appendix A
 	%\include{Chapters/Chapter0B} % Appendix B - empty
 	%\include{Chapters/Chapter0C} %template
 	%\include{Chapters/Chapter0D} %template
@@ -127,8 +136,7 @@ spanish, % Languages
 	%	POST-CONTENT THESIS PAGES
 	%----------------------------------------------------------------------------------------
 	
-
-	
+    
 	%1\cleardoublepage\include{FrontBackMatter/Colophon} % Colophon
 	
 	%1\cleardoublepage\include{FrontBackMatter/Declaration} % Declaration

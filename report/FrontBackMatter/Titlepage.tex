@@ -1,35 +1,100 @@
+% !TEX encoding = latin9
 \begin{titlepage}
-\newgeometry{left=15mm,top=15mm}
+    \begin{center}
+        \large
+        \hfill
+        \vfill
+        
+        {\huge\scshape Universidad de M{\'a}laga \par}
+        \vspace{0.4cm}
+        {\Large\scshape Escuela T{\'e}cnica Superior de \\ Ingenier{\'i}a de Telecomunicaci{\'o}n \par}        
+        \vspace{1.5cm}
+        
+        % Logo de la Universidad
+		\vspace{0.8cm} % Reducido para que quepa todo
+        
+        % Contenedor de logos alineados
+        \noindent
+        \begin{minipage}[c]{0.45\textwidth}
+            \centering
+            \includegraphics[height=2.2cm]{gfx/logo_uma_1} 
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.45\textwidth}
+            \centering
+            \includegraphics[height=2.2cm]{gfx/logo_uma_2} 
+        \end{minipage}
+        
+        \vspace{0.8cm}
+        
+        {\Large\bfseries TRABAJO FIN DE M{\'A}STER \par}
+        
+        \vspace{1cm}
+        
+        % Titulo del proyecto
+        {\huge\bfseries \myTitle \par}
+        
+        \vspace{1cm}
+        
+        % Nombre del Master
+        {\Large M{\'a}ster en Sistemas Electr{\'o}nicos \\ para Entornos Inteligentes \par}        
+        \vspace{2cm}
+        
+        {\Large M{\'A}LAGA, 2026 \par} 
+        
+        \vspace{1.5cm}
+        
+        {\Large \myName \par}
+        
+        \vfill
+    \end{center}
+\end{titlepage}
 
-\begin{minipage}[t][\textheight]{.25\textwidth}
-	\includegraphics[width=95px]{./gfx/HHlogo.jpg}\\\\
+\cleardoublepage
 
-	\centering
-	\hspace{-30px}
-	\rotatebox{270}{\fontsize{50pt}{85pt}\selectfont \color{myblue}
-	{\usefont{T1}{DejaVuSans-TLF}{b}{n} MASTER} 
-	{\usefont{T1}{DejaVuSans-TLF}{el}{n} THESIS}}
-\end{minipage}
-\begin{minipage}[t][.8\textheight]{.7\textwidth}
-	\raggedright
-	\vspace{-80pt}
-	\myDegree
-
-	\vspace{113px}
-	\includegraphics[width=\textwidth]{./gfx/HHpicture.png}
-
-	\vspace{1cm}
-	{\Large \myTitle}
-
-	\vspace{1cm}
-	
-	{\Large \myName}
-	{\large \mySubtitle}
-	\vfill
-
-	\myDepartment
-
-	\vspace{1.5cm}
-	\myUni, \today --\myVersion
-\end{minipage}
+\begin{titlepage}
+    \begin{center}
+        {\large\scshape Universidad de M{\'a}laga \par}
+        \vspace{0.2cm}
+        {\normalsize\scshape Escuela T{\'e}cnica Superior de Ingenier{\'i}a de Telecomunicaci{\'o}n \par}        
+        \vspace{1.5cm}
+        
+        {\Large\bfseries \myTitle \par}
+        
+        \vspace{1.5cm}
+    \end{center}
+    
+    \noindent\textbf{REALIZADO POR:}\\
+    \myName
+    
+    \vspace{0.8cm}
+    
+    \noindent\textbf{DIRIGIDO POR:}\\
+    \myProf
+    
+    \vspace{0.8cm}
+    
+    \noindent\textbf{DEPARTAMENTO:}\\
+    Tecnolog{\'i}a Electr{\'o}nica
+    
+    \vspace{0.8cm}
+    
+    \noindent\textbf{TITULACI{\'O}N:}\\
+    M{\'a}ster en Sistemas Electr{\'o}nicos para Entornos Inteligentes
+    
+    \vspace{0.8cm}
+    
+    \noindent\textbf{PALABRAS CLAVE:}\\
+    FPGA, VHDL, RTL, s{\'i}ntesis l{\'o}gica, sensor CMOS, visi{\'o}n artificial, OpenCV.
+    
+    \vspace{0.8cm}
+    
+    \noindent\textbf{RESUMEN:}\\
+    Este proyecto consiste en el estudio del funcionamiento del m{\'o}dulo sensor...
+    
+    \vfill
+    
+    \begin{flushright}
+        M{\'a}laga, \today
+    \end{flushright}
 \end{titlepage}
