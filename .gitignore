@@ -17,3 +17,7 @@ projects/*/*.ip_user_files/
 
 # Archivos de documentación generados
 docs/
+
+# --- Archivos temporales de LaTeX ---
+report/build/
+LATEX/
