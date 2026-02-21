@@ -1,0 +1,140 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% REFERENCIAR IMAGENES: \autoref
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%---------------------------------------------------------------------------------------- 
+\documentclass[%1twoside, %2DIV = 15,
+openright,titlepage,numbers=noenddot,headinclude,
+headlines,footinclude=true,cleardoublepage=empty,paper=a4,fontsize=12pt, % Binding correction, paper type and font 
+spanish, % Languages
+]{scrreprt} 
+
+% Includes the file which contains all the document configurations and packages - make sure to edit this file
+\input{classicthesis-config}
+
+\begin{document}
+	\frenchspacing % Reduces space after periods to make text more compact
+	\raggedbottom % Makes all pages the height of the text on that page
+	\selectlanguage{spanish} % Select your default language - e.g. american or ngerman
+	
+	%\renewcommand*{\bibname}{new name} % Uncomment to change the name of the bibliography
+	%\setbibpreamble{} % Uncomment to include a preamble to the bibliography - some text before the reference list starts
+	
+	\pagenumbering{roman} % Roman page numbering prior to the start of the thesis content (i, ii, iii, etc)
+	\pagestyle{plain} % Suppress headers for the pre-content pages
+	%1\include{FrontBackMatter/Titlepage} % Main title page
+	\includepdf[pages=-]{gfx/thesis-front-cover.pdf}
+	%1\include{FrontBackMatter/Titleback} % Back of the title page
+	%1\cleardoublepage\include{FrontBackMatter/Dedication} % Dedication page
+	%1\cleardoublepage\include{FrontBackMatter/Foreword} % Uncomment and create a Foreword.tex to include a foreword
+	\newpage
+	\thispagestyle{plain}
+	\mbox{}
+	\newpage
+	\cleardoublepage\include{FrontBackMatter/Abstract} % Abstract page
+	%1\cleardoublepage\include{FrontBackMatter/Publication} % Publications from the thesis page
+	\newpage
+	\thispagestyle{plain}
+	\mbox{}
+	\newpage
+	\cleardoublepage\include{FrontBackMatter/Acknowledgments} % Acknowledgements page
+	\newpage
+	\thispagestyle{plain}
+	\mbox{}
+	\newpage
+	\pagestyle{scrheadings} % Show chapter titles as headings
+	%\listoftodos
+	\cleardoublepage\include{FrontBackMatter/Contents} % Contents, list of figures/tables/listings and acronyms
+	\newpage
+	\thispagestyle{plain}
+	\mbox{}
+	\newpage
+	\cleardoublepage 
+	\pagenumbering{arabic} % Arabic page numbering for thesis content (1, 2, 3, etc)
+	%\setcounter{page}{90} % Uncomment to manually start the page counter at an arbitrary value (for example if you wish to count the pre-content pages in the page count)
+
+	\cleardoublepage % Avoids problems with pdfbookmark
+	
+	%----------------------------------------------------------------------------------------
+	%	THESIS CONTENT - CHAPTERS
+	%----------------------------------------------------------------------------------------
+	
+	%1\ctparttext{You can put some informational part preamble text here. Illo principalmente su nos. Non message \emph{occidental} angloromanic da. Debitas effortio simplificate sia se, auxiliar summarios da que, se avantiate publicationes via. Pan in terra summarios, capital interlingua se que. Al via multo esser specimen, campo responder que da. Le usate medical addresses pro, europa origine sanctificate nos se.} % Text on the Part 1 page describing  the content in Part 1
+	
+	%1\part{Some Kind of Manual} % First part of the thesis
+
+	\subfile{Chapters/introduction}
+%
+	\newpage
+	\thispagestyle{plain}
+	\mbox{}
+	\newpage
+	%
+	%\subfile{Chapters/literature}
+	%
+	%\newpage
+	%\thispagestyle{plain}
+	%\mbox{}
+	%\newpage
+	%
+	%\subfile{Chapters/methods}
+	%
+	%\newpage
+	%\thispagestyle{plain}
+	%\mbox{}
+	%\newpage		
+	%
+	%\subfile{Chapters/results}
+	%\newpage
+	%\thispagestyle{plain}
+	%\mbox{}
+	%\newpage
+	%\subfile{Chapters/discussion}
+	% 
+	%
+	%\subfile{Chapters/conclusion}
+	%
+	%\cleardoublepage % Empty page before the start of the next part
+	
+	%------------------------------------------------
+	
+	%1\ctparttext{You can put some informational part preamble text here. Illo principalmente su nos. Non message \emph{occidental} angloromanic da. Debitas effortio simplificate sia se, auxiliar summarios da que, se avantiate publicationes via. Pan in terra summarios, capital interlingua se que. Al via multo esser specimen, campo responder que da. Le usate medical addresses pro, europa origine sanctificate nos se.} % Text on the Part 2 page describing the content in Part 2
+	
+	%1\part{The Showcase} % Second part of the thesis
+	
+	%\include{Chapters/Chapter02} % Chapter 2
+	%\include{Chapters/Chapter03} % Chapter 3
+	%1\include{Chapters/Chapter04} % Chapter 4 - empty template
+	
+	%----------------------------------------------------------------------------------------
+	%	THESIS CONTENT - APPENDICES
+	%----------------------------------------------------------------------------------------
+	\cleardoublepage\include{FrontBackMatter/Bibliography} % Bibliography
+	\appendix
+	\pagenumbering{gobble}
+	%1\part{Appendix} % New part of the thesis for the appendix
+	%\include{Chapters/Chapter0A} % Appendix A
+	%\include{Chapters/Chapter0B} % Appendix B - empty
+	%\include{Chapters/Chapter0C} %template
+	%\include{Chapters/Chapter0D} %template
+	
+	%----------------------------------------------------------------------------------------
+	%	POST-CONTENT THESIS PAGES
+	%----------------------------------------------------------------------------------------
+	
+
+	
+	%1\cleardoublepage\include{FrontBackMatter/Colophon} % Colophon
+	
+	%1\cleardoublepage\include{FrontBackMatter/Declaration} % Declaration
+	
+	%1\cleartoleftpage\include{FrontBackMatter/Backpage} % Back cover
+	%----------------------------------------------------------------------------------------
+	
+
+\end{document}
