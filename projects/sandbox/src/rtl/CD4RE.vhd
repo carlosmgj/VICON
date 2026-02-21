@@ -1,5 +1,20 @@
 --! \file CD4RE.vhd
---! Archivo modulo CD4RE.
+--! MODULO CD4RE encargado de implementar un contador BCD de 4 bits con enable y reset. El contador cuenta de 0 a 9 y luego vuelve a 0.
+--! El contador tiene una salida de terminal count (TC) que se activa cuando el contador llega a 9, y una salida de carry out (CEO) que se activa cuando el contador incrementa de 9 a 0.
+--!
+--! \section plantilla Plantilla de instanciacion:
+--!
+--!     U0: entity WORK.CD4RE
+--!     port map (
+--!         C => MCLK, -- Señal de reloj a la que se serve el contador
+--!         R => GRST, -- Señal de reset global, activa a 1. Pone el contador a 0.
+--!         CE => TICK_FREERUN, -- Señal de enable del contador, activa a 1. El contador solo incrementa cuando esta señal esta activa.
+--!         Q => Q0, -- Salida de 4 bits del contador, que representa el valor actual del contador en formato BCD.
+--!         TC => open, -- Salida de terminal count, activa a 1 cuando el contador llega a 9.
+--!         CEO => TICK_SECOND -- Salida de carry out, activa a 1 cuando el contador incrementa de 9 a 0.
+--!     );
+--! \author Carlos Manuel Gomez Jimenez; DNI: 76037985P
+--! \date 2024-06
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;

@@ -1,20 +1,31 @@
 --! \file TOP.vhd
 --! Archivo fuente VHDL.
---! \mainpage Proyecto SECUENCIAL
---! \image html diagram.svg "Diagrama logico"
---! \section title1 Descripcion
---! Pasos a realizar:
---! Primer diseno secuencial con:
---! - Parametrizacion del diseno
---! - Conexion con MUX del EC21
---! - Diseno Jerarquico
+--! \mainpage Prueba de evaluacion Final 2
+--! \image html diagram.svg "Diagrama lógico"
+--! PROBLEMA 1
+--! -  Cronómetro de DOS dígitos:
+--!    -  El dígito de menor peso se incrementará cada décima de segundo.
+--!    -  El dígito de mayor peso se incrementará cada segundo.
+--! -  Funciona de manera ininterrumpida
+--! -  Nuestro reloj de referencia (MCLK) es de 50MHz, pero Nuestro cronómetro ha de funcionar en tiempo real:
+--!    -  Además de los DOS módulos que generan la cuenta (DOS contadores BCD)
+--! necesitaremos de un temporizador en tiempo real (free-running).
+--! PROBLEMA 2
+--! -  DOS CONTADORES INDEPENDIENTES, distintos a los dos anteriores, habilitados MANUALMENTE
+--!    -  ambos deben incrementar en paralelo su valor cada vez que actuamos MANUALMENTE sobre la señal de habilitación.
+--!    -  El objetivo es visualizar los problemas inherentes a los actuadores electromecánicos e implementar su solución
 --! \note El formato de comentario incluye ! para poder realizar documentacion dinamica con Doxygen. 
 --! \section Uso
 --! Acceder a la documentacion abriendo el archivo <b>index.html</b> dentro de la carpeta ./docs/html. <br>
 --! En cada archivo (File), es posible acceder a su codigo fuente mostrado sin todos los comentarios pulsando en "Go to source code".
+--! \section files Archivos documentados
+--! - top.vhd
+--! - display.vhd
+--! - CD4RE.vhd
 --! \section source Codigo fuente
---! La documentacion del codigo fuente se encuentra en \ref TOP.vhd
---! El codigo fuente se encuentra en <A HREF=_t_o_p_8vhd_source.html><B> TOP.vhd Annotated source </B></A> y en <A HREF=_c_d4_r_e_8vhd_source.html><B> CD4RE.vhd Annotated source </B></A>
+--! - <A HREF=_t_o_p_8vhd_source.html><B> TOP.vhd Annotated source </B></A>
+--! - <A HREF=_d_i_s_p_l_a_y_8vhd_source.html><B> DISPLAY.vhd Annotated source </B></A>
+--! - <A HREF=_c_d4_r_e_8vhd_source.html><B> CD4RE.vhd Annotated source </B></A>
 --! \section constraints Constraints
 --! El archivo de constraints se puede encontrar en \ref Basys3_GPIO.xdc
 --! \section reports Informes
@@ -48,7 +59,7 @@ entity TOP is
         N: NATURAL := 17 
         );
           --! Clock Input
-    Port (MCLK: in STD_LOGIC;
+    Port (CLK: in STD_LOGIC;
           --! Entrada de los 16 interruptores de tipo std_logic_vector, ordenado siendo el 15 el MSB.
           SW: in STD_LOGIC_VECTOR (15 downto 0);
           --! \brief Entrada de los 5 botones de tipo std_logic_vector, ordenado siendo el 4 el MSB.
@@ -65,20 +76,53 @@ end TOP;
 
 --! Arquitectura de TOP.
 architecture Behavioral of TOP is
-    signal DDi:STD_LOGIC_VECTOR (15 downto 0); --! Señal que define los valores visualizados en el DISPLAY. No es necesaria, se podria conectar SW directamente a DD de DISPLAY.
+    --------------------------  ALIAS
+    --! Alias de reset interna
+    alias reset_in: std_logic is BTN(0);
+    --------------------------  SENALES
+    --! Senal de reloj generada por el MMCM
+    signal MCLK: std_logic;
+    --! Senal que indica la estabilidad del MMCM
+    signal locked: std_logic;
+    --! Senal de reset interna dependiente de MMCM
+    signal grst: std_logic;
+    --! Senal para habilitar el contador de decisegundos.
+    signal tick_freerun: std_logic;
+    --! Senal de contador, usigned para que haga overflow de forma natural
+    signal counter: unsigned(N-1 downto 0) := (others => '0');
+    --! Senal con datos de entrada
+    signal DDi: std_logic_vector(15 downto 0);
+
 begin
-    --! Instancia del modulo DISPLAY, con el nombre "display_inst". Se conectan las entradas y salidas de TOP a las correspondientes de DISPLAY.
-    Instancia_display: entity work.DISPLAY
-        Generic Map (N => N) --! Se asigna el valor del parametro N de TOP al parametro N de DISPLAY.
-        Port Map (
-            C => MCLK, --! Se conecta la entrada MCLK de TOP a la entrada C de DISPLAY.
-            DD => SW, --! Se conecta la entrada SW de TOP a la entrada DD de DISPLAY.
-            CAT => CAT, --! Se conecta la salida CAT de DISPLAY a la salida CAT de TOP.
-            AN => AN --! Se conecta la salida AN de DISPLAY a la salida AN de TOP.
-        );
+    -----------------------------------------------------------------
+    --  MMCM
+    -----------------------------------------------------------------
+    miMMCM: entity WORK.clk_wiz_0
+    port map(
+        clk_in1 => CLK, 
+        reset => reset_in,
+        clk_out1 => MCLK, 
+        locked => locked
+    );
+
+    grst <= not locked; --! El reset global se activa mientras el MMCM no esta bloqueado, es decir, mientras no se ha estabilizado la senal de reloj generada.  
+    
+    
+    -----------------------------------------------------------------
+    -- CONTADOR FREERUNNING
+    -----------------------------------------------------------------
+    
+    process(MCLK)
+    begin
+        if rising_edge(MCLK) then
+            counter <= counter + 1;
+        end if;
+    end process;
+    tick_freerun <= '1' when counter = N-1  else '0'; -- dura 1 system clock
+
 
     LED <= SW; --! Se asigna el valor de los interruptores SW a los LEDs, de modo que cada LED se enciende cuando su correspondiente interruptor está en alto.
-    DDi <= SW; --! Se asigna el valor de los interruptores SW a la señal DDi, que se utiliza como entrada para el módulo DISPLAY. Esto permite que los valores mostrados en los displays correspondan a los interruptores seleccionados.
+    
 
 end Behavioral;
 

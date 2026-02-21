@@ -1,34 +1,23 @@
---! \file TOP.vhd
---! Archivo fuente VHDL.
---! \mainpage Prueba de evaluacion Final 21
---! -  Desarrollo de un pequeño core.
---! -  Uso de lógica combinacional y secuencial dentro del mismo core.
---! -  Documentar el modelo mediante breves comentarios.
---! -  La documentación debe facilitar la fácil reutilización del core.
---! -  Hacer uso del core creado en una sencilla prueba.
---! -  Analizar informes para extraer información
---! -  Hacer pruebas de verificación sobre placa para extraer información
---! -  Mejorar la destreza en el uso de las distintas herramientas que hemos utilizado hasta ahora
---! -  Revisar aquellos aspectos que en las pruebas de evaluación continua no quedaron bien terminados.
+--! \file DISPLAY.vhd
+--! MODULO DISPLAY encargado de mostrar los valores de 4 nibbles en los displays.
+--!  Se muestra un nibble en cada display, y se selecciona el nibble a mostrar con los interruptores SW.
+--! El modulo utiliza un contador Free-Running para multiplexar los displays y mostrar los valores de forma continua.
 --!
---! \note El formato de comentario incluye ! para poder realizar documentacion dinamica con Doxygen. 
---! \section Uso
---! Acceder a la documentacion abriendo el archivo <b>index.html</b> dentro de la carpeta ./docs/html. <br>
---! En cada archivo (File), es posible acceder a su codigo fuente mostrado sin todos los comentarios pulsando en "Go to source code".
---! \section source Codigo fuente
---! La documentacion del codigo fuente se encuentra en \ref TOP.vhd
---! El codigo fuente se encuentra en <A HREF=_t_o_p_8vhd_source.html><B> TOP.vhd Annotated source </B></A> y en <A HREF=_c_d4_r_e_8vhd_source.html><B> CD4RE.vhd Annotated source </B></A>
---! \section constraints Constraints
---! El archivo de constraints se puede encontrar en \ref Basys3_GPIO.xdc
---! \section reports Informes
---! Tal y como pide la guia, los informes de interes se pueden encontrar en \ref Informe_E/S  y en \ref Informe_Utilizacion
---! \section author Author
---! Carlos Manuel Gomez Jimenez, DNI: 76037985P
+--! \section plantilla Plantilla de instanciacion:
+--!
+--!     Instancia_display: entity work.DISPLAY
+--!         Generic Map (N => N) --! Se asigna el valor del parametro
+--!         Port Map (
+--!             C => MCLK, --! Se conecta la entrada MCLK de TOP a la entrada C de DISPLAY.
+--!             DD => SW, --! Se conecta la entrada SW de TOP a la entrada
+--!             CAT => CAT, --! Se conecta la salida CAT de DISPLAY a la salida CAT de TOP.
+--!             AN => AN --! Se conecta la salida AN de DISPLAY a la salida AN de TOP.
+--!         );
+--!
+--! \author Carlos Manuel Gomez Jimenez; DNI: 76037985P
+--! \date 2024-06
 
---! \page Informe_E/S 
---! \include io_report.txt
---! \page Informe_Utilizacion
---! \include synthesis_utilization.txt
+
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -55,7 +44,9 @@ entity DISPLAY is
           --! Salida de los 8 catodos de los displays de tipo std_logic_vector, ordenado siendo el 7 el MSB.
           CAT: out STD_LOGIC_VECTOR (7 downto 0);
           --! Salida de los 4 anodos de los displays de tipo std_logic_vector, ordenado siendo el 3 el MSB.
-          AN: out STD_LOGIC_VECTOR (3 downto 0));
+          AN: out STD_LOGIC_VECTOR (3 downto 0);
+          --! Entrada para la iluminacion de los puntos
+          DP: in STD_LOGIC_VECTOR (3 downto 0));
 end DISPLAY;
 
 
