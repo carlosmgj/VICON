@@ -3,53 +3,77 @@
    <wave_state>
    </wave_state>
    <db_ref_list>
-      <db_ref path="TOP_behav.wdb" id="1">
+      <db_ref path="TOP_verif_tb_behav.wdb" id="1">
          <top_modules>
-            <top_module name="TOP" />
-            <top_module name="glbl" />
+            <top_module name="TOP_verif_tb" />
          </top_modules>
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="566461824fs"></ZoomStartTime>
-      <ZoomEndTime time="676227188fs"></ZoomEndTime>
-      <Cursor1Time time="2030000000fs"></Cursor1Time>
+      <ZoomStartTime time="136681667fs"></ZoomStartTime>
+      <ZoomEndTime time="1224681668fs"></ZoomEndTime>
+      <Cursor1Time time="318015000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="231"></NameColumnWidth>
-      <ValueColumnWidth column_width="138"></ValueColumnWidth>
+      <ValueColumnWidth column_width="130"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="8" />
-   <wvobject fp_name="/TOP/CLK" type="logic">
-      <obj_property name="ElementShortName">CLK</obj_property>
-      <obj_property name="ObjectShortName">CLK</obj_property>
+   <WVObjectSize size="6" />
+   <wvobject fp_name="/TOP_verif_tb/cat" type="array">
+      <obj_property name="ElementShortName">cat[7:0]</obj_property>
+      <obj_property name="ObjectShortName">cat[7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/TOP/MCLK" type="logic">
-      <obj_property name="ElementShortName">MCLK</obj_property>
-      <obj_property name="ObjectShortName">MCLK</obj_property>
+   <wvobject fp_name="/TOP_verif_tb/an" type="array">
+      <obj_property name="ElementShortName">an[3:0]</obj_property>
+      <obj_property name="ObjectShortName">an[3:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/TOP/BTN[0]" type="logic">
-      <obj_property name="ElementShortName">[0]</obj_property>
-      <obj_property name="ObjectShortName">[0]</obj_property>
+   <wvobject fp_name="/TOP_verif_tb/CLK_PERIOD" type="other">
+      <obj_property name="ElementShortName">CLK_PERIOD</obj_property>
+      <obj_property name="ObjectShortName">CLK_PERIOD</obj_property>
    </wvobject>
-   <wvobject fp_name="/TOP/locked" type="logic">
-      <obj_property name="ElementShortName">locked</obj_property>
-      <obj_property name="ObjectShortName">locked</obj_property>
+   <wvobject fp_name="/TOP_verif_tb/sw" type="array">
+      <obj_property name="ElementShortName">sw[15:0]</obj_property>
+      <obj_property name="ObjectShortName">sw[15:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/TOP/COMB_CONN" type="array">
-      <obj_property name="ElementShortName">COMB_CONN[3:0]</obj_property>
-      <obj_property name="ObjectShortName">COMB_CONN[3:0]</obj_property>
+   <wvobject fp_name="/TOP_verif_tb/clk" type="logic">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
    </wvobject>
-   <wvobject fp_name="/TOP/BCD_EN" type="logic">
-      <obj_property name="ElementShortName">BCD_EN</obj_property>
-      <obj_property name="ObjectShortName">BCD_EN</obj_property>
-   </wvobject>
-   <wvobject fp_name="/TOP/N" type="other">
-      <obj_property name="ElementShortName">N</obj_property>
-      <obj_property name="ObjectShortName">N</obj_property>
-   </wvobject>
-   <wvobject fp_name="/TOP/COUNTER" type="other">
-      <obj_property name="ElementShortName">COUNTER</obj_property>
-      <obj_property name="ObjectShortName">COUNTER</obj_property>
+   <wvobject fp_name="group23" type="group">
+      <obj_property name="label">DISPLAY</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject fp_name="/TOP_verif_tb/dut/Instancia_display/N" type="other">
+         <obj_property name="ElementShortName">N</obj_property>
+         <obj_property name="ObjectShortName">N</obj_property>
+      </wvobject>
+      <wvobject fp_name="/TOP_verif_tb/dut/Instancia_display/DD" type="array">
+         <obj_property name="ElementShortName">DD[15:0]</obj_property>
+         <obj_property name="ObjectShortName">DD[15:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/TOP_verif_tb/dut/Instancia_display/Hin0" type="array">
+         <obj_property name="ElementShortName">Hin0[3:0]</obj_property>
+         <obj_property name="ObjectShortName">Hin0[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/TOP_verif_tb/dut/Instancia_display/sseg" type="array">
+         <obj_property name="ElementShortName">sseg[6:0]</obj_property>
+         <obj_property name="ObjectShortName">sseg[6:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/TOP_verif_tb/dut/Instancia_display/sel" type="array">
+         <obj_property name="ElementShortName">sel[1:0]</obj_property>
+         <obj_property name="ObjectShortName">sel[1:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/TOP_verif_tb/dut/Instancia_display/q_reg" type="array">
+         <obj_property name="ElementShortName">q_reg[3:0]</obj_property>
+         <obj_property name="ObjectShortName">q_reg[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/TOP_verif_tb/dut/Instancia_display/q_next" type="array">
+         <obj_property name="ElementShortName">q_next[3:0]</obj_property>
+         <obj_property name="ObjectShortName">q_next[3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/TOP_verif_tb/dut/Instancia_display/dot" type="logic">
+         <obj_property name="ElementShortName">dot</obj_property>
+         <obj_property name="ObjectShortName">dot</obj_property>
+      </wvobject>
    </wvobject>
 </wave_config>
