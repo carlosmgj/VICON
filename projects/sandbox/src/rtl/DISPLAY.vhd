@@ -66,7 +66,7 @@ architecture Behavioral of DISPLAY is
     --! HEX correspondiente al nibble a mostrar.
     signal hex: STD_LOGIC_VECTOR(3 downto 0);
     --! Señal de salida del contador FREE RUN.
-    signal q_reg:UNSIGNED(N-1 downto 0);
+    signal q_reg: UNSIGNED(N-1 downto 0) := (others=>'0');
     --! Señal futura del contador FREE RUNNING.
     signal q_next:UNSIGNED(N-1 downto 0);
     --! Señal que indica si el punto del display debe estar encendido o apagado.
