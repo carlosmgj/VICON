@@ -69,79 +69,98 @@ architecture Behavioral of mt9v111_agent is
     signal clk_int : std_logic := '0';
     constant PIX_PERIOD : time := 37 ns; -- ~27MHz
     signal addr_rx : std_logic_vector(7 downto 0); 
+    
+    type reg_map_t is array (0 to 255) of std_logic_vector(15 downto 0);
+    
+    signal regs_core : reg_map_t := (
+        16#00# => x"823A", -- Chip Version (ID real del MT9V111)
+        16#0D# => x"0008", -- Reset/Misc Control (valor por defecto)
+        others => x"CACA"
+    );
+
+    signal regs_ifp : reg_map_t := (
+        16#01# => x"0001", -- Color Pipeline Control
+        others => x"0FE0"
+    );
+
 begin
 
     -- Generador de Pixel Clock independiente 
     clk_int <= not clk_int after PIX_PERIOD/2;
-    pixclk  <= clk_int;
-
-    -----------------------------------------------------------
-    -- PROCESO 1: Generador de Patr贸n de Video (Gradiente) 
-    -----------------------------------------------------------
-    video_gen: process
-    begin
-        fval <= '0'; lval <= '0'; 
-        dout <= (others => '0');
-        wait for 1 us; 
-
-        loop
-            fval <= '1'; 
-            for row in 0 to IMG_HEIGHT-1 loop 
-                lval <= '1'; 
-                for col in 0 to IMG_WIDTH-1 loop 
-                    -- Generamos un gradiente simple 
-                    dout <= std_logic_vector(to_unsigned((col + row) mod 256, 8));
-                    wait until falling_edge(clk_int); 
-                end loop;
-                lval <= '0'; 
-                wait for 10 * PIX_PERIOD; 
-            end loop;
-            fval <= '0'; 
-            wait for 100 * PIX_PERIOD; 
-        end loop;
-    end process;
 
     -----------------------------------------------------------
     -- PROCESO 2: Respondedor I2C Activo (Slave)
     -----------------------------------------------------------
     i2c_active_respond: process
+        variable v_reg_addr : integer range 0 to 255;
+        variable v_data_16  : std_logic_vector(15 downto 0);
+        variable v_addr_dev : std_logic_vector(7 downto 0);
     begin
-        -- Estado inicial: SDA en alta impedancia para permitir que el Maestro escriba 
         sda <= 'Z';
-
-        -- 1. Detectar Condici贸n de START (SDA cae con SCL alto) 
+    
+        -- 1. START
         wait until falling_edge(sda) and scl = '1';
-        log_to_file("reporte_final_1.txt", "I2C Agente: START detectado", false); -- 
-
-        -- 2. Recibir Direcci贸n (7 bits) + R/W (1 bit)
+        
+        -- 2. Recibir Direcci髇 Dispositivo (8 bits)
         for i in 7 downto 0 loop
             wait until rising_edge(scl);
-            addr_rx(i) <= sda;
-            --log_to_file("reporte_final_1.txt","A馻dido dato " & vec_to_str(addr_rx(7 downto 1)), false);
+            v_addr_dev(i) := sda;
         end loop;
-        
-        log_to_file("reporte_final_1.txt","Direccion final:"& vec_to_str(addr_rx(7 downto 1)) & "/n ADDR: " & vec_to_str(I2C_ADDR(6 downto 0)) , false);
-        -- 3. Verificaci贸n de Direcci贸n 
-        -- El DUT env铆a 7 bits de direcci贸n. Comparamos addr_rx(7 downto 1).
-        if addr_rx(7 downto 1) = I2C_ADDR then
-            -- 4. Generar ACK (Poner SDA en '0' en el 9潞 pulso de reloj)
+    
+        if v_addr_dev(7 downto 1) = I2C_ADDR then
+            -- ACK 1 (Direcci髇 Dispositivo)
             wait until falling_edge(scl);
-            sda <= '0'; 
-            log_to_file("reporte_final_1.txt", "I2C Agente: Direccion 0x" & vec_to_str(addr_rx(7 downto 1)) & " correcta. Enviando ACK", false);
+            sda <= '0';
+            wait until falling_edge(scl);
+            sda <= 'Z';
+    
+            -- 3. Recibir Direcci髇 de Registro (8 bits)
+            for i in 7 downto 0 loop
+                wait until rising_edge(scl);
+                v_data_16(i+8) := sda; -- Usamos v_data_16 temporalmente para ahorrar variables
+            end loop;
+            v_reg_addr := to_integer(unsigned(v_data_16(15 downto 8)));
             
-            -- Esperar a que pase el pulso de ACK y liberar el bus
+            -- ACK 2 (Direcci髇 Registro)
+            wait until falling_edge(scl);
+            sda <= '0';
             wait until falling_edge(scl);
             sda <= 'Z';
-        else
-            -- Si no coincide, nos quedamos en Z (NACK impl铆cito)
-            log_to_file("reporte_final_1.txt", "I2C Agente: Direccion 0x" & vec_to_str(addr_rx(7 downto 1)) & " incorrecta.", true);
+    
+            -- 4. Recibir Dato BYTE ALTO (8 bits)
+            for i in 7 downto 0 loop
+                wait until rising_edge(scl);
+                v_data_16(i+8) := sda;
+            end loop;
+            
+            -- ACK 3 (Byte Alto)
+            wait until falling_edge(scl);
+            sda <= '0';
+            wait until falling_edge(scl);
             sda <= 'Z';
+    
+            -- 5. Recibir Dato BYTE BAJO (8 bits)
+            for i in 7 downto 0 loop
+                wait until rising_edge(scl);
+                v_data_16(i) := sda;
+            end loop;
+            
+            -- ACK 4 (Byte Bajo)
+            wait until falling_edge(scl);
+            sda <= '0';
+            wait until falling_edge(scl);
+            sda <= 'Z';
+    
+            -- 6. GUARDAR EN EL MAPA (Suponiendo que estamos en la p醙ina 0)
+            regs_core(v_reg_addr) <= v_data_16;
+            log_to_file("reporte_final_1.txt", "I2C Agente: Registro 0x" & integer'image(v_reg_addr) & 
+                        " escrito con valor 0x" & vec_to_str(v_data_16), false);
+    
         end if;
-
-        -- 5. Detectar Condici贸n de STOP (SDA sube con SCL alto) 
+    
+        -- 7. STOP
         wait until rising_edge(sda) and scl = '1';
-        log_to_file("reporte_final_1.txt", "I2C Agente: STOP detectado", false); -- 
-
+        log_to_file("reporte_final_1.txt", "I2C Agente: STOP detectado", false);
     end process;
 
 end Behavioral;

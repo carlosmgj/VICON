@@ -35,105 +35,79 @@ entity TOP is
 end TOP;
 
 architecture Behavioral of TOP is
-    -- FSM Estados: Incluimos sub-pasos para manejar el flanco de SCLK
-    type state_t is (IDLE, START, SEND_ADDR_LOW, SEND_ADDR_HIGH, ACK_WAIT, ACK_CHECK, STOP, FINISHED);
-    signal state      : state_t := IDLE;
-    
-    signal bit_cnt    : integer range 0 to 7 := 7;
-    signal clk_div    : unsigned(15 downto 0) := (others => '0');
-    signal en_i2c     : std_logic := '0';
-    
-    -- Se�ales internas para el buffer triestado
-    signal sdata_out  : std_logic := '1';
-    signal sdata_oe   : std_logic := '0'; -- '1' para escribir, '0' para leer (Z)
+
+    -- 1. Señales para conectar con el Controlador I2C
+    signal i2c_start     : std_logic := '0';
+    signal i2c_num_bytes : integer range 1 to 4 := 3; -- Para el MT9V111: Reg + 2 Bytes data = 3
+    signal i2c_reg_addr  : std_logic_vector(7 downto 0) := (others => '0');
+    signal i2c_data_wr   : std_logic_vector(15 downto 0) := (others => '0');
+    signal i2c_busy      : std_logic;
+    signal i2c_done      : std_logic;
+
+    -- 2. Nueva FSM simplificada del TOP (Gestor de alto nivel)
+    -- Ya no necesitamos estados de bits, solo estados de transacciones
+    type main_state_t is (IDLE, SETUP_SENSOR, WAIT_I2C, FINISH_ALL);
+    signal current_state : main_state_t := IDLE;
 
 begin
 
-    -- 1. Generador de Enable (100kHz). 100MHz / 1000 = 100kHz.
-    -- Usamos un pulso de un solo ciclo de clk para no anidar flancos.
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            if clk_div = 1000 then 
-                clk_div <= (others => '0');
-                en_i2c  <= '1';
-            else
-                clk_div <= clk_div + 1;
-                en_i2c  <= '0';
-            end if;
-        end if;
-    end process;
+    -- 3. INSTANCIA DEL CONTROLADOR I2C
+    -- Sustituye a toda la lógica de bits y clk_div que tenías antes
+    u_i2c_core : entity work.I2C_CONTROLLER
+        port map (
+            clk          => clk,
+            reset        => reset,
+            start        => i2c_start,
+            num_bytes    => i2c_num_bytes,
+            addr_dev     => SENSOR_ADDR,
+            addr_reg     => i2c_reg_addr,
+            data_wr      => i2c_data_wr,
+            busy         => i2c_busy,
+            done         => i2c_done,
+            sclk         => sclk,
+            sdata        => sdata
+        );
 
-    -- 2. L�gica del Buffer Triestado para SDATA
-    sdata <= sdata_out when sdata_oe = '1' else 'Z';
-
-    -- 3. M�quina de Estados Principal
+    -- 4. PROCESO DE CONTROL DEL TOP
+    -- Este proceso solo decide QUÉ enviar, no CÓMO enviarlo bit a bit
     process(clk)
     begin
         if rising_edge(clk) then
             if reset = '1' then
-                state     <= IDLE;
-                sclk      <= '1';
-                sdata_out <= '1';
-                sdata_oe  <= '0';
-                done      <= '0';
-                bit_cnt   <= 7;
-            elsif en_i2c = '1' then
-                case state is
+                current_state <= IDLE;
+                i2c_start     <= '0';
+                done          <= '0';
+            else
+                case current_state is
                     
                     when IDLE =>
-                        sclk      <= '1';
-                        sdata_out <= '1';
-                        sdata_oe  <= '1';
-                        state     <= START;
-
-                    when START =>
-                        sdata_out <= '0'; -- SDA cae mientras SCL es 1
-                        state     <= SEND_ADDR_LOW;
-                        bit_cnt   <= 7;
-
-                    when SEND_ADDR_LOW =>
-                        sclk <= '0';
-                        if bit_cnt > 0 then
-                            sdata_out <= SENSOR_ADDR(bit_cnt - 1); -- Env�a los 7 bits de la direcci�n
-                        else
-                            sdata_out <= '0'; -- El bit 0 es el R/W (0 para Write)
+                        done <= '0';
+                        if reset = '0' then -- Ejemplo: Iniciar al salir de reset
+                            current_state <= SETUP_SENSOR;
                         end if;
-                        state <= SEND_ADDR_HIGH;
 
-                    when SEND_ADDR_HIGH =>
-                        sclk      <= '1'; -- Subimos reloj para que el esclavo lea
-                        if bit_cnt = 0 then
-                            state <= ACK_WAIT;
-                        else
-                            bit_cnt <= bit_cnt - 1;
-                            state   <= SEND_ADDR_LOW;
+                    when SETUP_SENSOR =>
+                        -- Ejemplo: Escribir en el registro 0x00 el valor 0x823A
+                        if i2c_busy = '0' then
+                            i2c_reg_addr  <= x"00";     -- Dirección del registro
+                            i2c_data_wr   <= x"823A";   -- Dato de 16 bits
+                            i2c_num_bytes <= 3;         -- 1 byte addr + 2 bytes data
+                            i2c_start     <= '1';       -- Pulso de inicio
+                            current_state <= WAIT_I2C;
                         end if;
-                        
-                    when ACK_WAIT =>
-                        sclk <= '0';      -- Bajamos el reloj tras el 8� bit
-                        sdata_oe <= '0';  -- LIBERAMOS EL BUS (Z). Ahora el esclavo puede poner el ACK.
-                        state <= ACK_CHECK;
 
-                    when ACK_CHECK =>
-                        sclk     <= '1';
-                        sdata_oe <= '0'; -- LIBERAMOS EL BUS (Z) para recibir ACK
-                        state    <= STOP;
+                    when WAIT_I2C =>
+                        i2c_start <= '0'; -- Bajamos el start para no repetir la orden
+                        if i2c_done = '1' then
+                            current_state <= FINISH_ALL;
+                        end if;
 
-                    when STOP =>
-                        sclk      <= '0';
-                        sdata_oe  <= '1';
-                        sdata_out <= '0';
-                        -- En el siguiente tick, SCL sube y luego SDA sube
-                        state     <= FINISHED;
+                    when FINISH_ALL =>
+                        done <= '1';
+                        current_state <= FINISH_ALL; -- Fin de la secuencia
 
-                    when FINISHED =>
-                        sclk      <= '1';
-                        sdata_out <= '1'; -- STOP: SDA sube mientras SCL es 1
-                        done      <= '1';
-                        state     <= FINISHED;
-
-                    when others => state <= IDLE;
+                    when others => 
+                        current_state <= IDLE;
                 end case;
             end if;
         end if;
