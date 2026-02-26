@@ -2,7 +2,11 @@
 --! Archivo fuente VHDL para el controlador a desarrollar.
 --! \mainpage Proyecto VICON
 --! \section title1 Descripcion
---! \image html diagram.svg "Diagrama logico"
+--! \htmlonly
+--! <object type="image/svg+xml" data="image_1.svg" style="width:20%; height:auto;">
+--! </object>
+--! \endhtmlonly
+--!
 --! El proyecto consiste en el desarrollo de un controlador del sensor de imagen MT9V111, incluyendo la comunicación i2c y la transimión de señales por FTDI.
 --! \section source_code Código fuente
 --! - <A HREF=_d_u_t_8vhd_source.html><B> DUT.vhd</B></A>
@@ -89,9 +93,9 @@ begin
                     when SETUP_SENSOR =>
                         -- Ejemplo: Escribir en el registro 0x00 el valor 0x823A
                         if i2c_busy = '0' then
-                            i2c_reg_addr  <= x"00";     -- Dirección del registro
+                            i2c_reg_addr  <= x"04";     -- Dirección del registro
                             i2c_data_wr   <= x"823A";   -- Dato de 16 bits
-                            i2c_num_bytes <= 3;         -- 1 byte addr + 2 bytes data
+                            i2c_num_bytes <= 2;         -- 2 bytes data
                             i2c_start     <= '1';       -- Pulso de inicio
                             current_state <= WAIT_I2C;
                         end if;

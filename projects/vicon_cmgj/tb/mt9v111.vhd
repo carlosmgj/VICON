@@ -95,6 +95,7 @@ begin
         variable v_reg_addr : integer range 0 to 255;
         variable v_data_16  : std_logic_vector(15 downto 0);
         variable v_addr_dev : std_logic_vector(7 downto 0);
+        variable write_n_read : std_logic;
     begin
         sda <= 'Z';
     
@@ -113,13 +114,22 @@ begin
             sda <= '0';
             wait until falling_edge(scl);
             sda <= 'Z';
-    
+            write_n_read := v_addr_dev(0);
+                        
+            if (write_n_read = '0') then
+                log_to_file("reporte_final_1.txt", "COMANDO DE ESCRITURA", false);
+            else
+                log_to_file("reporte_final_1.txt", "COMANDO DE LECTURA", false);
+            end if;
+                        
+            
             -- 3. Recibir Dirección de Registro (8 bits)
             for i in 7 downto 0 loop
                 wait until rising_edge(scl);
                 v_data_16(i+8) := sda; -- Usamos v_data_16 temporalmente para ahorrar variables
             end loop;
             v_reg_addr := to_integer(unsigned(v_data_16(15 downto 8)));
+           
             
             -- ACK 2 (Dirección Registro)
             wait until falling_edge(scl);
@@ -153,8 +163,8 @@ begin
     
             -- 6. GUARDAR EN EL MAPA (Suponiendo que estamos en la página 0)
             regs_core(v_reg_addr) <= v_data_16;
-            log_to_file("reporte_final_1.txt", "I2C Agente: Registro 0x" & integer'image(v_reg_addr) & 
-                        " escrito con valor 0x" & vec_to_str(v_data_16), false);
+            log_to_file("reporte_final_1.txt", "I2C Agente: Registro 0x" & 
+            int_to_hex_str(v_reg_addr, 2) & " escrito con valor 0x" & int_to_hex_str(to_integer(unsigned(v_data_16)),4), false);
     
         end if;
     

@@ -10,7 +10,8 @@ package sim_utils_pkg is
 
     -- Función para convertir vectores a texto (mejorada)
     function vec_to_str(vec : std_logic_vector) return string;
-
+    function int_to_hex_str(val : integer; width : integer := 2) return string;
+    
     -- Procedimiento universal de logeo en archivo
     procedure log_to_file(
         constant file_name : in string;
@@ -41,6 +42,20 @@ package body sim_utils_pkg is
             end if;
         end loop;
         return res;
+    end function;
+
+    function int_to_hex_str(val : integer; width : integer := 2) return string is
+        variable temp : std_logic_vector((width * 4) - 1 downto 0);
+        constant hex_chars : string(1 to 16) := "0123456789ABCDEF";
+        variable res : string(1 to width);
+        variable nibble : integer;
+        begin
+            temp := std_logic_vector(to_unsigned(val, width * 4));
+            for i in 0 to width-1 loop
+                nibble := to_integer(unsigned(temp((i+1)*4-1 downto i*4)));
+                res(width-i) := hex_chars(nibble + 1);
+            end loop;
+            return res;
     end function;
 
     procedure log_to_file(

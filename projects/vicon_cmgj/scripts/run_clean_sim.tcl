@@ -1,13 +1,22 @@
-# 1. Reiniciar y ejecutar
-restart
-run 2 us
+# 1. Cargar cambios del VHDL y reiniciar la simulación
+# Es vital que sea lo primero para que compile los .vhd modificados
 
 # 2. Localizar ruta del archivo
 set proj_dir [get_property DIRECTORY [current_project]]
 set proj_name [get_property NAME [current_project]]
 set archivo_reporte "${proj_dir}/${proj_name}.sim/sim_1/behav/xsim/reporte_final_1.txt"
 
-# Pausa para que el disco escriba el archivo
+# 3. Limpieza: Borrar el archivo de log viejo para que no se mezclen resultados
+if {[file exists $archivo_reporte]} {
+    file delete -force $archivo_reporte
+}
+
+relaunch_sim
+
+# 4. Ejecutar la simulación
+run 2 us
+
+# Pausa para que el sistema operativo vuelque los datos al disco
 after 500
 
 puts "\n======================================="
@@ -36,11 +45,11 @@ if {[file exists $archivo_reporte]} {
                 set clean_time [string map {" " ""} $timestamp]
                 
                 # Añadir el marcador con nombre único
-                if {[catch { add_wave_marker -time $clean_time -name "M$i" } err]} {
+                #1 if {[catch { add_wave_marker -time $clean_time -name "M$i" } err]} {
                     # Si falla, nos avisa por qué
-                    puts "No se pudo poner marcador en $clean_time: $err"
-                }
-                incr i
+                #1     puts "No se pudo poner marcador en $clean_time: $err"
+                #1 }
+                #1 incr i
             }
         }
     }
