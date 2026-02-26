@@ -1,12 +1,10 @@
 --! \file DUT.vhd
 --! Archivo fuente VHDL para el controlador a desarrollar.
 --! \mainpage Proyecto VICON
---! \section title1 Descripcion
---! \htmlonly
---! <object type="image/svg+xml" data="image_1.svg" style="width:20%; height:auto;">
---! </object>
---! \endhtmlonly
+--! \section title1 DIAGRAMA INTERACTIVO
+--! @htmlinclude test.html
 --!
+--! \section title2 DESCRIPCION
 --! El proyecto consiste en el desarrollo de un controlador del sensor de imagen MT9V111, incluyendo la comunicación i2c y la transimión de señales por FTDI.
 --! \section source_code Código fuente
 --! - <A HREF=_d_u_t_8vhd_source.html><B> DUT.vhd</B></A>
