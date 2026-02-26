@@ -1,4 +1,4 @@
---! \file DUT.vhd
+--! \file TOP.vhd
 --! Archivo fuente VHDL para el controlador a desarrollar.
 --! \mainpage Proyecto VICON
 --! \section title1 DIAGRAMA INTERACTIVO
@@ -63,7 +63,7 @@ begin
             num_bytes    => i2c_num_bytes,
             addr_dev     => SENSOR_ADDR,
             addr_reg     => i2c_reg_addr,
-            data_wr      => i2c_data_wr,
+            data         => i2c_data_wr,
             busy         => i2c_busy,
             done         => i2c_done,
             sclk         => sclk,

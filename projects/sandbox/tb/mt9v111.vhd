@@ -38,81 +38,106 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use work.sim_utils_pkg.all;
+use std.textio.all;
+use work.sim_utils_pkg.all; -- Para usar log_to_file
 
 entity mt9v111_agent is
     generic (
-        I2C_ADDR     : std_logic_vector(6 downto 0) := "1011101"; -- 0xBA >> 1
-        IMG_WIDTH    : integer := 640;
-        IMG_HEIGHT   : integer := 480
+        I2C_ADDR : std_logic_vector(6 downto 0) := "1011100" -- 0x5C
     );
     port (
-        -- Interfaz de Video (Paralela)
-        pixclk  : out std_logic;
-        fval    : out std_logic;
-        lval    : out std_logic;
-        dout    : out std_logic_vector(7 downto 0);
-        
-        -- Interfaz de Control (I2C/SCCB)
-        scl     : in    std_logic;
-        sda     : inout std_logic
+        clk      : in    std_logic; -- Reloj de sistema para muestreo
+        reset    : in    std_logic;
+        sclk     : in    std_logic;
+        sdata    : in    std_logic;
+        -- Salidas de estado para debug en hardware
+        busy     : out   std_logic;
+        match    : out   std_logic
     );
 end mt9v111_agent;
 
 architecture Behavioral of mt9v111_agent is
-    -- Memoria de registros internos (emulación básica)
-    type reg_array is array (0 to 255) of std_logic_vector(15 downto 0);
-    signal regs : reg_array := (others => (others => '0'));
+    -- Estados de la FSM
+    type state_t is (IDLE, ADDR_BITS, ACK_BIT, STOP_DETECT);
+    signal state : state_t := IDLE;
+
+    -- Sincronizadores para señales asíncronas
+    signal sclk_sync  : std_logic_vector(2 downto 0);
+    signal sdata_sync : std_logic_vector(2 downto 0);
     
-    -- Señales internas de control de video
-    signal clk_int : std_logic := '0';
-    constant PIX_PERIOD : time := 37 ns; -- ~27MHz
+    -- Registro de desplazamiento para dirección
+    signal shift_reg : std_logic_vector(7 downto 0);
+    signal bit_cnt   : integer range 0 to 7 := 7;
+
 begin
-    -- Generador de Pixel Clock independiente
-    clk_int <= not clk_int after PIX_PERIOD/2;
-    pixclk  <= clk_int;
 
-    -----------------------------------------------------------
-    -- PROCESO 1: Generador de Patrón de Video (Barras/Gradiente)
-    -----------------------------------------------------------
-    video_gen: process
-        variable h_cnt : integer := 0;
-        variable v_cnt : integer := 0;
+    --! \section SYNC Sincronización de señales de entrada
+    process(clk)
     begin
-        fval <= '0'; lval <= '0'; dout <= (others => '0');
-        wait for 1 us; -- Pausa inicial antes del primer frame
-
-        loop
-            fval <= '1';
-            for row in 0 to IMG_HEIGHT-1 loop
-                lval <= '1';
-                for col in 0 to IMG_WIDTH-1 loop
-                    -- Generamos un gradiente simple
-                    dout <= std_logic_vector(to_unsigned((col + row) mod 256, 8));
-                    wait until falling_edge(clk_int);
-                end loop;
-                lval <= '0';
-                wait for 10 * PIX_PERIOD; -- Blanking horizontal
-            end loop;
-            fval <= '0';
-            wait for 100 * PIX_PERIOD; -- Blanking vertical (entre frames)
-        end loop;
+        if rising_edge(clk) then
+            sclk_sync  <= sclk_sync(1 downto 0) & sclk;
+            sdata_sync <= sdata_sync(1 downto 0) & sdata;
+        end if;
     end process;
-
-    -----------------------------------------------------------
-    -- PROCESO 2: Monitor I2C (Simplificado para simulación)
-    -----------------------------------------------------------
-    -- Este proceso "espía" las señales SCL/SDA y reporta al log
-    i2c_spy: process
+    
+    process(clk)
+        variable start_cond : boolean;
+        variable stop_cond  : boolean;
+        variable sclk_rise  : boolean;
     begin
-        wait until falling_edge(sda) and scl = '1'; -- Condición de START
-        log_to_file("reporte_final_1.txt", "I2C Agente: START detectado", false);
-        
-        -- Aquí podrías añadir lógica para decodificar los bits,
-        -- pero para empezar, con detectar actividad ya es un gran paso.
-        
-        wait until rising_edge(sda) and scl = '1'; -- Condición de STOP
-        log_to_file("reporte_final_1.txt", "I2C Agente: STOP detectado", false);
+        if rising_edge(clk) then
+            if reset = '1' then
+                state   <= IDLE;
+                match   <= '0';
+                busy    <= '0';
+                bit_cnt <= 7;
+            else
+                -- Detectores de flancos
+                start_cond := (sdata_sync(2) = '1' and sdata_sync(1) = '0' and sclk_sync(1) = '1');
+                stop_cond  := (sdata_sync(2) = '0' and sdata_sync(1) = '1' and sclk_sync(1) = '1');
+                sclk_rise  := (sclk_sync(2) = '0' and sclk_sync(1) = '1');
+
+                if start_cond then
+                    state   <= ADDR_BITS;
+                    bit_cnt <= 7;
+                    busy    <= '1';
+                elsif stop_cond then
+                    state   <= IDLE;
+                    busy    <= '0';
+                else
+                    case state is
+                        when ADDR_BITS =>
+                            if sclk_rise then
+                                shift_reg(bit_cnt) <= sdata_sync(1);
+                                if bit_cnt = 0 then
+                                    state <= ACK_BIT;
+                                else
+                                    bit_cnt <= bit_cnt - 1;
+                                end if;
+                            end if;
+
+                        when ACK_BIT =>
+                            if sclk_rise then
+                                -- Verificamos dirección (7 bits)
+                                if shift_reg(7 downto 1) = I2C_ADDR then
+                                    match <= '1';
+                                    -- PRÁCTICA SIMULACIÓN: Imprimimos resultado
+                                    if shift_reg(0) = '0' then
+                                        log_to_file("reporte_final_1.txt", "SINTETIZABLE: Escritura detectada en 0x" & vec_to_str(I2C_ADDR), false);
+                                    else
+                                        log_to_file("reporte_final_1.txt", "SINTETIZABLE: Lectura detectada en 0x" & vec_to_str(I2C_ADDR), false);
+                                    end if;
+                                else
+                                    match <= '0';
+                                end if;
+                                state <= IDLE; -- Volvemos a esperar otra trama
+                            end if;
+                            
+                        when others => state <= IDLE;
+                    end case;
+                end if;
+            end if;
+        end if;
     end process;
 
 end Behavioral;
