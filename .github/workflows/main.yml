@@ -21,8 +21,9 @@ jobs:
 
       - name: Generate docs
         run: |
-          cd projects/vicon_cmgj/scripts
-          doxygen Doxyfile
+          ls -R
+          pwd
+          doxygen projects/vicon_cmgj/scripts/Doxyfile
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
