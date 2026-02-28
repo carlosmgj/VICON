@@ -1,6 +1,6 @@
 var classmt9v111__agent =
 [
-    [ "mt9v111_agent.Behavioral", "classmt9v111__agent_1_1Behavioral.html", "classmt9v111__agent_1_1Behavioral" ],
+    [ "mt9v111_agent.Behavioral", "classmt9v111__agent_1_1_behavioral.html", "classmt9v111__agent_1_1_behavioral" ],
     [ "dout", "classmt9v111__agent.html#a71cd8d95d20b58f2f2da556d745e47d8", null ],
     [ "fval", "classmt9v111__agent.html#adcc072a7d4b633c405c71168a39efa6b", null ],
     [ "I2C_ADDR", "classmt9v111__agent.html#a61dffae8d2f7e8e7c30cb21e4585cf5f", null ],

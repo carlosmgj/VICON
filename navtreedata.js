@@ -26,14 +26,14 @@ var NAVTREE =
 [
   [ "VICON: Sistema de Visión configurable", "index.html", [
     [ "PORTADA", "index.html", "index" ],
-    [ "MT9V111", "AGENTE.html", [
-      [ "Descripcion", "AGENTE.html#Descripcion", null ],
-      [ "Uso", "AGENTE.html#Uso", null ],
-      [ "MT9V111 Sensor", "AGENTE.html#PINOUT", [
-        [ "Relojes y Control de Sistema", "AGENTE.html#CLOCKS_RESETS", null ],
-        [ "Interfaz de Control Serial (I2C/SCCB)", "AGENTE.html#SERIAL_IF", null ],
-        [ "Interfaz de Salida de Video", "AGENTE.html#VIDEO_OUT", null ],
-        [ "Alimentación y Referencias", "AGENTE.html#POWER", null ]
+    [ "MT9V111", "_a_g_e_n_t_e.html", [
+      [ "Descripcion", "_a_g_e_n_t_e.html#Descripcion", null ],
+      [ "Uso", "_a_g_e_n_t_e.html#Uso", null ],
+      [ "MT9V111 Sensor", "_a_g_e_n_t_e.html#PINOUT", [
+        [ "Relojes y Control de Sistema", "_a_g_e_n_t_e.html#CLOCKS_RESETS", null ],
+        [ "Interfaz de Control Serial (I2C/SCCB)", "_a_g_e_n_t_e.html#SERIAL_IF", null ],
+        [ "Interfaz de Salida de Video", "_a_g_e_n_t_e.html#VIDEO_OUT", null ],
+        [ "Alimentación y Referencias", "_a_g_e_n_t_e.html#POWER", null ]
       ] ]
     ] ],
     [ "Packages", "namespaces.html", [
@@ -57,7 +57,7 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"AGENTE.html"
+"_a_g_e_n_t_e.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

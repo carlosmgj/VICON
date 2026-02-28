@@ -38,7 +38,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="classTOP.html" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="class_t_o_p.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="138,-74 102,-74 102,-55 138,-55 138,-74"/>
 <text text-anchor="middle" x="120" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">TOP</text>
 </a>
@@ -56,7 +56,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="classI2C__CONTROLLER.html" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="class_i2_c___c_o_n_t_r_o_l_l_e_r.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="171.5,-129 68.5,-129 68.5,-110 171.5,-110 171.5,-129"/>
 <text text-anchor="middle" x="120" y="-117" font-family="Helvetica,sans-Serif" font-size="10.00">I2C_CONTROLLER</text>
 </a>
