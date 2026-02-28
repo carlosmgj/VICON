@@ -8,7 +8,7 @@ var searchData=
   ['de_20sistema_5',['Relojes y Control de Sistema',['../AGENTE.html#CLOCKS_RESETS',1,'']]],
   ['de_20video_6',['Interfaz de Salida de Video',['../AGENTE.html#VIDEO_OUT',1,'']]],
   ['descripcion_7',['DESCRIPCION',['../index.html#title_desc',1,'']]],
-  ['diagrama_20funcional_8',['DIAGRAMA FUNCIONAL',['../index.html#subtitle_diagram',1,'']]],
+  ['diagrama_20interactivo_8',['DIAGRAMA INTERACTIVO',['../index.html#subtitle_diagram',1,'']]],
   ['done_9',['done',['../classDUT.html#a76fdb13eed45cfd9855f0ece1a5ad174',1,'DUT.done'],['../classI2C__CONTROLLER.html#a76fdb13eed45cfd9855f0ece1a5ad174',1,'I2C_CONTROLLER.done'],['../classTOP.html#a76fdb13eed45cfd9855f0ece1a5ad174',1,'TOP.done']]],
   ['done_5fsig_10',['done_sig',['../classtestbench_1_1Structural.html#a7fc66639059c6a47f104779cea949c06',1,'testbench::Structural']]],
   ['dout_11',['dout',['../classmt9v111__agent.html#a71cd8d95d20b58f2f2da556d745e47d8',1,'mt9v111_agent']]],
