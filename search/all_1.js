@@ -7,5 +7,5 @@ var searchData=
   ['alimentación_20y_20referencias_4',['Alimentación y Referencias',['../AGENTE.html#POWER',1,'']]],
   ['areg_5fr_5',['areg_r',['../classI2C__CONTROLLER_1_1Behavioral.html#a231185977460dae4ce314dfcb93218f7',1,'I2C_CONTROLLER::Behavioral']]],
   ['author_6',['Author',['../Basys3__GPIO_8xdc.html#author_',1,'']]],
-  ['autor_7',['Autor',['../index.html#author',1,'']]]
+  ['autor_7',['AUTOR',['../index.html#author',1,'']]]
 ];

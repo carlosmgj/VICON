@@ -1,8 +1,10 @@
 var index =
 [
-    [ "📄 MEMORIA DE PROYECTO", "index.html#title1", null ],
-    [ "DIAGRAMA FUNCIONAL", "index.html#title2", null ],
-    [ "DESCRIPCION", "index.html#title3", null ],
-    [ "Código fuente", "index.html#source_code", null ],
-    [ "Autor", "index.html#author", null ]
+    [ "DESCRIPCION", "index.html#title_desc", null ],
+    [ "MEMORIA DE PROYECTO 📄", "index.html#title_mem", null ],
+    [ "FPGA", "index.html#title_fpga", [
+      [ "DIAGRAMA FUNCIONAL", "index.html#subtitle_diagram", null ]
+    ] ],
+    [ "CODIGO FUENTE", "index.html#source_code", null ],
+    [ "AUTOR", "index.html#author", null ]
 ];

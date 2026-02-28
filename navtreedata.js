@@ -25,7 +25,7 @@
 var NAVTREE =
 [
   [ "VICON: Sistema de Visión configurable", "index.html", [
-    [ "Proyectoooo VICON", "index.html", "index" ],
+    [ "PORTADA", "index.html", "index" ],
     [ "MT9V111", "AGENTE.html", [
       [ "Descripcion", "AGENTE.html#Descripcion", null ],
       [ "Uso", "AGENTE.html#Uso", null ],
