@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['proyecto_20vicon_0',['Proyecto VICON',['../index.html',1,'']]]
+  ['vicon_0',['Proyectoooo VICON',['../index.html',1,'']]]
 ];
