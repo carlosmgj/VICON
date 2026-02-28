@@ -102,14 +102,14 @@ begin
         -- 1. START
         wait until falling_edge(sda) and scl = '1';
         
-        -- 2. Recibir Dirección Dispositivo (8 bits)
+        -- 2. Recibir Direccion Dispositivo (8 bits)
         for i in 7 downto 0 loop
             wait until rising_edge(scl);
             v_addr_dev(i) := sda;
         end loop;
     
         if v_addr_dev(7 downto 1) = I2C_ADDR then
-            -- ACK 1 (Dirección Dispositivo)
+            -- ACK 1 (Direccion Dispositivo)
             wait until falling_edge(scl);
             sda <= '0';
             wait until falling_edge(scl);
@@ -123,7 +123,7 @@ begin
             end if;
                         
             
-            -- 3. Recibir Dirección de Registro (8 bits)
+            -- 3. Recibir Direccion de Registro (8 bits)
             for i in 7 downto 0 loop
                 wait until rising_edge(scl);
                 v_data_16(i+8) := sda; -- Usamos v_data_16 temporalmente para ahorrar variables
@@ -131,7 +131,7 @@ begin
             v_reg_addr := to_integer(unsigned(v_data_16(15 downto 8)));
            
             
-            -- ACK 2 (Dirección Registro)
+            -- ACK 2 (Direccion Registro)
             wait until falling_edge(scl);
             sda <= '0';
             wait until falling_edge(scl);
@@ -161,7 +161,7 @@ begin
             wait until falling_edge(scl);
             sda <= 'Z';
     
-            -- 6. GUARDAR EN EL MAPA (Suponiendo que estamos en la página 0)
+            -- 6. GUARDAR EN EL MAPA (Suponiendo que estamos en la pagina 0)
             regs_core(v_reg_addr) <= v_data_16;
             log_to_file("reporte_final_1.txt", "I2C Agente: Registro 0x" & 
             int_to_hex_str(v_reg_addr, 2) & " escrito con valor 0x" & int_to_hex_str(to_integer(unsigned(v_data_16)),4), false);

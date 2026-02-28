@@ -15,7 +15,14 @@
  * @htmlinclude test.html
  *
  * \section source_code CODIGO FUENTE
+<<<<<<< HEAD
  * - <A HREF="_t_o_p_8vhd_source"><B>TOP.vhd (DUT) </B></A>
+=======
+ * - <A HREF="testbench_8vhd_source.html"><B>I2C TESTBENCH </B></A>
+ * - <A HREF="_t_o_p_8vhd_source.html"><B>TOP(DUT) </B></A>
+ * - <A HREF="mt9v111_8vhd_source.html"><B>AGENTE MT9V111 </B></A>
+ * - <A HREF="clock__generator_8vhd_source.html"><B>AGENTE CLK & RST </B></A>
+>>>>>>> feature/i2c_controller
  *
  * \section author AUTOR
  * Carlos Manuel Gomez Jimenez
