@@ -11,11 +11,11 @@
  * @endhtmlonly
  *
  * \section title_fpga FPGA
- * \subsection subtitle_diagram DIAGRAMA FUNCIONAL
+ * \subsection subtitle_diagram DIAGRAMA INTERACTIVO
  * @htmlinclude test.html
  *
  * \section source_code CODIGO FUENTE
- * - <A HREF="_d_u_t_8vhd_source.html"><B>DUT.vhd</B></A>
+ * - <A HREF="_t_o_p_8vhd_source"><B>TOP.vhd (DUT) </B></A>
  *
  * \section author AUTOR
  * Carlos Manuel Gomez Jimenez
