@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['dut_0',['DUT',['../classDUT.html',1,'']]]
+  ['i2c_5fcontroller_0',['I2C_CONTROLLER',['../classI2C__CONTROLLER.html',1,'']]]
 ];

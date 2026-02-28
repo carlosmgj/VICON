@@ -5,7 +5,7 @@ var searchData=
   ['regs_5fcore_2',['regs_core',['../classmt9v111__agent_1_1Behavioral.html#aeb468d9f7068957dfeef1dd49b500b7a',1,'mt9v111_agent::Behavioral']]],
   ['regs_5fifp_3',['regs_ifp',['../classmt9v111__agent_1_1Behavioral.html#ac79ed626471a1c24469dcd7984a94894',1,'mt9v111_agent::Behavioral']]],
   ['relojes_20y_20control_20de_20sistema_4',['Relojes y Control de Sistema',['../AGENTE.html#CLOCKS_RESETS',1,'']]],
-  ['reset_5',['reset',['../classDUT.html#a108f6801ba4104063b9d5f9286194302',1,'DUT.reset'],['../classI2C__CONTROLLER.html#a108f6801ba4104063b9d5f9286194302',1,'I2C_CONTROLLER.reset'],['../classTOP.html#a108f6801ba4104063b9d5f9286194302',1,'TOP.reset']]],
+  ['reset_5',['reset',['../classI2C__CONTROLLER.html#a108f6801ba4104063b9d5f9286194302',1,'I2C_CONTROLLER.reset'],['../classTOP.html#a108f6801ba4104063b9d5f9286194302',1,'TOP.reset']]],
   ['reset_5fi_6',['reset_i',['../classclk__reset__gen_1_1Behavioral.html#a015863497573d0ae6fbfc0df2b3f01b0',1,'clk_reset_gen::Behavioral']]],
   ['reset_5fout_7',['reset_out',['../classclk__reset__gen.html#a03e6cb01ef62f3628acafa301fc0ac24',1,'clk_reset_gen']]],
   ['rst_5ffinal_8',['rst_final',['../classtestbench_1_1Structural.html#a4c3b82ee8a49984a31d8327d2251faab',1,'testbench::Structural']]],
