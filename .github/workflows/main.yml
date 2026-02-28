@@ -24,6 +24,20 @@ jobs:
       - name: Install Graphviz
         run: sudo apt-get update && sudo apt-get install -y graphviz
 
+        # Compila el PDF de la memoria
+      - name: Install LaTeX
+        run: sudo apt-get install -y texlive-full bibtex
+
+      - name: Compile LaTeX
+        working-directory: report
+        run: |
+          mkdir -p build
+          pdflatex -interaction=nonstopmode -output-directory=build main.tex
+          cd build && bibtex main && cd ..
+          pdflatex -interaction=nonstopmode -output-directory=build main.tex
+          pdflatex -interaction=nonstopmode -output-directory=build main.tex
+          test -f build/main.pdf || (echo "No se generó main.pdf" && exit 1)
+
       - name: Generate docs (Doxygen)
         working-directory: projects/vicon_cmgj/scripts
         run: |
