@@ -11,7 +11,7 @@
  * @endhtmlonly
  *
  * \section title_fpga FPGA
- * \subsection subtitle_diagram DIAGRAMA FUNCIONAL
+ * \subsection subtitle_diagram DIAGRAMA INTERACTIVO
  * @htmlinclude test.html
  *
  * \section source_code CODIGO FUENTE
