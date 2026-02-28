@@ -1,0 +1,21 @@
+/*!
+ * \mainpage Proyectoooo VICON
+ *
+ * \section title1 📄 MEMORIA DE PROYECTO
+ * @htmlonly
+ * <a href="memoria.pdf" target="_blank"><b>Memoria del TFM</b></a>
+ * @endhtmlonly
+ *
+ * \section title2 DIAGRAMA FUNCIONAL
+ * @htmlinclude test.html
+ *
+ * \section title3 DESCRIPCION
+ * El proyecto consiste en el desarrollo de un controlador del sensor de imagen MT9V111,
+ * incluyendo la comunicación I2C y la transmisión de señales por FTDI.
+ *
+ * \section source_code Código fuente
+ * - <A HREF="_d_u_t_8vhd_source.html"><B>DUT.vhd</B></A>
+ *
+ * \section author Autor
+ * Carlos Manuel Gomez Jimenez
+ */

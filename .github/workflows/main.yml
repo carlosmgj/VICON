@@ -25,17 +25,17 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y graphviz
 
       - name: Generate docs (Doxygen)
-        working-directory: projects/vicon_cmgj/scripts
+        working-directory: doxygen
         run: |
           doxygen --version
           doxygen Doxyfile
-          test -d ../docs/html || (echo "No existe ../docs/html; revisa rutas" && exit 1)
+          test -d docs/html || (echo "No existe docs/html; revisa rutas" && exit 1)
 
       - name: Copy PDF to Doxygen html
-        run: cp report/build/main.pdf projects/vicon_cmgj/docs/html/memoria.pdf
+        run: cp report/build/main.pdf doxygen/docs/html/memoria.pdf
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: projects/vicon_cmgj/docs/html
+          publish_dir: doxygen/docs/html

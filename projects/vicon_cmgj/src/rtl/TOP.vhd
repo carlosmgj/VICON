@@ -1,27 +1,7 @@
 --! \file TOP.vhd
 --! Archivo fuente VHDL para el controlador a desarrollar.
 --! \mainpage Proyecto VICON
---! \section title1 DIAGRAMA INTERACTIVO
---! @htmlinclude test.html
---! @htmlonly
---! <a href="memoria.pdf" target="_blank"><b>📄 Memoria del TFM</b></a>
---! @endhtmlonly
---!
---! \section title2 DESCRIPCION
---! El proyecto consiste en el desarrollo de un controlador del sensor de imagen MT9V111, incluyendo la comunicación i2c y la transimión de señales por FTDI.
---! \section source_code Código fuente
---! - <A HREF=_d_u_t_8vhd_source.html><B> DUT.vhd</B></A>
---! \note El formato de comentario incluye ! para poder realizar documentacion dinamica con Doxygen. 
---! \section Verificacion
---! \subsection DUT
---! \subsection agent_mt9v111 Agente MT9V111
---! \subsection agent_ftdi Agente FTDDI
---! \section author Author
---! Carlos Manuel Gomez Jimenez, DNI: 76037985P
---! \page Informe_E/S 
---! \include io_report.txt
---! \page Informe_Utilizacion
---! \include synthesis_utilization.txt
+
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
