@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['vec_5fto_5fstr_0',['vec_to_str',['../classsim__utils__pkg.html#acae388f77ca958cabdaf5044560ad1ed',1,'sim_utils_pkg.vec_to_str()'],['../class__sim__utils__pkg.html#acae388f77ca958cabdaf5044560ad1ed',1,'_sim_utils_pkg.vec_to_str()']]],
-  ['vhd_20dut_20b_20a_1',['- &lt;A HREF=&quot;_t_o_p_8vhd_source&quot;&gt;&lt;B&gt;TOP.vhd (DUT) &lt;/B&gt;&lt;/A&gt;',['../index.html#autotoc_md0',1,'']]],
-  ['video_2',['Interfaz de Salida de Video',['../AGENTE.html#VIDEO_OUT',1,'']]]
+  ['y_20control_20de_20sistema_0',['Relojes y Control de Sistema',['../AGENTE.html#CLOCKS_RESETS',1,'']]],
+  ['y_20referencias_1',['Alimentación y Referencias',['../AGENTE.html#POWER',1,'']]]
 ];
