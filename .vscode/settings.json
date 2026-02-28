@@ -1,0 +1,54 @@
+{
+    "workbench.iconTheme": "material-icon-theme",
+    "git.autofetch": true,
+    "git.openRepositoryInParentFolders": "always",
+    "highlight.regexes": {
+        "(--!.*)": {
+            "filterLanguageRegex": "vhdl",
+            "decorations": [
+                {
+                    "color": "#444444"
+                }
+            ]
+        }
+    },
+    "latex-workshop.latex.tools": [
+        {
+            "name": "pdflatex",
+            "command": "pdflatex",
+            "args": [
+                "-synctex=1",
+                "-interaction=nonstopmode",
+                "-file-line-error",
+                "-output-directory=%WORKSPACE_FOLDER%/report/build",
+                "-aux-directory=%WORKSPACE_FOLDER%/report/build",
+                "%DOC%"
+            ]
+        },
+        {
+            "name": "bibtex",
+            "command": "powershell",
+            "args": [
+                "-Command",
+                "Push-Location '%OUTDIR%'; bibtex main; Pop-Location"
+            ]
+        }
+    ],
+    "latex-workshop.latex.recipes": [
+        {
+            "name": "Compilar con Bibliografía",
+            "tools": [
+            "pdflatex",
+            "bibtex",
+            "pdflatex",
+            "pdflatex"
+            ]
+        }
+    ],
+"latex-workshop.latex.autoClean.run": "never",
+"latex-workshop.latex.autoBuild.run": "never",
+"latex-workshop.latex.clean.method": "glob",
+"latex-workshop.latex.clean.fileTypes": [],
+"latex-workshop.latex.rootFile.useSubFileAsRoot": false,
+"latex-workshop.latex.outDir": "%WORKSPACE_FOLDER%/report/build",
+}
