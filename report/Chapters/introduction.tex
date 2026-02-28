@@ -3,37 +3,19 @@
 % Chapter 1
 \begin{document}
 
-\chapter{Introduccion} % Chapter title
+\chapter{Introducción} % Chapter title
 \label{chap:introduccion} % For referencing the chapter elsewhere, use \autoref{ch:litterature} 
 
 %----------------------------------------------------------------------------------------
 %\todosolve{No quitar comentarios, mejor poner que se han solucionado tipo asi. \textbf{Solucionado cambiado por tal}}\todohint{Al final ponemos disable en todonotes y todos se quitan sin borrarlos a mano, pero asi tenemos historial}
 
-X-ray crystallography determines the internal structure of molecules, including proteins, DNA and viruses, among others. This analysis is helpful in many fields, like the creation of vaccines against these viruses or understanding how haemoglobin cells behave when carrying oxygen.
-Atomic resolution structures of proteins can nowadays be obtained at room temperature from crystals using a powerful X-ray beam, in this case, at the MAX IV Synchrotron facility located at Lund. Within the AdaptoCell project \cite{max4web}, integrated at three beamlines, different techniques are carried out: X-ray Absorption/Emission Spectroscopy (XAS/XES, Balder beamline) and Small Angle X-ray Scattering (SAXS, CoSAXS beamline), and later it will be available for Serial Crystallography (SSX, MicroMAX beamline). Among those three beamlines, the MicroMAX aims to obtain protein structures using a \ac{MFD}, which supplies a flow of micro crystals, thus reducing their radiation damage.
+\section{Motivación}
+\subsubsection*{Problema}
+Lorem ipsum \ac{PCB}.
 
-\section{Motivation}
-\subsubsection*{Problem}
-These protein crystals need a liquid \cite{max4web} buffer to flow through the \ac{MFD}'s channel, mixed in a particular proportion depending on the application. So far, when performing the techniques mentioned above, the X-ray beam shutter is continuously opened, and the beam hits not only the crystals but also the gaps between them. This generates undesired data, subsequently stored, taking up disc space and interfering in the proteins' model creation.
+\section{Requisitos}
+Lorem ipsum
 
-Currently, software solutions are implemented to analyze and discard this useless data. However, this filtering technique is not 100 \% accurate, and it takes a high processing load. Therefore, an additional method should be installed to improve this filtering stage.
-
-In addition, the continuous exposure of the \ac{MFD} to the X-ray beam leads to undesired burns as shown in %\autoref{fig:burnt_chip}.
-
-\todo[inline, color=red!40]{Insertar imagen del chip quemado}
-
-\section{Goals}
-
-In order to fulfill this purpose, the project is split into the following goals:
-
-\begin{itemize}
-	\item  Determine design requirements and restrictions of any sensor device.
-	\item Simulate and design different optical detection setups according to the requirements.
-	\item Test plausible configurations with the microfluidic device and detect changes inside the channel using the each setup.
-	%\item User interface with a microcontroller.
-\end{itemize}
-
-
-\todo[inline]{Tener en cuenta}
+\todohint[caption={Esquema SySML (?)}, inline]{Formato de requisitos en SysML o en tabla?}
 
 \end{document}
