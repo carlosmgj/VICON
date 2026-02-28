@@ -26,8 +26,7 @@ jobs:
 
         # Compila el PDF de la memoria
       - name: Install LaTeX
-        run: sudo apt-get install -y texlive-full bibtex
-
+        run: sudo apt-get install -y texlive-full
       - name: Compile LaTeX
         working-directory: report
         run: |
