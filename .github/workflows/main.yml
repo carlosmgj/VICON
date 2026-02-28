@@ -24,25 +24,15 @@ jobs:
       - name: Install Graphviz
         run: sudo apt-get update && sudo apt-get install -y graphviz
 
-        # Compila el PDF de la memoria
-      - name: Install LaTeX
-        run: sudo apt-get install -y texlive-full
-      - name: Compile LaTeX
-        working-directory: report
-        run: |
-          mkdir -p build
-          pdflatex -interaction=nonstopmode -output-directory=build main.tex
-          cd build && bibtex main && cd ..
-          pdflatex -interaction=nonstopmode -output-directory=build main.tex
-          pdflatex -interaction=nonstopmode -output-directory=build main.tex
-          test -f build/main.pdf || (echo "No se generó main.pdf" && exit 1)
-
       - name: Generate docs (Doxygen)
         working-directory: projects/vicon_cmgj/scripts
         run: |
           doxygen --version
           doxygen Doxyfile
           test -d ../docs/html || (echo "No existe ../docs/html; revisa rutas" && exit 1)
+
+      - name: Copy PDF to Doxygen html
+        run: cp report/build/main.pdf projects/vicon_cmgj/docs/html/memoria.pdf
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4

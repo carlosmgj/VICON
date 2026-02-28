@@ -3,6 +3,9 @@
 --! \mainpage Proyecto VICON
 --! \section title1 DIAGRAMA INTERACTIVO
 --! @htmlinclude test.html
+--! @htmlonly
+--! <a href="memoria.pdf" target="_blank"><b>📄 Memoria del TFM</b></a>
+--! @endhtmlonly
 --!
 --! \section title2 DESCRIPCION
 --! El proyecto consiste en el desarrollo de un controlador del sensor de imagen MT9V111, incluyendo la comunicación i2c y la transimión de señales por FTDI.
