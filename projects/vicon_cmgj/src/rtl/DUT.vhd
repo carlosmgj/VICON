@@ -19,7 +19,6 @@ entity DUT is
 end DUT;
 
 architecture Behavioral of DUT is
-    -- FSM Estados: Incluimos sub-pasos para manejar el flanco de SCLK
     type state_t is (IDLE, START, SEND_ADDR_LOW, SEND_ADDR_HIGH, ACK_CHECK, STOP, FINISHED);
     signal state      : state_t := IDLE;
     
@@ -27,7 +26,7 @@ architecture Behavioral of DUT is
     signal clk_div    : unsigned(15 downto 0) := (others => '0');
     signal en_i2c     : std_logic := '0';
     
-    -- Se�ales internas para el buffer triestado
+    -- Senales internas para el buffer triestado
     signal sdata_out  : std_logic := '1';
     signal sdata_oe   : std_logic := '0'; -- '1' para escribir, '0' para leer (Z)
 
@@ -48,11 +47,11 @@ begin
         end if;
     end process;
 
-    -- 2. L�gica del Buffer Triestado para SDATA
+    -- 2. Logica del Buffer Triestado para SDATA
     
     sdata <= sdata_out when sdata_oe = '1' else 'Z';
 
-    -- 3. M�quina de Estados Principal
+    -- 3. Maquina de Estados Principal
     process(clk)
     begin
         if rising_edge(clk) then

@@ -47,14 +47,12 @@ architecture Behavioral of TOP is
     signal i2c_done      : std_logic;
 
     -- 2. Nueva FSM simplificada del TOP (Gestor de alto nivel)
-    -- Ya no necesitamos estados de bits, solo estados de transacciones
     type main_state_t is (IDLE, SETUP_SENSOR, WAIT_I2C, FINISH_ALL);
     signal current_state : main_state_t := IDLE;
 
 begin
 
     -- 3. INSTANCIA DEL CONTROLADOR I2C
-    -- Sustituye a toda la lógica de bits y clk_div que tenías antes
     u_i2c_core : entity work.I2C_CONTROLLER
         port map (
             clk          => clk,
@@ -71,7 +69,6 @@ begin
         );
 
     -- 4. PROCESO DE CONTROL DEL TOP
-    -- Este proceso solo decide QUÉ enviar, no CÓMO enviarlo bit a bit
     process(clk)
     begin
         if rising_edge(clk) then
@@ -84,12 +81,12 @@ begin
                     
                     when IDLE =>
                         done <= '0';
-                        if reset = '0' then -- Ejemplo: Iniciar al salir de reset
+                        if reset = '0' then 
                             current_state <= SETUP_SENSOR;
                         end if;
 
                     when SETUP_SENSOR =>
-                        -- Ejemplo: Escribir en el registro 0x00 el valor 0x823A
+                        
                         if i2c_busy = '0' then
                             i2c_reg_addr  <= x"04";     -- Dirección del registro
                             i2c_data_wr   <= x"823A";   -- Dato de 16 bits

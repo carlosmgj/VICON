@@ -12,20 +12,20 @@ entity I2C_CONTROLLER is
     port (
         clk      : in    std_logic;
         reset    : in    std_logic;
-        -- Control de operación
+        -- CONTROL
         rw       : in    std_logic;                      -- '0'=Write, '1'=Read
         start    : in    std_logic;
         num_bytes: in    integer range 1 to 4;           -- Bytes de datos (modo write)
-        -- Datos
+        -- DATOS
         addr_dev : in    std_logic_vector(6 downto 0);
         addr_reg : in    std_logic_vector(7 downto 0);
         data_wr  : in    std_logic_vector(31 downto 0);  -- Datos a escribir (MSB first)
-        data_rd  : out   std_logic_vector(7 downto 0);   -- Byte leído (modo read)
-        -- Estado
+        data_rd  : out   std_logic_vector(7 downto 0);   -- Byte leido (modo read)
+        -- ESTADO
         busy     : out   std_logic;
         done     : out   std_logic;
         error    : out   std_logic;
-        -- Bus I2C
+        -- BUS I2C
         sclk     : out   std_logic;
         sdata    : inout std_logic
     );
@@ -38,26 +38,19 @@ architecture Behavioral of I2C_CONTROLLER is
     -- -------------------------------------------------------------------------
     type state_t is (
         IDLE,
-        -- Condición START / Repeated START
         START_SDA_LOW,
         START_SCL_LOW,
-        -- Transmisión de un byte (escritura master?esclavo)
         TX_BIT_LOW,
         TX_BIT_HIGH,
-        -- Espera ACK del esclavo
         ACK_SCL_LOW,
         ACK_SCL_HIGH,
-        -- Recepción de un byte (lectura esclavo?master)
         RX_BIT_LOW,
         RX_BIT_HIGH,
-        -- Envío ACK/NACK del master al esclavo
         MACK_SCL_LOW,
         MACK_SCL_HIGH,
-        -- Condición STOP
         STOP_SCL_LOW,
         STOP_SDA_LOW,
         STOP_SCL_HIGH,
-        -- Fin
         FINISHED,
         ERROR_STATE
     );
@@ -83,14 +76,14 @@ architecture Behavioral of I2C_CONTROLLER is
     signal sdata_out : std_logic := '1';
     signal sdata_oe  : std_logic := '0';  -- '1' = master conduce SDA
 
-    -- Registros de los parámetros de la transacción (latched al inicio)
+    -- Registros de los parametros de la transaccion (latcheados al inicio)
     signal rw_r      : std_logic := '0';
     signal nb_r      : integer range 1 to 4 := 1;
     signal addr_r    : std_logic_vector(6 downto 0) := (others => '0');
     signal areg_r    : std_logic_vector(7 downto 0) := (others => '0');
     signal dwr_r     : std_logic_vector(31 downto 0) := (others => '0');
 
-    -- Flag para saber si el siguiente ACK es el último antes de parar
+    -- Flag para saber si el siguiente ACK es el ultimo antes de parar
     signal last_data  : std_logic := '0';
     -- Flag para saber si estamos en la fase de lectura (tras repeated start)
     signal in_read    : std_logic := '0';
@@ -123,7 +116,7 @@ begin
     end process p_clkdiv;
 
     -- =========================================================================
-    -- Máquina de estados - avanza sólo en cada tick
+    -- Maquina de estados - avanza solo en cada tick
     -- =========================================================================
     p_fsm : process(clk)
     begin
@@ -158,7 +151,7 @@ begin
                         sdata_oe  <= '1';
                         in_read   <= '0';
                         if start = '1' then
-                            -- Latch de parámetros
+                            -- Latch 
                             rw_r     <= rw;
                             nb_r     <= num_bytes;
                             addr_r   <= addr_dev;
@@ -170,7 +163,7 @@ begin
                         end if;
 
                     -- ---------------------------------------------------------
-                    -- Condición START: SDA baja con SCL alto
+                    --  START: SDA baja con SCL alto
                     -- ---------------------------------------------------------
                     when START_SDA_LOW =>
                         sdata_out <= '0';   -- SDA baja ? START
@@ -190,7 +183,7 @@ begin
                         state     <= TX_BIT_LOW;
 
                     -- ---------------------------------------------------------
-                    -- Transmisión de un byte (master ? esclavo)
+                    -- Transmision de un byte (master ? esclavo)
                     -- ---------------------------------------------------------
                     when TX_BIT_LOW =>
                         sclk_r    <= '0';
@@ -221,7 +214,7 @@ begin
                             -- NACK ? abortar
                             state <= ERROR_STATE;
                         else
-                            -- ACK OK ? decidir siguiente acción según byte_cnt
+                            -- ACK OK ? decidir siguiente accion segun byte_cnt
                             if in_read = '1' then
                                 -- Acabamos de enviar ADDR+R, empezamos a leer
                                 bit_cnt <= 7;
@@ -266,7 +259,7 @@ begin
                         end if;
 
                     -- ---------------------------------------------------------
-                    -- Recepción de un byte (esclavo ? master)
+                    -- Recepcion de un byte (esclavo ? master)
                     -- ---------------------------------------------------------
                     when RX_BIT_LOW =>
                         sclk_r   <= '0';
@@ -278,8 +271,8 @@ begin
                         rx_reg(bit_cnt)     <= sdata;   -- Muestreamos SDA
                         if bit_cnt = 0 then
                             -- Byte completo recibido
-                            data_rd <= rx_reg(7 downto 1) & sdata; -- incluimos último bit
-                            -- Master envía NACK (último byte) ? indica fin de lectura
+                            data_rd <= rx_reg(7 downto 1) & sdata; -- incluimos ultimo bit
+                            -- Master envia NACK (ultimo byte) ? indica fin de lectura
                             state <= MACK_SCL_LOW;
                         else
                             bit_cnt <= bit_cnt - 1;
@@ -287,7 +280,7 @@ begin
                         end if;
 
                     -- ---------------------------------------------------------
-                    -- Master envía NACK tras recibir el byte (fin de lectura)
+                    -- Master envia NACK tras recibir el byte (fin de lectura)
                     -- ---------------------------------------------------------
                     when MACK_SCL_LOW =>
                         sclk_r    <= '0';
@@ -300,7 +293,7 @@ begin
                         state  <= STOP_SCL_LOW;
 
                     -- ---------------------------------------------------------
-                    -- Condición STOP: SDA sube con SCL alto
+                    -- Condicion STOP: SDA sube con SCL alto
                     -- ---------------------------------------------------------
                     when STOP_SCL_LOW =>
                         sclk_r    <= '0';

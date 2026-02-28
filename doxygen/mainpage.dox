@@ -1,0 +1,25 @@
+/*!
+ * \mainpage PORTADA
+ *
+* \section title_desc DESCRIPCION
+ * El proyecto consiste en el desarrollo de un controlador del sensor de imagen MT9V111,
+ * incluyendo la comunicación I2C y la transmisión de señales por FTDI.
+ *
+ * \section title_mem MEMORIA DE PROYECTO 📄
+ * @htmlonly
+ * <a href="memoria.pdf" target="_blank"><b>Memoria del TFM</b></a>
+ * @endhtmlonly
+ *
+ * \section title_fpga FPGA
+ * \subsection subtitle_diagram DIAGRAMA INTERACTIVO
+ * @htmlinclude test.html
+ *
+ * \section source_code CODIGO FUENTE
+ * - <A HREF="testbench_8vhd_source.html"><B>I2C TESTBENCH </B></A>
+ * - <A HREF="_t_o_p_8vhd_source.html"><B>TOP(DUT) </B></A>
+ * - <A HREF="mt9v111_8vhd_source.html"><B>AGENTE MT9V111 </B></A>
+ * - <A HREF="clock__generator_8vhd_source.html"><B>AGENTE CLK & RST </B></A>
+ *
+ * \section author AUTOR
+ * Carlos Manuel Gomez Jimenez
+ */
