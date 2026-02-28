@@ -138,7 +138,7 @@ Instantiations</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p class="definition">Definition at line <a class="el" href="TOP_8vhd_source.html#l00039">39</a> of file <a class="el" href="TOP_8vhd_source.html">TOP.vhd</a>.</p>
+<p class="definition">Definition at line <a class="el" href="TOP_8vhd_source.html#l00042">42</a> of file <a class="el" href="TOP_8vhd_source.html">TOP.vhd</a>.</p>
 </div><h2 class="groupheader">Member Function/Procedure/Process Documentation</h2>
 <a id="a05737ac79f6a8260c73c7b9c2d3e103c" name="a05737ac79f6a8260c73c7b9c2d3e103c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a05737ac79f6a8260c73c7b9c2d3e103c">&#9670;&#160;</a></span>PROCESS_2()</h2>
@@ -155,49 +155,49 @@ Instantiations</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="TOP_8vhd_source.html#l00075">75</a> of file <a class="el" href="TOP_8vhd_source.html">TOP.vhd</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   75</span>    process(clk)</div>
-<div class="line"><span class="lineno">   76</span>    begin</div>
-<div class="line"><span class="lineno">   77</span>        if rising_edge(clk) then</div>
-<div class="line"><span class="lineno">   78</span>            if reset = &#39;1&#39; then</div>
-<div class="line"><span class="lineno">   79</span>                current_state &lt;= IDLE;</div>
-<div class="line"><span class="lineno">   80</span>                i2c_start     &lt;= &#39;0&#39;;</div>
-<div class="line"><span class="lineno">   81</span>                done          &lt;= &#39;0&#39;;</div>
-<div class="line"><span class="lineno">   82</span>            else</div>
-<div class="line"><span class="lineno">   83</span>                case current_state is</div>
-<div class="line"><span class="lineno">   84</span>                    </div>
-<div class="line"><span class="lineno">   85</span>                    when IDLE =&gt;</div>
-<div class="line"><span class="lineno">   86</span>                        done &lt;= &#39;0&#39;;</div>
-<div class="line"><span class="lineno">   87</span>                        if reset = &#39;0&#39; then -- Ejemplo: Iniciar al salir de reset</div>
-<div class="line"><span class="lineno">   88</span>                            current_state &lt;= SETUP_SENSOR;</div>
-<div class="line"><span class="lineno">   89</span>                        end if;</div>
-<div class="line"><span class="lineno">   90</span> </div>
-<div class="line"><span class="lineno">   91</span>                    when SETUP_SENSOR =&gt;</div>
-<div class="line"><span class="lineno">   92</span>                        -- Ejemplo: Escribir en el registro 0x00 el valor 0x823A</div>
-<div class="line"><span class="lineno">   93</span>                        if i2c_busy = &#39;0&#39; then</div>
-<div class="line"><span class="lineno">   94</span>                            i2c_reg_addr  &lt;= x&quot;04&quot;;     -- Dirección del registro</div>
-<div class="line"><span class="lineno">   95</span>                            i2c_data_wr   &lt;= x&quot;823A&quot;;   -- Dato de 16 bits</div>
-<div class="line"><span class="lineno">   96</span>                            i2c_num_bytes &lt;= 2;         -- 2 bytes data</div>
-<div class="line"><span class="lineno">   97</span>                            i2c_start     &lt;= &#39;1&#39;;       -- Pulso de inicio</div>
-<div class="line"><span class="lineno">   98</span>                            current_state &lt;= WAIT_I2C;</div>
-<div class="line"><span class="lineno">   99</span>                        end if;</div>
-<div class="line"><span class="lineno">  100</span> </div>
-<div class="line"><span class="lineno">  101</span>                    when WAIT_I2C =&gt;</div>
-<div class="line"><span class="lineno">  102</span>                        i2c_start &lt;= &#39;0&#39;; -- Bajamos el start para no repetir la orden</div>
-<div class="line"><span class="lineno">  103</span>                        if i2c_done = &#39;1&#39; then</div>
-<div class="line"><span class="lineno">  104</span>                            current_state &lt;= FINISH_ALL;</div>
-<div class="line"><span class="lineno">  105</span>                        end if;</div>
-<div class="line"><span class="lineno">  106</span> </div>
-<div class="line"><span class="lineno">  107</span>                    when FINISH_ALL =&gt;</div>
-<div class="line"><span class="lineno">  108</span>                        done &lt;= &#39;1&#39;;</div>
-<div class="line"><span class="lineno">  109</span>                        current_state &lt;= FINISH_ALL; -- Fin de la secuencia</div>
-<div class="line"><span class="lineno">  110</span> </div>
-<div class="line"><span class="lineno">  111</span>                    when others =&gt; </div>
-<div class="line"><span class="lineno">  112</span>                        current_state &lt;= IDLE;</div>
-<div class="line"><span class="lineno">  113</span>                end case;</div>
-<div class="line"><span class="lineno">  114</span>            end if;</div>
-<div class="line"><span class="lineno">  115</span>        end if;</div>
-<div class="line"><span class="lineno">  116</span>    end process;</div>
+<p class="definition">Definition at line <a class="el" href="TOP_8vhd_source.html#l00078">78</a> of file <a class="el" href="TOP_8vhd_source.html">TOP.vhd</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   78</span>    process(clk)</div>
+<div class="line"><span class="lineno">   79</span>    begin</div>
+<div class="line"><span class="lineno">   80</span>        if rising_edge(clk) then</div>
+<div class="line"><span class="lineno">   81</span>            if reset = &#39;1&#39; then</div>
+<div class="line"><span class="lineno">   82</span>                current_state &lt;= IDLE;</div>
+<div class="line"><span class="lineno">   83</span>                i2c_start     &lt;= &#39;0&#39;;</div>
+<div class="line"><span class="lineno">   84</span>                done          &lt;= &#39;0&#39;;</div>
+<div class="line"><span class="lineno">   85</span>            else</div>
+<div class="line"><span class="lineno">   86</span>                case current_state is</div>
+<div class="line"><span class="lineno">   87</span>                    </div>
+<div class="line"><span class="lineno">   88</span>                    when IDLE =&gt;</div>
+<div class="line"><span class="lineno">   89</span>                        done &lt;= &#39;0&#39;;</div>
+<div class="line"><span class="lineno">   90</span>                        if reset = &#39;0&#39; then -- Ejemplo: Iniciar al salir de reset</div>
+<div class="line"><span class="lineno">   91</span>                            current_state &lt;= SETUP_SENSOR;</div>
+<div class="line"><span class="lineno">   92</span>                        end if;</div>
+<div class="line"><span class="lineno">   93</span> </div>
+<div class="line"><span class="lineno">   94</span>                    when SETUP_SENSOR =&gt;</div>
+<div class="line"><span class="lineno">   95</span>                        -- Ejemplo: Escribir en el registro 0x00 el valor 0x823A</div>
+<div class="line"><span class="lineno">   96</span>                        if i2c_busy = &#39;0&#39; then</div>
+<div class="line"><span class="lineno">   97</span>                            i2c_reg_addr  &lt;= x&quot;04&quot;;     -- Dirección del registro</div>
+<div class="line"><span class="lineno">   98</span>                            i2c_data_wr   &lt;= x&quot;823A&quot;;   -- Dato de 16 bits</div>
+<div class="line"><span class="lineno">   99</span>                            i2c_num_bytes &lt;= 2;         -- 2 bytes data</div>
+<div class="line"><span class="lineno">  100</span>                            i2c_start     &lt;= &#39;1&#39;;       -- Pulso de inicio</div>
+<div class="line"><span class="lineno">  101</span>                            current_state &lt;= WAIT_I2C;</div>
+<div class="line"><span class="lineno">  102</span>                        end if;</div>
+<div class="line"><span class="lineno">  103</span> </div>
+<div class="line"><span class="lineno">  104</span>                    when WAIT_I2C =&gt;</div>
+<div class="line"><span class="lineno">  105</span>                        i2c_start &lt;= &#39;0&#39;; -- Bajamos el start para no repetir la orden</div>
+<div class="line"><span class="lineno">  106</span>                        if i2c_done = &#39;1&#39; then</div>
+<div class="line"><span class="lineno">  107</span>                            current_state &lt;= FINISH_ALL;</div>
+<div class="line"><span class="lineno">  108</span>                        end if;</div>
+<div class="line"><span class="lineno">  109</span> </div>
+<div class="line"><span class="lineno">  110</span>                    when FINISH_ALL =&gt;</div>
+<div class="line"><span class="lineno">  111</span>                        done &lt;= &#39;1&#39;;</div>
+<div class="line"><span class="lineno">  112</span>                        current_state &lt;= FINISH_ALL; -- Fin de la secuencia</div>
+<div class="line"><span class="lineno">  113</span> </div>
+<div class="line"><span class="lineno">  114</span>                    when others =&gt; </div>
+<div class="line"><span class="lineno">  115</span>                        current_state &lt;= IDLE;</div>
+<div class="line"><span class="lineno">  116</span>                end case;</div>
+<div class="line"><span class="lineno">  117</span>            end if;</div>
+<div class="line"><span class="lineno">  118</span>        end if;</div>
+<div class="line"><span class="lineno">  119</span>    end process;</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -214,7 +214,7 @@ Instantiations</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="TOP_8vhd_source.html#l00052">52</a> of file <a class="el" href="TOP_8vhd_source.html">TOP.vhd</a>.</p>
+<p class="definition">Definition at line <a class="el" href="TOP_8vhd_source.html#l00055">55</a> of file <a class="el" href="TOP_8vhd_source.html">TOP.vhd</a>.</p>
 
 </div>
 </div>
@@ -230,7 +230,7 @@ Instantiations</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="TOP_8vhd_source.html#l00046">46</a> of file <a class="el" href="TOP_8vhd_source.html">TOP.vhd</a>.</p>
+<p class="definition">Definition at line <a class="el" href="TOP_8vhd_source.html#l00049">49</a> of file <a class="el" href="TOP_8vhd_source.html">TOP.vhd</a>.</p>
 
 </div>
 </div>
@@ -246,7 +246,7 @@ Instantiations</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="TOP_8vhd_source.html#l00045">45</a> of file <a class="el" href="TOP_8vhd_source.html">TOP.vhd</a>.</p>
+<p class="definition">Definition at line <a class="el" href="TOP_8vhd_source.html#l00048">48</a> of file <a class="el" href="TOP_8vhd_source.html">TOP.vhd</a>.</p>
 
 </div>
 </div>
@@ -262,7 +262,7 @@ Instantiations</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="TOP_8vhd_source.html#l00047">47</a> of file <a class="el" href="TOP_8vhd_source.html">TOP.vhd</a>.</p>
+<p class="definition">Definition at line <a class="el" href="TOP_8vhd_source.html#l00050">50</a> of file <a class="el" href="TOP_8vhd_source.html">TOP.vhd</a>.</p>
 
 </div>
 </div>
@@ -278,7 +278,7 @@ Instantiations</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="TOP_8vhd_source.html#l00043">43</a> of file <a class="el" href="TOP_8vhd_source.html">TOP.vhd</a>.</p>
+<p class="definition">Definition at line <a class="el" href="TOP_8vhd_source.html#l00046">46</a> of file <a class="el" href="TOP_8vhd_source.html">TOP.vhd</a>.</p>
 
 </div>
 </div>
@@ -294,7 +294,7 @@ Instantiations</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="TOP_8vhd_source.html#l00044">44</a> of file <a class="el" href="TOP_8vhd_source.html">TOP.vhd</a>.</p>
+<p class="definition">Definition at line <a class="el" href="TOP_8vhd_source.html#l00047">47</a> of file <a class="el" href="TOP_8vhd_source.html">TOP.vhd</a>.</p>
 
 </div>
 </div>
@@ -310,7 +310,7 @@ Instantiations</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="TOP_8vhd_source.html#l00042">42</a> of file <a class="el" href="TOP_8vhd_source.html">TOP.vhd</a>.</p>
+<p class="definition">Definition at line <a class="el" href="TOP_8vhd_source.html#l00045">45</a> of file <a class="el" href="TOP_8vhd_source.html">TOP.vhd</a>.</p>
 
 </div>
 </div>
@@ -326,7 +326,7 @@ Instantiations</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="TOP_8vhd_source.html#l00051">51</a> of file <a class="el" href="TOP_8vhd_source.html">TOP.vhd</a>.</p>
+<p class="definition">Definition at line <a class="el" href="TOP_8vhd_source.html#l00054">54</a> of file <a class="el" href="TOP_8vhd_source.html">TOP.vhd</a>.</p>
 
 </div>
 </div>
@@ -342,7 +342,7 @@ Instantiations</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="TOP_8vhd_source.html#l00071">71</a> of file <a class="el" href="TOP_8vhd_source.html">TOP.vhd</a>.</p>
+<p class="definition">Definition at line <a class="el" href="TOP_8vhd_source.html#l00074">74</a> of file <a class="el" href="TOP_8vhd_source.html">TOP.vhd</a>.</p>
 
 </div>
 </div>
