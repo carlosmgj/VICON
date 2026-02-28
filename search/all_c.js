@@ -1,18 +1,14 @@
 var searchData=
 [
-  ['referencias_0',['Alimentación y Referencias',['../AGENTE.html#POWER',1,'']]],
-  ['reg_5fmap_5ft_1',['reg_map_t',['../classmt9v111__agent_1_1Behavioral.html#a06842a92713a9659b6392aad27b38b74',1,'mt9v111_agent::Behavioral']]],
-  ['regs_5fcore_2',['regs_core',['../classmt9v111__agent_1_1Behavioral.html#aeb468d9f7068957dfeef1dd49b500b7a',1,'mt9v111_agent::Behavioral']]],
-  ['regs_5fifp_3',['regs_ifp',['../classmt9v111__agent_1_1Behavioral.html#ac79ed626471a1c24469dcd7984a94894',1,'mt9v111_agent::Behavioral']]],
-  ['relojes_20y_20control_20de_20sistema_4',['Relojes y Control de Sistema',['../AGENTE.html#CLOCKS_RESETS',1,'']]],
-  ['reset_5',['reset',['../classDUT.html#a108f6801ba4104063b9d5f9286194302',1,'DUT.reset'],['../classI2C__CONTROLLER.html#a108f6801ba4104063b9d5f9286194302',1,'I2C_CONTROLLER.reset'],['../classTOP.html#a108f6801ba4104063b9d5f9286194302',1,'TOP.reset']]],
-  ['reset_5fi_6',['reset_i',['../classclk__reset__gen_1_1Behavioral.html#a015863497573d0ae6fbfc0df2b3f01b0',1,'clk_reset_gen::Behavioral']]],
-  ['reset_5fout_7',['reset_out',['../classclk__reset__gen.html#a03e6cb01ef62f3628acafa301fc0ac24',1,'clk_reset_gen']]],
-  ['rst_5ffinal_8',['rst_final',['../classtestbench_1_1Structural.html#a4c3b82ee8a49984a31d8327d2251faab',1,'testbench::Structural']]],
-  ['rst_5fraw_9',['rst_raw',['../classtestbench_1_1Structural.html#a5b170d3310b2c13b04b2ffbfec9a228d',1,'testbench::Structural']]],
-  ['run_5fclean_5fsim_10',['run_clean_sim',['../namespacerun__clean__sim.html',1,'']]],
-  ['run_5fclean_5fsim_2etcl_11',['run_clean_sim.tcl',['../run__clean__sim_8tcl.html',1,'']]],
-  ['rw_12',['rw',['../classI2C__CONTROLLER.html#a8b78b2b252550a51ae939735097f4ec9',1,'I2C_CONTROLLER']]],
-  ['rw_5fr_13',['rw_r',['../classI2C__CONTROLLER_1_1Behavioral.html#abd35c0b5e0c6dcdb06dcadb8c6675cd0',1,'I2C_CONTROLLER::Behavioral']]],
-  ['rx_5freg_14',['rx_reg',['../classI2C__CONTROLLER_1_1Behavioral.html#a61f5fa51097b8f9edbd01921184b0d5b',1,'I2C_CONTROLLER::Behavioral']]]
+  ['p_5fclkdiv_0',['p_clkdiv',['../classI2C__CONTROLLER_1_1Behavioral.html#a17700e939c8a347aa547dd1789c0de0d',1,'I2C_CONTROLLER::Behavioral']]],
+  ['p_5ffsm_1',['p_fsm',['../classI2C__CONTROLLER_1_1Behavioral.html#a71395967ea7bd54ff56c449c28a66265',1,'I2C_CONTROLLER::Behavioral']]],
+  ['pix_5fperiod_2',['PIX_PERIOD',['../classmt9v111__agent_1_1Behavioral.html#a3be7fedef92b3b04b29d087d260369d1',1,'mt9v111_agent::Behavioral']]],
+  ['pixclk_3',['pixclk',['../classmt9v111__agent.html#a5b72b02b302a7a75c44713e26064578d',1,'mt9v111_agent']]],
+  ['portada_4',['PORTADA',['../index.html',1,'']]],
+  ['process_5f0_5',['PROCESS_0',['../classDUT_1_1Behavioral.html#a7fff6d728c52bd4a08f47ca610229209',1,'DUT::Behavioral']]],
+  ['process_5f1_6',['PROCESS_1',['../classDUT_1_1Behavioral.html#a67cbd29443fafed2b0446c1321a8e91c',1,'DUT::Behavioral']]],
+  ['process_5f2_7',['PROCESS_2',['../classTOP_1_1Behavioral.html#a05737ac79f6a8260c73c7b9c2d3e103c',1,'TOP::Behavioral']]],
+  ['process_5f3_8',['PROCESS_3',['../classclk__reset__gen_1_1Behavioral.html#ad6cab3590f19d09760591444870d2e29',1,'clk_reset_gen::Behavioral']]],
+  ['process_5f4_9',['PROCESS_4',['../classclk__reset__gen_1_1Behavioral.html#af0caed2af0190b69030cc982192e635e',1,'clk_reset_gen::Behavioral']]],
+  ['proyecto_20📄_10',['MEMORIA DE PROYECTO 📄',['../index.html#title_mem',1,'']]]
 ];
