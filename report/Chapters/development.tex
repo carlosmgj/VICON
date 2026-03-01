@@ -1,0 +1,23 @@
+% !TEX root = ../main.tex
+\documentclass[../main.tex]{subfiles}%para poder compilar esta file sola
+% Chapter 1
+\begin{document}
+
+\chapter{Desarrollo}
+\label{chap:desarrollo} 
+
+\section{RTL Design}
+
+\subsection{I2C Controller}
+
+
+\begin{figure}[htbp] 
+    \centering
+    \includegraphics[width=0.8\textwidth]{gfx/waveforms/4phases_sclk.pdf}
+    \caption{Cronograma de las 4 fases de SCLK.} 
+    \label{fig:waveforms_4phases} 
+\end{figure}
+
+\todohint[caption={Figuras diagramas}, inline]{Explicar de forma detallada junto con los diagramas de drawio la secuencia de la FSM del I2C Controller.}
+
+\end{document}
