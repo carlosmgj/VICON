@@ -26,18 +26,21 @@ var NAVTREE =
 [
   [ "VICON: Sistema de Visión configurable", "index.html", [
     [ "PORTADA", "index.html", "index" ],
-    [ "MT9V111", "_a_g_e_n_t_e.html", [
-      [ "Descripcion", "_a_g_e_n_t_e.html#Descripcion", null ],
-      [ "Uso", "_a_g_e_n_t_e.html#Uso", null ],
-      [ "MT9V111 Sensor", "_a_g_e_n_t_e.html#PINOUT", [
-        [ "Relojes y Control de Sistema", "_a_g_e_n_t_e.html#CLOCKS_RESETS", null ],
-        [ "Interfaz de Control Serial (I2C/SCCB)", "_a_g_e_n_t_e.html#SERIAL_IF", null ],
-        [ "Interfaz de Salida de Video", "_a_g_e_n_t_e.html#VIDEO_OUT", null ],
-        [ "Alimentación y Referencias", "_a_g_e_n_t_e.html#POWER", null ]
+    [ "Herramientas Utilizadas", "_tools.html", [
+      [ "DISEÑO RTL", "_tools.html#tool_rtl_design", null ],
+      [ "GENERACION DE DIAGRAMAS DE TIEMPO", "_tools.html#tool_timing_diagrams", [
+        [ "PASOS DE EXPORTACION VIVADO->SVG", "_tools.html#subs_vivado2svg", null ],
+        [ "INCLUIR SVG NAVEGABLE EN DOXYGEN", "_tools.html#subs_vcddoxygen", null ],
+        [ "RECORTAR DIAGRAMA TEMPORAL", "_tools.html#subs_recortar_wavedrom", null ]
       ] ]
     ] ],
     [ "Packages", "namespaces.html", [
-      [ "Package List", "namespaces.html", "namespaces_dup" ]
+      [ "Package List", "namespaces.html", "namespaces_dup" ],
+      [ "Package Members", "namespacemembers.html", [
+        [ "All", "namespacemembers.html", null ],
+        [ "Functions/Procedures/Processes", "namespacemembers_func.html", null ],
+        [ "Variables", "namespacemembers_vars.html", null ]
+      ] ]
     ] ],
     [ "Design Units", "annotated.html", [
       [ "Design Unit List", "annotated.html", "annotated_dup" ],
@@ -57,7 +60,8 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"_a_g_e_n_t_e.html"
+"_basys3___g_p_i_o_8xdc.html",
+"recortar__json__wavedrom_8py.html#a3a8037faa896760a1f12e34c74ff03c4"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

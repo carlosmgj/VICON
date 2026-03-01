@@ -56,9 +56,9 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="class_i2_c___c_o_n_t_r_o_l_l_e_r.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="171.5,-129 68.5,-129 68.5,-110 171.5,-110 171.5,-129"/>
-<text text-anchor="middle" x="120" y="-117" font-family="Helvetica,sans-Serif" font-size="10.00">I2C_CONTROLLER</text>
+<g id="a_Node000004"><a xlink:href="classi2c__master.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="155.5,-129 84.5,-129 84.5,-110 155.5,-110 155.5,-129"/>
+<text text-anchor="middle" x="120" y="-117" font-family="Helvetica,sans-Serif" font-size="10.00">i2c_master</text>
 </a>
 </g>
 </g>

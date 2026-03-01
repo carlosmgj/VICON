@@ -1,8 +1,4 @@
 var searchData=
 [
-  ['p_5fclkdiv_0',['p_clkdiv',['../class_i2_c___c_o_n_t_r_o_l_l_e_r_1_1_behavioral.html#a17700e939c8a347aa547dd1789c0de0d',1,'I2C_CONTROLLER::Behavioral']]],
-  ['p_5ffsm_1',['p_fsm',['../class_i2_c___c_o_n_t_r_o_l_l_e_r_1_1_behavioral.html#a71395967ea7bd54ff56c449c28a66265',1,'I2C_CONTROLLER::Behavioral']]],
-  ['process_5f0_2',['PROCESS_0',['../class_t_o_p_1_1_behavioral.html#a7fff6d728c52bd4a08f47ca610229209',1,'TOP::Behavioral']]],
-  ['process_5f1_3',['PROCESS_1',['../classclk__reset__gen_1_1_behavioral.html#a5742fe7bf212e020ef29ba1ecac27700',1,'clk_reset_gen::Behavioral']]],
-  ['process_5f2_4',['PROCESS_2',['../classclk__reset__gen_1_1_behavioral.html#a031269c3515f7279dab9aede82457a06',1,'clk_reset_gen::Behavioral']]]
+  ['obtener_5finfo_5farchivo_0',['obtener_info_archivo',['../namespacerecortar__json__wavedrom.html#acfb2c938559c69bd4deebdff15bd16d3',1,'recortar_json_wavedrom']]]
 ];

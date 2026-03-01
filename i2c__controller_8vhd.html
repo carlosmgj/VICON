@@ -114,13 +114,35 @@ $(function(){initNavTree('i2c__controller_8vhd.html',''); initResizable(true); }
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Entities</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_i2_c___c_o_n_t_r_o_l_l_e_r.html">I2C_CONTROLLER</a> &#160;</td><td class="memItemRight" valign="bottom">entity</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classi2c__master.html">i2c_master</a> &#160;</td><td class="memItemRight" valign="bottom">entity</td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_i2_c___c_o_n_t_r_o_l_l_e_r_1_1_behavioral.html">I2C_CONTROLLER.Behavioral</a> &#160;</td><td class="memItemRight" valign="bottom">architecture</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classi2c__master_1_1rtl.html">i2c_master.rtl</a> &#160;</td><td class="memItemRight" valign="bottom">architecture</td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Controlador I2C para el sensor MT9V111. Implementa una escritura simple a la dirección del sensor. </p>
+<div class="textblock"><p>Controlador I2C para comunicación con el sensor MT9V111. Protocolo MT9V111:</p>
+<ul>
+<li>WRITE: S + ADDR_WR + ACK + REG_ADDR + ACK + DATA_H + ACK + DATA_L + ACK + [repetir DATA_H/DATA_L para más registros, auto-increment] + P</li>
+<li>READ: S + ADDR_WR + ACK + REG_ADDR + ACK + Sr + ADDR_RD + ACK + DATA_H + ACK + ... + DATA_L + NACK + P</li>
+</ul>
+<p>Timing SCL – 4 fases de CLKS_PER_PHASE ciclos de sistema cada una:</p><ul>
+<li>_0 SCL=0 → cambiar / preparar SDA</li>
+<li>_1 SCL=1</li>
+<li>_2 SCL=1 → muestrear SDA</li>
+<li>_3 SCL=0 → transición  
+ <iframe src="timing1.html"
+         width="100%"
+         height="400px"
+         style="border:none;">
+ </iframe>
+ </li>
+</ul>
+<p>Bloques reutilizables en la FSM:</p><ul>
+<li>TX (ST_TX_*) envía 'tx_byte' MSB-first. Al completar el bit 0 pasa a ST_RACK_* para recibir el ACK del esclavo. Tras el ACK va a 'seq_next'.</li>
+<li>RX (ST_RX_*) recibe un byte en 'rx_byte' MSB-first. Al completar el bit 0 pasa a ST_MACK_* donde el master envía ACK o NACK según 'send_nack'. Tras el ACK/NACK va a 'seq_next'.</li>
+<li>START (ST_START_*) genera condición START o Repeated START. Tras completar carga tx_byte con la dirección y salta a TX. La señal 'start_rd_mode' indica si la dirección va con R/W='1'. <dl class="section warning"><dt>Warning</dt><dd>Los estados ST_LOAD_DATA_H y ST_LOAD_NEXT_DATA_H añaden un ciclo de latencia para que 'wr_word' se estabilice antes de cargarlo en 'tx_byte'. Sin este ciclo extra, ST_TX_0 arrancaba con el valor antiguo de tx_byte. </dd></dl>
+</li>
+</ul>
 
 <p class="definition">Definition in file <a class="el" href="i2c__controller_8vhd_source.html">i2c_controller.vhd</a>.</p>
 </div></div><!-- contents -->

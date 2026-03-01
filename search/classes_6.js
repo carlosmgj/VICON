@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['testbench_0',['testbench',['../classtestbench.html',1,'']]],
-  ['top_1',['TOP',['../class_t_o_p.html',1,'']]]
+  ['sim_5futils_5fpkg_0',['sim_utils_pkg',['../classsim__utils__pkg.html',1,'']]],
+  ['structural_1',['Structural',['../classtestbench_1_1_structural.html',1,'testbench']]]
 ];

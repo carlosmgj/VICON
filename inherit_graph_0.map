@@ -1,11 +1,11 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$classclk__reset__gen.html" title=" " alt="" coords="197,5,309,31"/>
-<area shape="rect" id="Node000001" href="$classtestbench.html" title=" " alt="" coords="363,55,449,80"/>
-<area shape="poly" id="edge1_Node000000_Node000001" title=" " alt="" coords="307,32,366,52,365,57,305,38"/>
-<area shape="rect" id="Node000003" href="$class_i2_c___c_o_n_t_r_o_l_l_e_r.html" title=" " alt="" coords="5,55,143,80"/>
-<area shape="rect" id="Node000002" href="$class_t_o_p.html" title=" " alt="" coords="229,55,277,80"/>
-<area shape="poly" id="edge2_Node000003_Node000002" title=" " alt="" coords="157,65,228,65,228,70,157,70"/>
-<area shape="poly" id="edge3_Node000002_Node000001" title=" " alt="" coords="291,65,362,65,362,70,291,70"/>
-<area shape="rect" id="Node000004" href="$classmt9v111__agent.html" title=" " alt="" coords="191,104,315,129"/>
-<area shape="poly" id="edge4_Node000004_Node000001" title=" " alt="" coords="305,97,365,78,366,83,307,102"/>
+<area shape="rect" id="Node000000" href="$classclk__reset__gen.html" title=" " alt="" coords="154,5,266,31"/>
+<area shape="rect" id="Node000001" href="$classtestbench.html" title=" " alt="" coords="320,55,407,80"/>
+<area shape="poly" id="edge1_Node000000_Node000001" title=" " alt="" coords="264,32,324,52,322,57,262,38"/>
+<area shape="rect" id="Node000003" href="$classi2c__master.html" title=" " alt="" coords="5,55,100,80"/>
+<area shape="rect" id="Node000002" href="$class_t_o_p.html" title=" " alt="" coords="186,55,234,80"/>
+<area shape="poly" id="edge2_Node000003_Node000002" title=" " alt="" coords="114,65,186,65,186,70,114,70"/>
+<area shape="poly" id="edge3_Node000002_Node000001" title=" " alt="" coords="248,65,319,65,319,70,248,70"/>
+<area shape="rect" id="Node000004" href="$classmt9v111__agent.html" title=" " alt="" coords="148,104,272,129"/>
+<area shape="poly" id="edge4_Node000004_Node000001" title=" " alt="" coords="262,97,322,78,324,83,264,102"/>
 </map>

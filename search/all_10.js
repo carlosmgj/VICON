@@ -1,5 +1,30 @@
 var searchData=
 [
-  ['y_20control_20de_20sistema_0',['Relojes y Control de Sistema',['../_a_g_e_n_t_e.html#CLOCKS_RESETS',1,'']]],
-  ['y_20referencias_1',['Alimentación y Referencias',['../_a_g_e_n_t_e.html#POWER',1,'']]]
+  ['scl_0',['scl',['../classmt9v111__agent.html#a5f3aeccbd6897dbe239683ab0c193ec3',1,'mt9v111_agent']]],
+  ['scl_5fr_1',['scl_r',['../classi2c__master_1_1rtl.html#a9a11b57a4f4f41b2a255213636b6476d',1,'i2c_master::rtl']]],
+  ['sclk_2',['sclk',['../classi2c__master.html#ab46c91efcbc21d4a077ea83f2950c6cc',1,'i2c_master.sclk'],['../class_t_o_p.html#ab46c91efcbc21d4a077ea83f2950c6cc',1,'TOP.sclk']]],
+  ['sclk_5fbus_3',['sclk_bus',['../classtestbench_1_1_structural.html#a6f2557739268ed7992b9399a88e70b31',1,'testbench::Structural']]],
+  ['sda_4',['sda',['../classmt9v111__agent.html#ac45857e4988773c96df5c91e31933d17',1,'mt9v111_agent']]],
+  ['sda_5fbus_5',['sda_bus',['../classtestbench_1_1_structural.html#ad1403a5f9cd4c01918ed8ee04c0ebb86',1,'testbench::Structural']]],
+  ['sda_5foe_6',['sda_oe',['../classi2c__master_1_1rtl.html#a524441fd264a22c446c425e4388698e1',1,'i2c_master::rtl']]],
+  ['sda_5fout_5fr_7',['sda_out_r',['../classi2c__master_1_1rtl.html#a862bf9e89047630d4142594f3471fef8',1,'i2c_master::rtl']]],
+  ['sdata_8',['sdata',['../classi2c__master.html#a0cde9d71493ba007e15a2bae241683f6',1,'i2c_master.sdata'],['../class_t_o_p.html#a0cde9d71493ba007e15a2bae241683f6',1,'TOP.sdata']]],
+  ['seleccionar_5farchivo_9',['seleccionar_archivo',['../namespacerecortar__json__wavedrom.html#a14e2f1a47737f1a30cf15f740e4e23ef',1,'recortar_json_wavedrom']]],
+  ['send_5fnack_10',['send_nack',['../classi2c__master_1_1rtl.html#a8a213f341642dc4cc44a73658b594de6',1,'i2c_master::rtl']]],
+  ['sensor_5faddr_11',['SENSOR_ADDR',['../class_t_o_p.html#a3b9a25a07f1efa7e5094f5def929a7dc',1,'TOP']]],
+  ['seq_5fnext_12',['seq_next',['../classi2c__master_1_1rtl.html#a766688325feb6b10e8405e5e315026bc',1,'i2c_master::rtl']]],
+  ['side_13',['side',['../namespacerecortar__json__wavedrom.html#afc015eff6557e84151d2e53b94375445',1,'recortar_json_wavedrom']]],
+  ['sim_5futils_5fpkg_14',['sim_utils_pkg',['../classsim__utils__pkg.html',1,'sim_utils_pkg'],['../namespacesim__utils__pkg.html',1,'sim_utils_pkg'],['../classmt9v111__agent.html#a55a37f2d1b5eb76d3a00f5d6cb848bc2',1,'mt9v111_agent.sim_utils_pkg']]],
+  ['sim_5futils_5fpkg_2evhd_15',['sim_utils_pkg.vhd',['../sim__utils__pkg_8vhd.html',1,'']]],
+  ['spin_5fevery_16',['spin_every',['../namespacerecortar__json__wavedrom.html#ae004d1bea0315bbfc7b4f59736521a44',1,'recortar_json_wavedrom']]],
+  ['spin_5fhscale_17',['spin_hscale',['../namespacerecortar__json__wavedrom.html#a3a8037faa896760a1f12e34c74ff03c4',1,'recortar_json_wavedrom']]],
+  ['start_5fi2c_18',['start_i2c',['../classi2c__master.html#adb4870730aeb6c02dbdcbbcd3929286a',1,'i2c_master']]],
+  ['start_5frd_5fmode_19',['start_rd_mode',['../classi2c__master_1_1rtl.html#a881de7312f7a12a2247504cb5c798749',1,'i2c_master::rtl']]],
+  ['state_20',['state',['../classi2c__master_1_1rtl.html#a63d71e49c59f71dd59fabb5b14908dc4',1,'i2c_master.rtl.state'],['../class_t_o_p_1_1_behavioral.html#a1398fb852ffb3f64721693f004fb94ac',1,'TOP.Behavioral.state']]],
+  ['state_5ft_21',['state_t',['../classi2c__master_1_1rtl.html#a7b6defb155ac8a80ebe558419b98697b',1,'i2c_master::rtl']]],
+  ['std_5flogic_5f1164_22',['STD_LOGIC_1164',['../class_t_o_p.html#aa4b2b25246a821511120e3149b003563',1,'TOP.STD_LOGIC_1164'],['../classclk__reset__gen.html#aa4b2b25246a821511120e3149b003563',1,'clk_reset_gen.STD_LOGIC_1164'],['../classmt9v111__agent.html#aa4b2b25246a821511120e3149b003563',1,'mt9v111_agent.STD_LOGIC_1164'],['../classsim__utils__pkg.html#aa4b2b25246a821511120e3149b003563',1,'sim_utils_pkg.STD_LOGIC_1164'],['../classtestbench.html#aa4b2b25246a821511120e3149b003563',1,'testbench.STD_LOGIC_1164']]],
+  ['std_5flogic_5f1164_23',['std_logic_1164',['../classi2c__master.html#acd03516902501cd1c7296a98e22c6fcb',1,'i2c_master']]],
+  ['structural_24',['Structural',['../classtestbench_1_1_structural.html',1,'testbench']]],
+  ['svg_25',['PASOS DE EXPORTACION VIVADO-&gt;SVG',['../_tools.html#subs_vivado2svg',1,'']]],
+  ['svg_20navegable_20en_20doxygen_26',['INCLUIR SVG NAVEGABLE EN DOXYGEN',['../_tools.html#subs_vcddoxygen',1,'']]]
 ];

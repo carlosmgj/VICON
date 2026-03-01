@@ -1,5 +1,5 @@
 var i2c__controller_8vhd =
 [
-    [ "I2C_CONTROLLER", "class_i2_c___c_o_n_t_r_o_l_l_e_r.html", "class_i2_c___c_o_n_t_r_o_l_l_e_r" ],
-    [ "I2C_CONTROLLER.Behavioral", "class_i2_c___c_o_n_t_r_o_l_l_e_r_1_1_behavioral.html", "class_i2_c___c_o_n_t_r_o_l_l_e_r_1_1_behavioral" ]
+    [ "i2c_master", "classi2c__master.html", "classi2c__master" ],
+    [ "i2c_master.rtl", "classi2c__master_1_1rtl.html", "classi2c__master_1_1rtl" ]
 ];
