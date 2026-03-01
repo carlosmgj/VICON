@@ -967,7 +967,8 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = mainpage.dox \
-                         ../projects/vicon_cmgj
+                         ../projects/vicon_cmgj \
+                         ../scripts
 
 # This tag can be used to specify the character encoding of the source files
 # that Doxygen parses. Internally Doxygen uses the UTF-8 encoding. Doxygen uses
@@ -1435,7 +1436,7 @@ HTML_EXTRA_STYLESHEET  =
 # files will be copied as-is; there are no commands or markers available.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_FILES       = ./../projects/vicon_cmgj/diagram/test.html
+HTML_EXTRA_FILES       = ./../projects/vicon_cmgj/diagram/vicon_drawio.html ./../projects/vicon_cmgj/diagram/timing1/timing1.html 
 
 # The HTML_COLORSTYLE tag can be used to specify if the generated HTML output
 # should be rendered with a dark or light theme.
