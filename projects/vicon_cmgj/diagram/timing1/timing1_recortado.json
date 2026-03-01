@@ -1,0 +1,25 @@
+{
+  "signal": [
+    {
+      "name": "testbench.u_dut.sclk",
+      "wave": "1.0.1.0.1.0.1.0.1.0.1.0",
+      "data": []
+    },
+    {
+      "name": "testbench.u_dut.sdata",
+      "wave": "...1.0.1...0...1.......",
+      "data": []
+    }
+  ],
+  "head": {
+    "text": "blabla",
+    "tick": 0,
+    "every": 2
+  },
+  "foot": {
+    "text": "bloblo"
+  },
+  "config": {
+    "hscale": 1
+  }
+}

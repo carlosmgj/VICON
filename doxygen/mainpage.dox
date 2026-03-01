@@ -10,9 +10,10 @@
  * <a href="memoria.pdf" target="_blank"><b>Memoria del TFM</b></a>
  * @endhtmlonly
  *
+ *
  * \section title_fpga FPGA
  * \subsection subtitle_diagram DIAGRAMA INTERACTIVO
- * @htmlinclude test.html
+ * @htmlinclude vicon_drawio.html
  *
  * \section source_code CODIGO FUENTE
  * - <A HREF="testbench_8vhd_source.html"><B>I2C TESTBENCH </B></A>
@@ -23,4 +24,141 @@
  *
  * \section author AUTOR
  * Carlos Manuel Gomez Jimenez
+ * \page Tools Herramientas Utilizadas
+ * \section tool_rtl_design DISEÑO RTL
+ * \section tool_timing_diagrams GENERACION DE DIAGRAMAS DE TIEMPO
+ * \subsection subs_vivado2svg PASOS DE EXPORTACION VIVADO->SVG
+ * - Corremos la simulación en VIVADO
+ * - En la consola de TCL escribimos:
+ * \code{.tcl}
+ * restart
+ * open_vcd <nombre_custom_vcd>.vcd
+ * log_vcd [get_objects -r [get_waves *]]
+ * run <tiempo>
+ * close_vcd
+ * \endcode
+ * 
+ * - Si queremos lanzar la simulación hasta que cierta señal alcance un valor lo podemos hacer cambiando run <tiempo> por:
+ * \code
+ *  while {$val != 2} {
+ *     run 10 ns            ;# ejecuta 10 ns cada iteración
+ *     set val [get_property VALUE [get_objects <long name de la señal>]]
+ * }
+ * \endcode
+ * - Comprobamos que tenemos python instalado en nuestro sistema
+ * - Descargamos en zip el repositorio de <a href="https://github.com/Toroid-io/vcd2wavedrom">aquí</a> 
+ * - En la terminal, instalamos el paquete descargado
+ * \code
+ * cd <ruta a la carpeta descomprimida>
+ * pip install .
+ * \endcode
+ * - Navegamos a la carpeta donde tengamos el vcd, si no deberíamos modificar la ruta de manera acorde.
+ * \code
+ * python -m vcd2wavedrom.vcd2wavedrom -i <nombre_custom_vcd>.vcd -o <nombre_custom_json>.json
+ * Get-Content .\<nombre_custom_json>.json | Set-Clipboard
+ * \endcode
+ * - Abrimos <a href="https://wavedrom.com/editor.html">wavedrom</a> y pegamos el json
+ * \subsection subs_vcddoxygen INCLUIR SVG NAVEGABLE EN DOXYGEN
+ * - Debemos crear un archivo html llamado <nombre_html_waveform>.html
+ *
+ * - Dependiendo del lenguaje del archivo donde se quiera incluir el archivo se comentará de una manera o de otra. Por ejemplo para VHDL:
+ * \code 
+ * --! @htmlonly
+ * --! <iframe src="<nombre_html_waveform>.html"
+ * --!         width="100%"
+ * --!         height="200px"
+ * --!         style="border:none;">
+ * --! </iframe>
+ * --! @endhtmlonly
+ * \endcode
+ *
+ * \warning Este html debe de ser referenciado en el Doxyfile en la parte de \code HTML_EXTRA_FILES       = ./../projects/vicon_cmgj/diagram/test.html ./../projects/vicon_cmgj/diagram/timing1/timing1.html \endcode
+ *
+ * El html siguiente contenido (sustituir SVG donde se indica):
+ * \code
+ * <!DOCTYPE html>
+ * <html>
+ * <head>
+ * <style>
+ *   body { margin: 0; background: #fff; font-family: sans-serif; }
+ *   #toolbar {
+ *     padding: 8px;
+ *     background: #f4f4f4;
+ *     border-bottom: 1px solid #ddd;
+ *     display: flex;
+ *     gap: 8px;
+ *     align-items: center;
+ *   }
+ *   #toolbar button {
+ *     padding: 4px 12px;
+ *     cursor: pointer;
+ *     font-size: 16px;
+ *     border: 1px solid #ccc;
+ *     border-radius: 4px;
+ *     background: white;
+ *   }
+ *   #toolbar button:hover { background: #e0e0e0; }
+ *   #container {
+ *     width: 100%;
+ *     height: calc(100vh - 50px);
+ *     overflow-x: scroll;
+ *     overflow-y: auto;
+ *   }
+ *   #svg-wrapper {
+ *     height: 100%;
+ *     display: inline-block;
+ *     white-space: nowrap;
+ *   }
+ * </style>
+ * </head>
+ * <body>
+ * 
+ * <div id="toolbar">
+ *   <button onclick="zoom(1.2)">＋</button>
+ *   <button onclick="zoom(0.8)">－</button>
+ *   <button onclick="resetView()">⟳ Reset</button>
+ *   <span id="zoom-label" style="color:#666; font-size:13px;">100%</span>
+ * </div>
+ * 
+ * <div id="container">
+ *   <div id="svg-wrapper">
+ *      CONTENIDO DEL SVG AQUI, HAY QUE ABRIRLO Y COPIAR EL INTERIOR DESDE <svg> a </svg>
+ * </div>
+ * </div>
+ * 
+ * <script>
+ *   let scale = 1;
+ *   const wrapper = document.getElementById('svg-wrapper');
+ *   const label   = document.getElementById('zoom-label');
+ * 
+ *   function applyScale() {
+ *     const svg = wrapper.querySelector('svg');
+ *     if (!svg) return;
+ *     const baseWidth = parseInt(svg.getAttribute('width')) || 800;
+ *     svg.style.width  = (baseWidth * scale) + 'px';
+ *     svg.style.height = 'auto';
+ *     label.textContent = Math.round(scale * 100) + '%';
+ *   }
+ * 
+ *   function zoom(factor) {
+ *     scale = Math.min(Math.max(scale * factor, 0.2), 5);
+ *     applyScale();
+ *   }
+ * 
+ *   function resetView() {
+ *     scale = 1;
+ *     applyScale();
+ *     document.getElementById('container').scrollLeft = 0;
+ *   }
+ * 
+ *   applyScale();
+ * </script>
+ * 
+ * </body>
+ * </html>
+ * \endcode
+ * 
+ * \subsection subs_recortar_wavedrom RECORTAR DIAGRAMA TEMPORAL
+ *
+ * Se ha creado un script de python (@ref recortar_json_wavedrom.py) que permite recortar los datos de salida para mostrar la información más relevante. 
  */
