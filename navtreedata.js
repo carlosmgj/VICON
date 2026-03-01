@@ -45,7 +45,7 @@ var NAVTREE =
     [ "Design Units", "annotated.html", [
       [ "Design Unit List", "annotated.html", "annotated_dup" ],
       [ "Design Unit Index", "classes.html", null ],
-      [ "Design Unit Hierarchy", "hierarchy.html", null ],
+      [ "Design Unit Hierarchy", "hierarchy.html", "hierarchy" ],
       [ "Design Unit Members", "functions.html", [
         [ "All", "functions.html", null ],
         [ "Functions/Procedures/Processes", "functions_func.html", null ],
@@ -61,7 +61,7 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "_basys3___g_p_i_o_8xdc.html",
-"recortar__json__wavedrom_8py.html#a3a8037faa896760a1f12e34c74ff03c4"
+"namespacerecortar__json__wavedrom.html#a5fef7fc88df7ec49fc9494801ceb0faa"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

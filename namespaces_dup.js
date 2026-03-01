@@ -1,6 +1,7 @@
 var namespaces_dup =
 [
     [ "Basys3_GPIO", "namespace_basys3___g_p_i_o.html", null ],
+    [ "convertidor_svg2pdf", "namespaceconvertidor__svg2pdf.html", "namespaceconvertidor__svg2pdf" ],
     [ "create_project", "namespacecreate__project.html", null ],
     [ "recortar_json_wavedrom", "namespacerecortar__json__wavedrom.html", [
       [ "limpiar_formato_wavedrom", "namespacerecortar__json__wavedrom.html#a8dba1a0905997dc46c1bc2ccbce80132", null ],

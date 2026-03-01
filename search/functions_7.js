@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['vec_5fto_5fstr_0',['vec_to_str',['../classsim__utils__pkg.html#acae388f77ca958cabdaf5044560ad1ed',1,'sim_utils_pkg.vec_to_str()'],['../class__sim__utils__pkg.html#acae388f77ca958cabdaf5044560ad1ed',1,'_sim_utils_pkg.vec_to_str()']]]
+  ['seleccionar_5farchivo_0',['seleccionar_archivo',['../namespacerecortar__json__wavedrom.html#a14e2f1a47737f1a30cf15f740e4e23ef',1,'recortar_json_wavedrom']]],
+  ['select_5ffiles_1',['select_files',['../classconvertidor__svg2pdf_1_1_s_v_g_converter_app.html#aacc8a3e3e3a684763b098713ff146b0d',1,'convertidor_svg2pdf::SVGConverterApp']]]
 ];
