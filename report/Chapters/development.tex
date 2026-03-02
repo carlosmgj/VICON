@@ -10,6 +10,25 @@
 
 \subsection{I2C Controller}
 
+La interfaz de control del sensor MT9V111 incluye un bus I2C, que permite la escritura y lectura de los registros internos del sensor. Dentro de los distintos modos de operación, en este proyecto se implementan las funciones 
+de escritura y lectura de datos de 16 bits, que es el tamaño de los registros internos. Además, el sensor permite escritura/lectura iterativa en una sola transmisión y es el modo de comunicación que se usará. 
+\cite{mt9v111_datasheet} 
+
+\paragraph{Protocolo I2C MT9V111}
+
+\begin{itemize}
+    \item Start: El bit de start se da cuando la señal SDA baja mientras SCLK está en alto (Marcador 3 en \ref{fig:waveforms_16bitswriting}).
+    \begin{figure}[htbp] 
+        \centering
+        \includegraphics[width=\textwidth]{gfx/waveforms/16bitswriting.pdf}
+        \caption{Cronograma de las 4 fases de SCLK.} 
+        \label{fig:waveforms_16bitswriting} 
+    \end{figure}
+
+    \item 
+\end{itemize}
+
+
 
 \begin{figure}[htbp] 
     \centering
