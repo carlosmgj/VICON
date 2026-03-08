@@ -19,5 +19,8 @@ projects/*/*.ip_user_files/
 docs/
 
 # --- Archivos temporales de LaTeX ---
-report/build/
+report/build/*
+!report/build/main.pdf
 LATEX/
+*.drawio.bkp
+definition/memoria_tfm_antigua/

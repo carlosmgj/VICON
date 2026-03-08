@@ -2,13 +2,13 @@
 setlocal
 
 REM Obtener directorio donde está este .bat
-set SCRIPT_DIR=%~dp0
+set DOXYGEN_DIR=%~dp0
 
-REM Ir al directorio del script
-cd /d "%SCRIPT_DIR%"
+REM Ir al directorio 
+cd /d "%DOXYGEN_DIR%"
 
 REM Ejecutar doxygen con Doxyfile tres niveles arriba
-doxygen "%SCRIPT_DIR%\Doxyfile"
+doxygen "%DOXYGEN_DIR%\Doxyfile"
 
 REM Comprobar si Doxygen terminó correctamente
 if errorlevel 1 (
@@ -19,7 +19,7 @@ if errorlevel 1 (
 )
 
 REM Abrir index.html generado
-set INDEX_FILE=%SCRIPT_DIR%..\docs\html\index.html
+set INDEX_FILE=%DOXYGEN_DIR%\docs\html\index.html
 
 if exist "%INDEX_FILE%" (
     start "" "%INDEX_FILE%"

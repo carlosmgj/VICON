@@ -1,0 +1,41 @@
+
+name: Deploy Doxygen Docs
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # Instala Doxygen 1.12.0 (o la que uses) y Graphviz
+      - name: Install Doxygen 1.12.0
+        uses: ssciwr/doxygen-install@v1
+        with:
+          version: '1.12.0'
+      - name: Install Graphviz
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+
+      - name: Generate docs (Doxygen)
+        working-directory: doxygen
+        run: |
+          doxygen --version
+          doxygen Doxyfile
+          test -d docs/html || (echo "No existe docs/html; revisa rutas" && exit 1)
+
+      - name: Copy PDF to Doxygen html
+        run: cp report/build/main.pdf doxygen/docs/html/memoria.pdf
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: doxygen/docs/html
