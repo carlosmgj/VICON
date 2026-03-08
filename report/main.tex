@@ -14,7 +14,8 @@
 %----------------------------------------------------------------------------------------
 %	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
 %---------------------------------------------------------------------------------------- 
-\documentclass[%1twoside, %2DIV = 15,
+\documentclass[%1twoside, 
+DIV = 10,
 openright,titlepage,numbers=noenddot,headinclude,
 headlines,footinclude=true,cleardoublepage=empty,paper=a4,fontsize=12pt, % Binding correction, paper type and font 
 spanish, % Languages
@@ -55,8 +56,6 @@ spanish, % Languages
 	\mbox{}
 	\newpage
 	\pagestyle{scrheadings} % Show chapter titles as headings
-	\pdfbookmark[1]{Lista de TODOS}{todolist}
-	\listoftodos
 	\cleardoublepage\include{FrontBackMatter/Contents} % Contents, list of figures/tables/listings and acronyms
 	\newpage
 	\thispagestyle{plain}

@@ -17,22 +17,26 @@ de escritura y lectura de datos de 16 bits, que es el tamaño de los registros i
 \paragraph{Protocolo I2C MT9V111}
 
 \begin{itemize}
-    \item Start: El bit de start se da cuando la señal SDA baja mientras SCLK está en alto (Marcador 3 en \ref{fig:waveforms_16bitswriting}).
+    \item Start: El bit de start se da cuando la señal SDA baja mientras SCLK está en alto (Marcador 3 en \ref{fig:waveforms_16bits_rw_frames}).
     \begin{figure}[htbp] 
-        \centering
-        \includegraphics[width=\textwidth]{gfx/waveforms/16bitswriting.pdf}
-        \caption{Cronograma de las 4 fases de SCLK.} 
-        \label{fig:waveforms_16bitswriting} 
+    \centering
+        %\subfloat[Trama completa]{\includegraphics[width=\textwidth]{gfx/waveforms/16bitswriting/16bitswriting.pdf}\label{fig:waveforms_16bitswriting_a}}
+        %\\
+        \subfloat[Envío de dirección de esclavo]{\fbox{\includegraphics[width=0.9\textwidth]{gfx/waveforms/16bitswriting/16bitswriting_addr.pdf}\label{fig:waveforms_16bitswriting_addr}}}
+        \\
+        \subfloat[Envío de dirección del registro \textbf{+ W}]{\fbox{\includegraphics[width=0.9\textwidth]{gfx/waveforms/16bitswriting/16bitswriting_reg_addr.pdf}\label{fig:waveforms_16bitswriting_reg_addr}}}
+        \\
+        \subfloat[Envío de start repetido y de dirección del resitro \textbf{+ R}]{\fbox{\includegraphics[width=0.9\textwidth]{gfx/waveforms/16bitsreading/16bitsreading_rstart.pdf}\label{fig:waveforms_16bitsreading_rstart}}}
+        \\
+        \subfloat[Envío de valor del registro: MSB \& LSB ]{\fbox{\includegraphics[width=\textwidth]{gfx/waveforms/16bitswriting/16bitswriting_reg_val.pdf}\label{fig:waveforms_16bitswriting_reg_val}}}
+    \caption{Tramas para Escritura y Lectura de 16 bits en el bus I2C del sensor MT9V111.} 
+    \label{fig:waveforms_16bits_rw_frames} 
     \end{figure}
-
-    \item 
 \end{itemize}
-
-
 
 \begin{figure}[htbp] 
     \centering
-    \includegraphics[width=0.8\textwidth]{gfx/waveforms/4phases_sclk.pdf}
+    \includegraphics[width=0.6\textwidth]{gfx/waveforms/4phases_sclk.pdf}
     \caption{Cronograma de las 4 fases de SCLK.} 
     \label{fig:waveforms_4phases} 
 \end{figure}
