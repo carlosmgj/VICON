@@ -1,17 +1,13 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-entity testbench is
+entity testbench is    
 end testbench;
 
 architecture Structural of testbench is
     -- 1. SENALES DE INFRAESTRUCTURA
     signal clk_base  : std_logic;
     signal rst_raw   : std_logic;
-    signal mclk      : std_logic;
-    signal locked    : std_logic;
-    signal rst_final : std_logic;
-
     -- 2. SENALES DEL BUS I2C (Solo para I2C!)
     signal sclk_bus  : std_logic;
     signal sda_bus   : std_logic := 'H'; -- Pull-up virtual
@@ -26,24 +22,14 @@ begin
             reset_out => rst_raw    -- Reset inicial
         );
 
-    -- MMCM 
-    mi_MMCM : entity work.clk_wiz_0
-        port map (
-            clk_in1  => clk_base,
-            reset    => rst_raw,
-            clk_out1 => mclk,
-            locked   => locked
-        );
-
-    -- Logica de Reset: El sistema solo sale de reset cuando el reloj es estable
-    rst_final <= rst_raw or (not locked);
+    
 
     -- Instancia del DUT (El Maestro I2C)
     u_dut : entity work.TOP
         generic map ( SENSOR_ADDR => "1011100" )
         port map (
-            clk   => mclk,       -- Usa el reloj del MMCM
-            reset => rst_final,  -- Reset sincronizado
+            clk   => clk_base,       -- Usa el reloj del MMCM
+            reset => rst_raw,  -- Reset sincronizado
             sclk  => sclk_bus,   -- Genera el reloj I2C
             sdata => sda_bus,    -- Datos I2C
             done  => done_sig
@@ -58,4 +44,5 @@ begin
             pixclk => open, fval => open, lval => open, dout => open
         );
 
+    sda_bus <= 'H';
 end Structural;
