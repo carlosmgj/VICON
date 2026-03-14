@@ -275,9 +275,11 @@ begin
     begin
         if rising_edge(clk) then
             if reset = '1' then
-                phase_cnt <= 0; phase_tick <= '0';
+                phase_cnt <= 0;
+                phase_tick <= '0';
             elsif phase_cnt = CLKS_PER_PHASE - 1 then
-                phase_cnt <= 0; phase_tick <= '1';
+                phase_cnt <= 0; 
+                phase_tick <= '1';
             else
                 phase_cnt  <= phase_cnt + 1;
                 phase_tick <= '0';

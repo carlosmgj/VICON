@@ -76,7 +76,11 @@ architecture Behavioral of TOP is
 
     -- Contador para cargar múltiples entradas en la WR FIFO
     signal fill_cnt : integer range 0 to FIFO_DEPTH := 0;
-
+    
+    signal mclk      : std_logic;
+    signal locked    : std_logic;
+    signal rst_final : std_logic;
+    
     -- Número de registros a escribir/leer en este ejemplo
     constant NUM_REGS_WR : integer := 2;
     constant NUM_REGS_RD : integer := 2;
@@ -94,7 +98,19 @@ architecture Behavioral of TOP is
     signal rd_cnt   : integer range 0 to NUM_REGS_RD := 0;
 
 begin
-
+        -- MMCM 
+    mi_MMCM : entity work.clk_wiz_0
+        port map (
+            clk_in1  => clk,
+            reset    => reset,
+            clk_out1 => mclk,
+            locked   => locked
+        );
+        
+        
+     -- Logica de Reset: El sistema solo sale de reset cuando el reloj es estable
+    rst_final <= not locked;
+    
     ---------------------------------------------------------------------------
     -- Instancia del controlador I2C
     ---------------------------------------------------------------------------
@@ -105,8 +121,8 @@ begin
             FIFO_DEPTH  => FIFO_DEPTH
         )
         port map (
-            clk           => clk,
-            reset         => reset,
+            clk           => mclk,
+            reset         => rst_final,
             rw            => i2c_rw,
             start_i2c     => i2c_start,
             num_regs      => i2c_num_regs,
@@ -130,10 +146,10 @@ begin
     ---------------------------------------------------------------------------
     -- FSM principal
     ---------------------------------------------------------------------------
-    process(clk)
+    process(mclk)
     begin
-        if rising_edge(clk) then
-            if reset = '1' then
+        if rising_edge(mclk) then
+            if rst_final = '1' then
                 state        <= ST_IDLE;
                 i2c_rw       <= '0';
                 i2c_start    <= '0';
