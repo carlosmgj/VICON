@@ -1,5 +1,7 @@
 var NAVTREEINDEX1 =
 {
+"namespacerecortar__json__wavedrom.html#a3a8037faa896760a1f12e34c74ff03c4":[2,0,3,27],
+"namespacerecortar__json__wavedrom.html#a5341426fbdcf3905144d67cbaa0302fd":[2,0,3,12],
 "namespacerecortar__json__wavedrom.html#a5fef7fc88df7ec49fc9494801ceb0faa":[2,0,3,5],
 "namespacerecortar__json__wavedrom.html#a7f826318445848b58c1d0b68ace80cb7":[2,0,3,19],
 "namespacerecortar__json__wavedrom.html#a8c9c2b81176b8768564eb14ef510ee9a":[2,0,3,14],

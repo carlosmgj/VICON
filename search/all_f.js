@@ -35,7 +35,7 @@ var searchData=
   ['reset_5fui_32',['reset_ui',['../classconvertidor__svg2pdf_1_1_s_v_g_converter_app.html#aa1806ddada93bee669177035b16e56d8',1,'convertidor_svg2pdf::SVGConverterApp']]],
   ['root_33',['root',['../classconvertidor__svg2pdf_1_1_s_v_g_converter_app.html#ab4b8daf4b8ea9d39568719e1e320076f',1,'convertidor_svg2pdf.SVGConverterApp.root'],['../namespaceconvertidor__svg2pdf.html#ab4b8daf4b8ea9d39568719e1e320076f',1,'convertidor_svg2pdf.root'],['../namespacerecortar__json__wavedrom.html#ab4b8daf4b8ea9d39568719e1e320076f',1,'recortar_json_wavedrom.root']]],
   ['row_34',['row',['../namespacerecortar__json__wavedrom.html#ad42e2d1ad172100a2cd1338656cf0425',1,'recortar_json_wavedrom']]],
-  ['rst_5ffinal_35',['rst_final',['../classtestbench_1_1_structural.html#a4c3b82ee8a49984a31d8327d2251faab',1,'testbench::Structural']]],
+  ['rst_5ffinal_35',['rst_final',['../class_t_o_p_1_1_behavioral.html#a4c3b82ee8a49984a31d8327d2251faab',1,'TOP::Behavioral']]],
   ['rst_5fraw_36',['rst_raw',['../classtestbench_1_1_structural.html#a5b170d3310b2c13b04b2ffbfec9a228d',1,'testbench::Structural']]],
   ['rtl_37',['DISEÑO RTL',['../_tools.html#tool_rtl_design',1,'']]],
   ['rtl_38',['rtl',['../classi2c__master_1_1rtl.html',1,'i2c_master']]],

@@ -1,6 +1,6 @@
 var class_t_o_p_1_1_behavioral =
 [
-    [ "PROCESS_0", "class_t_o_p_1_1_behavioral.html#a7fff6d728c52bd4a08f47ca610229209", null ],
+    [ "PROCESS_0", "class_t_o_p_1_1_behavioral.html#a873cd56bdaa3cbad0a1cacdfea5e6831", null ],
     [ "fill_cnt", "class_t_o_p_1_1_behavioral.html#aef261bc6b0d957a089cc47339429871a", null ],
     [ "i2c_addr_reg", "class_t_o_p_1_1_behavioral.html#a3815c6df6c493459846f7f0b4c93b0af", null ],
     [ "i2c_busy", "class_t_o_p_1_1_behavioral.html#a917d4218658cd343802256b35b7aa6d8", null ],
@@ -17,13 +17,17 @@ var class_t_o_p_1_1_behavioral =
     [ "i2c_wr_empty", "class_t_o_p_1_1_behavioral.html#add55166b73db40b7eb6dc2fe7c2e5133", null ],
     [ "i2c_wr_full", "class_t_o_p_1_1_behavioral.html#ab84584be3cb3ce3737dd9eb20a168c2d", null ],
     [ "i2c_wr_push", "class_t_o_p_1_1_behavioral.html#a7c9bbba6af9edc22a8e9be3a5db4c7cf", null ],
+    [ "locked", "class_t_o_p_1_1_behavioral.html#a2cf370a9fff185974b9ad6fb4f8d085b", null ],
     [ "main_state_t", "class_t_o_p_1_1_behavioral.html#a5110fa219786a863bf410d2c5d68a6b3", null ],
+    [ "mclk", "class_t_o_p_1_1_behavioral.html#a9460cb9530d409665f22cc4047792d01", null ],
+    [ "mi_mmcm", "class_t_o_p_1_1_behavioral.html#ad8b0fc1d78976d0f0e483d20efb49d00", null ],
     [ "NUM_REGS_RD", "class_t_o_p_1_1_behavioral.html#a3bb0ef31b12c237fe067dd22ef6ee6ff", null ],
     [ "NUM_REGS_WR", "class_t_o_p_1_1_behavioral.html#ae3a68a0dcb0c753e0048b9e49e88d70b", null ],
     [ "rd_buf", "class_t_o_p_1_1_behavioral.html#a8b01e5ac627845e9802d4beb918c4d7b", null ],
     [ "rd_buf_t", "class_t_o_p_1_1_behavioral.html#abfe9057bb44f23a4d3b7fe4e67363265", null ],
     [ "rd_cnt", "class_t_o_p_1_1_behavioral.html#aad0d1d3870d29f69261116ec11e1b395", null ],
     [ "reg_data_array_t", "class_t_o_p_1_1_behavioral.html#abaa5f55923b873a91d1d5cca526cd192", null ],
+    [ "rst_final", "class_t_o_p_1_1_behavioral.html#a4c3b82ee8a49984a31d8327d2251faab", null ],
     [ "state", "class_t_o_p_1_1_behavioral.html#a1398fb852ffb3f64721693f004fb94ac", null ],
     [ "u_i2c", "class_t_o_p_1_1_behavioral.html#a7f840ee54bf694e6545c044beeb38e22", null ],
     [ "WR_DATA", "class_t_o_p_1_1_behavioral.html#a9bde6bb3bff7e5e4d5c562af23a6fd17", null ]
