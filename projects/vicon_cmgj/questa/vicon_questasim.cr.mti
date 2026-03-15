@@ -1,0 +1,67 @@
+C:/Users/carlos/Documents/MSEI/TFM/projects/vicon_cmgj/tb/testbench.vhd {1 {vcom -work work -2002 -explicit -vopt -stats=none C:/Users/carlos/Documents/MSEI/TFM/projects/vicon_cmgj/tb/testbench.vhd
+Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+** Note: (vcom-220) 'C:/Users/carlos/Documents/MSEI/TFM/projects/vicon_cmgj/questa/vicon_questasim.mpf' is used as the ini file.
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Compiling entity testbench
+-- Compiling architecture Structural of testbench
+-- Loading entity clk_reset_gen
+-- Loading package NUMERIC_STD
+-- Loading entity TOP
+-- Loading package sim_utils_pkg
+-- Loading entity mt9v111_agent
+
+} {} {}} C:/Users/carlos/Documents/MSEI/TFM/projects/vicon_cmgj/tb/sim_utils_pkg.vhd {1 {vcom -work work -2002 -explicit -vopt -stats=none C:/Users/carlos/Documents/MSEI/TFM/projects/vicon_cmgj/tb/sim_utils_pkg.vhd
+Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+** Note: (vcom-220) 'C:/Users/carlos/Documents/MSEI/TFM/projects/vicon_cmgj/questa/vicon_questasim.mpf' is used as the ini file.
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Compiling package sim_utils_pkg
+-- Compiling package body sim_utils_pkg
+-- Loading package sim_utils_pkg
+
+} {} {}} C:/Users/carlos/Documents/MSEI/TFM/projects/vicon_cmgj/src/rtl/TOP.vhd {1 {vcom -work work -2002 -explicit -vopt -stats=none C:/Users/carlos/Documents/MSEI/TFM/projects/vicon_cmgj/src/rtl/TOP.vhd
+Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+** Note: (vcom-220) 'C:/Users/carlos/Documents/MSEI/TFM/projects/vicon_cmgj/questa/vicon_questasim.mpf' is used as the ini file.
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Compiling entity TOP
+-- Compiling architecture Behavioral of TOP
+-- Loading entity clk_wiz_0
+-- Loading entity i2c_master
+
+} {} {}} C:/Users/carlos/Documents/MSEI/TFM/projects/vicon_cmgj/tb/clock_generator.vhd {1 {vcom -work work -2002 -explicit -vopt -stats=none C:/Users/carlos/Documents/MSEI/TFM/projects/vicon_cmgj/tb/clock_generator.vhd
+Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+** Note: (vcom-220) 'C:/Users/carlos/Documents/MSEI/TFM/projects/vicon_cmgj/questa/vicon_questasim.mpf' is used as the ini file.
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Compiling entity clk_reset_gen
+-- Compiling architecture Behavioral of clk_reset_gen
+
+} {} {}} C:/Users/carlos/Documents/MSEI/TFM/projects/vicon_cmgj/questa/clk_wiz_0_sim.vhd {1 {vcom -work work -2002 -explicit -vopt -stats=none C:/Users/carlos/Documents/MSEI/TFM/projects/vicon_cmgj/questa/clk_wiz_0_sim.vhd
+Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+** Note: (vcom-220) 'C:/Users/carlos/Documents/MSEI/TFM/projects/vicon_cmgj/questa/vicon_questasim.mpf' is used as the ini file.
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Compiling entity clk_wiz_0
+-- Compiling architecture sim of clk_wiz_0
+
+} {} {}} C:/Users/carlos/Documents/MSEI/TFM/projects/vicon_cmgj/tb/mt9v111.vhd {1 {vcom -work work -2002 -explicit -vopt -stats=none C:/Users/carlos/Documents/MSEI/TFM/projects/vicon_cmgj/tb/mt9v111.vhd
+Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+** Note: (vcom-220) 'C:/Users/carlos/Documents/MSEI/TFM/projects/vicon_cmgj/questa/vicon_questasim.mpf' is used as the ini file.
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Loading package sim_utils_pkg
+-- Compiling entity mt9v111_agent
+-- Compiling architecture Behavioral of mt9v111_agent
+
+} {} {}}

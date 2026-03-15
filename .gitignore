@@ -24,3 +24,10 @@ report/build/*
 LATEX/
 *.drawio.bkp
 definition/memoria_tfm_antigua/
+
+
+**/questa/work/
+**/*.wlf
+**/*.vstf
+**/*.ucdb
+
