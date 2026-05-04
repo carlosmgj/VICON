@@ -1,38 +1,4 @@
 #!/usr/bin/env python3
-"""
-generate_hierarchy.py
-=====================
-Genera un diagrama PlantUML de la jerarquía de instanciaciones VHDL
-de un proyecto y lo escribe en un fichero .dox para Doxygen.
-
-Uso
----
-    py -3.11 scripts/generate_hierarchy.py <ruta_proyecto> [--out <ruta_output>]
-
-Ejemplo:
-    py -3.11 scripts/generate_hierarchy.py ../../project
-    py -3.11 scripts/generate_hierarchy.py ../../project --out content/hierarchy.dox
-
-Argumentos
-----------
-    <ruta_proyecto>  Carpeta raíz del proyecto VHDL. Se recorre recursivamente
-                     buscando ficheros .vhd y .vhdl.
-    --out            Ruta del fichero .dox de salida. Por defecto:
-                     content/hierarchy.dox (relativo al directorio de trabajo)
-
-Formas de instanciación detectadas
-------------------------------------
-    1. entity work.nombre_entidad       (instanciación directa)
-    2. component nombre_componente      (instanciación por componente)
-    3. entity libreria.nombre_entidad   (instanciación con librería explícita)
-
-Requisitos
-----------
-    Python 3.11 — sin dependencias externas (solo librería estándar)
-    No requiere pyGHDL ni GHDL — usa regex sobre el texto fuente.
-    Esto es suficiente para detectar instanciaciones con fiabilidad.
-"""
-
 import re
 import sys
 import argparse
@@ -50,7 +16,7 @@ class VhdlModule:
     name: str                          # nombre de la entidad
     path: Path                         # ruta del fichero fuente
     instantiates: list[str] = field(default_factory=list)  # entidades que instancia
-
+    architecture: str = ''  # nombre de la arquitectura
 
 # =============================================================================
 # PARSER DE JERARQUÍA
@@ -97,6 +63,11 @@ class HierarchyParser:
         re.IGNORECASE
     )
 
+    _RE_ARCH = re.compile(
+        r'\barchitecture\s+(\w+)\s+of\s+(\w+)\s+is\b',
+        re.IGNORECASE
+    )
+    
     def parse_file(self, path: Path) -> list[VhdlModule]:
         """
         Parsea un fichero VHDL y devuelve los módulos (entidades) encontrados
@@ -122,6 +93,12 @@ class HierarchyParser:
                 continue
 
             module = VhdlModule(name=entity_name, path=path)
+
+            # Detectar arquitectura
+            arch_match = self._RE_ARCH.search(source_clean)
+            if arch_match:
+                module.architecture = arch_match.group(1)
+                
             rest = source_clean[entity_match.start():]
 
             # 1. Instanciaciones directas: entity work.X o entity lib.X

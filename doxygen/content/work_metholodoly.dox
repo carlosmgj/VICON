@@ -3,10 +3,13 @@
 
 \section sec_comments AUTODOCUMENTATION  
 
+La documentación se puede realizar o bien dentro de los mismos .vhd o con archivos independientes con contenido plano, preferiblemente .dox o .md
+
+Mi recomendación es: Si es simple ponerlo dentro del propio .vhd y si no, ponerlo en un archivo aparte.  <b> Para hacerlo con un archivo aparte es necesario crear un .dox con el mismo nombre que el .vhd y en su misma carpeta </b>
+
 \subsection subsec_comments_wavedrom WAVEFORMS
 
-
-Para poder hacer diagramas dinámicos de señal pondremos en la <b> declaración de la entidad </b> los siguientes wrapper para el json con estilo de wavedrom:
+Para poder hacer diagramas dinámicos de señal pondremos en la <b> descripción del file </b> o en la <b> declaración de la entidad </b> los siguientes wrapper para el json con estilo de wavedrom:
 
 - Simple: Si es largo desborda sin scroll
 

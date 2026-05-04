@@ -826,6 +826,16 @@ def main():
 
     block = generator.generate(entity, existing_uml=existing_uml, fsm_show_actions=fsm_show_actions)
     
+    # Buscar fichero de descripción asociado (mismo nombre, extensión .dox)
+    desc_file = path.with_suffix('.dox')
+    if desc_file.exists():
+        desc_content = desc_file.read_text(encoding='utf-8', errors='replace')
+        # Inyectar después del \file en el fuente
+        file_re = re.compile(r'(--!\s*\\file[^\n]*\n)', re.IGNORECASE)
+        m_file = file_re.search(source)
+        if m_file:
+            source = source[:m_file.end()] + desc_content + source[m_file.end():]
+
     injector  = Injector()
     result    = injector.inject(source, block)
 

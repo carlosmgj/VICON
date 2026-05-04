@@ -3,7 +3,7 @@
 
 \section sec_loremipsum Lorem Ipsum
 
-Cross Reference test: \ref sec_docuse 
+Cross Reference test: \ref sec_setup_python 
 
 \subsection subsec_diagram NAVIGABLE DIAGRAM
 \htmlinclude vicon_drawio.html
