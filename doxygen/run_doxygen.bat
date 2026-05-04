@@ -16,6 +16,11 @@ if errorlevel 1 (
     exit /b 1
 )
 
+REM Escribir fecha de generación en fichero
+for /f "tokens=2 delims==" %%I in ('wmic os get localdatetime /value') do set DT=%%I
+set BUILD_DATE=%DT:~6,2%/%DT:~4,2%/%DT:~0,4%
+echo \var build_date %BUILD_DATE% > content\builddate.dox
+
 REM Ejecutar doxygen con Doxyfile tres niveles arriba
 doxygen "%DOXYGEN_DIR%\Doxyfile"
 

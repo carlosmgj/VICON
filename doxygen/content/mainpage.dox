@@ -1,33 +1,31 @@
 /*!
 \mainpage MAIN PAGE
  
+
 \section sec_desc DESCRIPTION
-Sandbox project used to find out what can be achieved. Requirementes are:
-- Offline Tools
-- Not Licensed
-- 
-
-\htmlinclude vicon_drawio.html
 
 
-\section sec_docuse DOCUMENTATION USAGE
-\subsection subsec_diagram NAVIGABLE DIAGRAM
-
- 
 \section sec_source_code SOURCE CODE
 
+\ref page_hierarchy "DESIGN UNITS"
+
 [FILE LIST](files.html)
+ 
 
-\section sec_extra_pages EXTRA PAGES
-
-\ref page_setup
-
-\ref page_hierarchy
+\section sec_source_autodoc AUTODOC
 
 \ref page_workmethodology
 
- 
+\ref page_setup
+
 \section sec_author AUTHOR
 Carlos Manuel Gomez Jimenez
+
+\htmlonly
+<p style="color:gray;font-size:0.9em;">Documentation generated: <span id="bdate"></span></p>
+<script>
+document.getElementById('bdate').innerText = document.lastModified;
+</script>
+\endhtmlonly
 
 */

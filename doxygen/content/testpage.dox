@@ -5,5 +5,20 @@
 
 Cross Reference test: \ref sec_docuse 
 
+\subsection subsec_diagram NAVIGABLE DIAGRAM
+\htmlinclude vicon_drawio.html
+
+\subsection subsec_waveform GENERATED WAVEFORM
+\htmlonly
+<div style="text-align:center;">
+<script type="WaveDrom">
+{ "signal": [
+  { "name": "clk", "wave": "P......." },
+  { "name": "rst", "wave": "10......" }
+]}
+</script>
+</div>
+\endhtmlonly
+
 
 */
