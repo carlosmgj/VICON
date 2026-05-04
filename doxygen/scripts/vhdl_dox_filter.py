@@ -452,8 +452,8 @@ class DoxygenGenerator:
         
         if not existing_uml:
             # Descomentar la siguiete línea y comentar la que está activa para UML similar a TEROSHDL
-            # blocks.append(self._entity_diagram2(entity))
-            blocks.append(self._entity_diagram(entity))
+            blocks.append(self._entity_diagram2(entity))
+            # blocks.append(self._entity_diagram(entity))
 
         if entity.signals:
             visible_signals = [s for s in entity.signals if 'next' not in s.name.lower()]
@@ -549,50 +549,66 @@ class DoxygenGenerator:
         for i in range(max_ports):
             left  = inputs[i]  if i < len(inputs)  else None
             right = outputs[i] if i < len(outputs) else None
-
-            left_td  = f'<td style="width:1px;white-space:nowrap;"padding:4px 10px;text-align:right;color:#1a1a1a;font-family:monospace;font-size:13px;">← {left.name}<br/><span style="font-size:10px;color:inherit;">{left.type_str}</span></td>'   if left  else '<td></td>'
-            right_td = f'<td style="padding:4px 10px;text-align:right;color:#1a1a1a;font-family:monospace;font-size:13px;">{right.name} →<br/><span style="font-size:10px;color:inherit;">{right.type_str}</span></td>' if right else '<td></td>'
-
+        
+            left_td = (
+                f'<td style="width:50%;padding:4px 10px;text-align:left;color:#1a1a1a;'
+                f'font-family:monospace;font-size:13px;white-space:nowrap;">'
+                f'← <b>{left.name}</b> '
+                f'<span style="font-size:11px;color:inherit;">{left.type_str}</span>'
+                f'</td>'
+            ) if left else '<td style="width:50%;"></td>'
+            
+            right_td = (
+                f'<td style="width:50%;padding:4px 10px;text-align:right;color:#1a1a1a;'
+                f'font-family:monospace;font-size:13px;white-space:nowrap;">'
+                f'<span style="font-size:11px;color:inherit;">{right.type_str}</span>'
+                f' <b>{right.name}</b> →'
+                f'</td>'
+            ) if right else '<td style="width:50%;"></td>'
+        
             port_rows += f'<tr>{left_td}{right_td}</tr>'
 
-        # Construir filas de parámetros/constantes/señales internas
         internal_rows = ''
-        for t in entity.enum_types:
-            internal_rows += f'<tr><td style="padding:2px 10px;font-family:monospace;font-size:12px;color:#1a1a1a;"><b>{t.name}</b>: {", ".join(t.states)}</td></tr>'
-        for c in entity.constants:
-            internal_rows += f'<tr><td style="padding:2px 10px;font-family:monospace;font-size:12px;color:#1a1a1a;">{c.name} = {c.value}</td></tr>'
-        internals = [s for s in entity.signals if 'next' not in s.name.lower()]
-        for s in internals:
-            internal_rows += f'<tr><td style="padding:2px 10px;font-family:monospace;font-size:12px;color:#1a1a1a;">{s.name} : {s.type_str}</td></tr>'
+        for g in entity.generics:
+            default = f' = {g.default}' if g.default else ''
+            internal_rows += f'<tr><td style="padding:2px 10px;font-family:monospace;font-size:12px;color:#1a1a1a;"><b>{g.name}</b> : {g.type_str}{default}</td></tr>'
+        
+        
+        # Construir filas de parámetros/constantes/señales internas
+        # internal_rows = ''
+        # for t in entity.enum_types:
+        #     internal_rows += f'<tr><td style="padding:2px 10px;font-family:monospace;font-size:12px;color:#1a1a1a;"><b>{t.name}</b>: {", ".join(t.states)}</td></tr>'
+        # for c in entity.constants:
+        #     internal_rows += f'<tr><td style="padding:2px 10px;font-family:monospace;font-size:12px;color:#1a1a1a;">{c.name} = {c.value}</td></tr>'
+        # internals = [s for s in entity.signals if 'next' not in s.name.lower()]
+        # for s in internals:
+        #     internal_rows += f'<tr><td style="padding:2px 10px;font-family:monospace;font-size:12px;color:#1a1a1a;">{s.name} : {s.type_str}</td></tr>'
 
-        # HTML del diagrama
         html = f'''--! \\par Entity Diagram
-    --! \\htmlonly
-    --! <div style="display:inline-block;border:2px solid #888;border-radius:4px;overflow:hidden;font-family:sans-serif;min-width:300px;">
-    --!   <!-- Cabecera con nombre de entidad -->
-    --!   <div style="background:#4a4a4a;color:white;text-align:center;padding:6px 16px;font-size:15px;font-weight:bold;letter-spacing:1px;">
-    --!     {entity.name}
-    --!   </div>
-    --!   <!-- Caja verde: parámetros, constantes, señales internas -->'''
-
+        --! \\htmlonly
+        --! <div style="display:inline-block;border:2px solid #888;border-radius:4px;overflow:hidden;font-family:sans-serif;min-width:max-content;">
+        --!   <div style="background:#4a4a4a;color:white;text-align:center;padding:6px 16px;font-size:15px;font-weight:bold;letter-spacing:1px;white-space:nowrap;">
+        --!     {entity.name}
+        --!   </div>
+        --!   <!-- Caja verde: parámetros, constantes, señales internas -->'''
+        
         if internal_rows:
             html += f'''
-    --!   <div style="background:#c8e6c9;padding:6px 0;border-bottom:1px solid #888;">
-    --!     <table style="width:100%;border-collapse:collapse;">
-    --!       {internal_rows}
-    --!     </table>
-    --!   </div>'''
-
+        --!   <div style="background:#c8e6c9;padding:6px 0;border-bottom:1px solid #888;white-space:nowrap;">
+        --!     <table style="width:100%;border-collapse:collapse;">
+        --!       {internal_rows}
+        --!     </table>
+        --!   </div>'''
+        
         html += f'''
-    --!   <!-- Caja amarilla: puertos -->
-    --!   <div style="background:#fff9c4;padding:6px 0;">
-    --!     <table style="width:100%;border-collapse:collapse;">
-    --!       {port_rows}
-    --!     </table>
-    --!   </div>
-    --! </div>
-    --! \\endhtmlonly
-    --!'''
+        --!   <div style="background:#fff9c4;padding:6px 0;white-space:nowrap;">
+        --!     <table style="width:100%;border-collapse:collapse;">
+        --!       {port_rows}
+        --!     </table>
+        --!   </div>
+        --! </div>
+        --! \\endhtmlonly
+        --!'''
 
         # Convertir a líneas --!
         lines = []
@@ -626,26 +642,35 @@ class DoxygenGenerator:
         lines.append(f'--! [{entity.name}] as ENT')
         lines.append('--!')
 
-        # Nota con señales internas, enums y constantes
         note_lines = []
-        internals = [s for s in entity.signals if 'next' not in s.name.lower()]
-        if internals:
-            note_lines.append('--!   **Internal Signals**')
-            for s in internals:
-                note_lines.append(f'--!   {s.name} : {s.type_str}')
+        
+        # Solo genéricos en la nota
+        if entity.generics:
+            note_lines.append('--!   **Generics**')
+            for g in entity.generics:
+                default = f' = {g.default}' if g.default else ''
+                note_lines.append(f'--!   {g.name} : {g.type_str}{default}')
 
-        for t in entity.enum_types:
-            if note_lines:
-                note_lines.append('--!   ----')
-            note_lines.append(f'--!   **{t.name}**')
-            note_lines.append(f'--!   {", ".join(t.states)}')
+        # Nota con señales internas, enums y constantes
+        # note_lines = []
+        # internals = [s for s in entity.signals if 'next' not in s.name.lower()]
+        # if internals:
+        #     note_lines.append('--!   **Internal Signals**')
+        #     for s in internals:
+        #         note_lines.append(f'--!   {s.name} : {s.type_str}')
 
-        if entity.constants:
-            if note_lines:
-                note_lines.append('--!   ----')
-            note_lines.append('--!   **Constants**')
-            for c in entity.constants:
-                note_lines.append(f'--!   {c.name} = {c.value}')
+        # for t in entity.enum_types:
+        #     if note_lines:
+        #         note_lines.append('--!   ----')
+        #     note_lines.append(f'--!   **{t.name}**')
+        #     note_lines.append(f'--!   {", ".join(t.states)}')
+
+        # if entity.constants:
+        #     if note_lines:
+        #         note_lines.append('--!   ----')
+        #     note_lines.append('--!   **Constants**')
+        #     for c in entity.constants:
+        #         note_lines.append(f'--!   {c.name} = {c.value}')
 
         if note_lines:
             lines.append('--! note right of ENT')

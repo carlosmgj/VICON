@@ -1,6 +1,63 @@
 /*!
 \page page_workmethodology WORK METHODOLOGY
 
+\section sec_comments AUTODOCUMENTATION  
+
+\subsection subsec_comments_wavedrom WAVEFORMS
+
+
+Para poder hacer diagramas dinámicos de señal pondremos en la <b> declaración de la entidad </b> los siguientes wrapper para el json con estilo de wavedrom:
+
+- Simple: Si es largo desborda sin scroll
+
+   @verbatim
+   --! \htmlonly
+   --! <div style="text-align:center;">
+   --! <script type="WaveDrom">
+   --! AQUI VA EL JSON DE WAVEDROM COMENTADO CON IDENTIFICADORES DOXYGEN (--!)
+   --! </script>
+   --! </div>
+   --! \endhtmlonly
+   @endverbatim
+
+- Sin desbordamiento: con scroll
+
+   @verbatim
+   --! \brief Mi controlador I2C
+   --! \fsm_show_actions
+   --! \htmlonly
+   --! <div style="text-align:center; overflow-x: auto; max-width: 100%;">
+   --! <style>
+   --! #mi_i2c svg { width: 1000% !important; height: auto !important; }
+   --! </style>
+   --! <div id="mi_i2c">
+   --! <script type="WaveDrom">
+   --! AQUI VA EL JSON DE WAVEDROM COMENTADO CON IDENTIFICADORES DOXYGEN (--!)
+   --! </script>
+   --! </div>
+   --! </div>
+   --! \endhtmlonly
+   @endverbatim
+
+- Desbordamiento controlado
+
+   @verbatim
+   --! \brief Mi controlador I2C
+   --! \fsm_show_actions
+   --! \htmlonly
+   --! <div style="text-align:center; max-width: 100%;">
+   --! <style>
+   --! #mi_i2c svg { width: 1000% !important; height: auto !important; }
+   --! </style>
+   --! <div id="mi_i2c">
+   --! <script type="WaveDrom">
+   --! AQUI VA EL JSON DE WAVEDROM COMENTADO CON IDENTIFICADORES DOXYGEN (--!)
+   --! </script>
+   --! </div>
+   --! </div>
+   --! \endhtmlonly
+   @endverbatim
+
 \section sec_work_tools Tools
 
 \subsection sec_vscode VSCODE
