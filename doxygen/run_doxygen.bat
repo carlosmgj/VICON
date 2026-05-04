@@ -7,6 +7,15 @@ set DOXYGEN_DIR=%~dp0
 REM Ir al directorio 
 cd /d "%DOXYGEN_DIR%"
 
+REM Generar diagrama de jerarquía VHDL
+py -3.11 scripts\generate_hierarchy.py ..\projects\vicon_cmgj
+if errorlevel 1 (
+    echo.
+    echo ERROR generando jerarquía VHDL.
+    pause
+    exit /b 1
+)
+
 REM Ejecutar doxygen con Doxyfile tres niveles arriba
 doxygen "%DOXYGEN_DIR%\Doxyfile"
 

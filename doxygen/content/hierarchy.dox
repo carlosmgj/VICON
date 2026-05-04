@@ -1,0 +1,46 @@
+/*!
+\page page_hierarchy DESIGN HIERARCHY
+
+\brief Jerarquía de instanciaciones del proyecto VHDL.
+
+Este diagrama muestra la jerarquía de instanciaciones entre las entidades
+del proyecto. Los módulos en verde son los módulos raíz (top-level),
+es decir, los que no son instanciados por ningún otro módulo.
+
+\par Hierarchy Diagram
+\startuml
+@startuml
+skinparam componentStyle rectangle
+skinparam defaultFontName Helvetica
+skinparam component {
+  BackgroundColor #E8F4FD
+  BorderColor #2E86AB
+  FontColor #1a1a1a
+}
+skinparam arrow {
+  Color #2E86AB
+  FontColor #1a1a1a
+}
+left to right direction
+
+component "testbench" as testbench #D4EDDA
+
+TOP --> clk_wiz_0
+TOP --> i2c_master
+testbench --> clk_reset_gen
+testbench --> TOP
+testbench --> mt9v111_agent
+
+@enduml
+\enduml
+
+\par Module List
+| Module | File | Instantiates |
+|--------|------|--------------|
+| `clk_reset_gen` | `clock_generator.vhd` | — |
+| `i2c_master` | `i2c_controller.vhd` | — |
+| `mt9v111_agent` | `mt9v111.vhd` | — |
+| `testbench` | `testbench.vhd` | `clk_reset_gen`, `TOP`, `mt9v111_agent` |
+| `TOP` | `TOP.vhd` | `clk_wiz_0`, `i2c_master` |
+
+*/

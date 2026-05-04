@@ -1,0 +1,297 @@
+/*!
+\page page_setup SETUP
+
+Esta página documenta la instalación completa del entorno de desarrollo y documentación del proyecto.
+
+\tableofcontents
+
+---
+
+\section sec_setup_python PYTHON
+
+\warning Realizado downgrade de Python de 3.14 a 3.13 porque el primero no tiene todavía soporte para la librería "cocotb".
+
+\warning Instalado **adicionalmente** Python 3.11.9 (sin añadir al PATH del sistema) porque VUnit y pyGHDL tienen soporte oficial hasta Python 3.11 o 3.12. Ambas versiones conviven usando el launcher `py` de Windows (`py -3.13` / `py -3.11`).
+
+@htmlonly
+<a href="https://www.python.org/downloads/release/python-3119/" target="_blank">
+   <button class="dl-button">⬇ Descargar Python 3.11.9 (Windows 64-bit)</button>
+</a>
+@endhtmlonly
+
+\note Durante la instalación de Python 3.11: **NO** marcar "Add python.exe to PATH". Sí marcar "Install launcher for all users".
+
+Verificar que ambas versiones conviven correctamente:
+@code{.sh}
+py -3.13 --version   # Python 3.13.x
+py -3.11 --version   # Python 3.11.9
+@endcode
+
+---
+
+\section sec_setup_java JAVA
+
+Necesario para que Doxygen pueda invocar PlantUML (que está escrito en Java).
+
+@htmlonly
+<a href="https://adoptium.net/download?link=https%3A%2F%2Fgithub.com%2Fadoptium%2Ftemurin21-binaries%2Freleases%2Fdownload%2Fjdk-21.0.11%252B10%2FOpenJDK21U-jdk_x64_windows_hotspot_21.0.11_10.msi&vendor=Adoptium" target="_blank">
+   <button class="dl-button">⬇ Descargar Eclipse Temurin 21 LTS (Windows x64)</button>
+</a>
+@endhtmlonly
+
+\note Durante la instalación marcar: ✅ Add to PATH y ✅ Set JAVA_HOME.
+
+Verificar:
+@code{.sh}
+java -version   # openjdk version "21.x.x"
+@endcode
+
+---
+
+\section sec_setup_ghdl GHDL
+
+GHDL es el compilador/simulador VHDL open source. En este proyecto se usa
+\b únicamente como parser para que pyGHDL pueda analizar el AST de los
+ficheros VHDL y generar documentación automática. QuestaSim sigue siendo
+el simulador principal — no hay conflicto entre ambos.
+
+\subsection subsec_ghdl_binario Binario GHDL
+
+Descomprimir en `C:\ghdl` y añadir `C:\ghdl\bin` al PATH del sistema.
+
+@htmlonly
+<a href="https://github.com/ghdl/ghdl/releases/download/v6.0.0/ghdl-mcode-6.0.0-mingw64.zip" target="_blank">
+   <button class="dl-button">⬇ Descargar GHDL 6.0.0 (Windows MINGW64)</button>
+</a>
+@endhtmlonly
+
+Verificar:
+@code{.sh}
+ghdl --version   # GHDL 6.0.0
+@endcode
+
+\subsection subsec_ghdl_pyghdl pyGHDL (bindings Python)
+
+La distribución Windows de GHDL no incluye los bindings Python. Hay que clonar
+el source de la versión exacta que coincide con el binario instalado (6.0.0-rc2):
+
+@code{.sh}
+git clone --depth=1 --branch v6.0.0-rc2 https://github.com/ghdl/ghdl.git C:\tools\ghdl-src-6
+setx PYTHONPATH "C:\tools\ghdl-src-6"
+@endcode
+
+\warning Abrir una terminal **nueva** después de `setx` para que el PYTHONPATH tenga efecto.
+
+Instalar dependencias de pyGHDL con Python 3.11:
+@code{.sh}
+py -3.11 -m pip install pyTooling pyVHDLModel
+@endcode
+
+Verificar que pyGHDL funciona correctamente:
+@code{.sh}
+py -3.11 -c "from pyGHDL.dom.NonStandard import Design, Document; print('OK')"
+@endcode
+
+---
+
+\section sec_setup_vunit VUNIT
+
+VUnit es el framework de verificación VHDL. En este proyecto se usa para:
+- Definir el orden de compilación del proyecto (necesario para pyGHDL)
+- Lanzar simulaciones con QuestaSim
+
+@code{.sh}
+py -3.11 -m pip install vunit-hdl
+@endcode
+
+Verificar:
+@code{.sh}
+py -3.11 -m pip show vunit-hdl   # Version: 4.x.x
+@endcode
+
+---
+
+\section sec_setup_doxygen DOXYGEN
+
+\subsection subsec_doxygen_graphviz Graphviz
+
+Necesario para que Doxygen genere los diagramas de dependencias entre ficheros.
+
+@code{.sh}
+winget install Graphviz.Graphviz
+@endcode
+
+\subsection subsec_doxygen_plantuml PlantUML
+
+Necesario para renderizar los diagramas de entidad y FSM generados por
+el script `vhdl_dox_filter.py`. Descargar el `.jar` y colocarlo en `C:\tools\plantuml.jar`.
+
+@htmlonly
+<a href="https://github.com/plantuml/plantuml/releases/download/v1.2026.2/plantuml-gpl-1.2026.2.jar" target="_blank">
+   <button class="dl-button">⬇ Descargar PlantUML 1.2026.2 (GPL JAR)</button>
+</a>
+@endhtmlonly
+
+\note Se usa la versión GPL en lugar de MIT porque incluye más renderers.
+
+Verificar:
+@code{.sh}
+java -jar C:\tools\plantuml.jar -version
+@endcode
+
+\subsection subsec_doxygen_wavedrom WaveDrom (offline)
+
+WaveDrom permite incluir diagramas de timing en la documentación. Se carga
+localmente para que la documentación funcione sin conexión a internet.
+
+Descargar los siguientes ficheros y colocarlos en `doxygen/style/extra_js/`:
+
+- `https://cdnjs.cloudflare.com/ajax/libs/wavedrom/3.1.0/wavedrom.min.js`
+- `https://cdnjs.cloudflare.com/ajax/libs/wavedrom/3.1.0/skins/default.js`
+
+En el `Doxyfile`:
+@code{.sh}
+HTML_EXTRA_FILES = style/extra_js/wavedrom.min.js \
+                   style/extra_js/default.js
+@endcode
+
+En `header.html`, añadir antes de `</head>`:
+@code{.html}
+<script src="$relpath^wavedrom.min.js" type="text/javascript"></script>
+<script src="$relpath^default.js" type="text/javascript"></script>
+@endcode
+
+Y el tag `<body>`:
+@code{.html}
+<body onload="WaveDrom.ProcessAll()">
+@endcode
+
+---
+
+\section sec_setup_filter SCRIPT DE DOCUMENTACIÓN VHDL
+
+El script `scripts/vhdl_dox_filter.py` es el núcleo del sistema de documentación.
+Se configura en el Doxyfile como `INPUT_FILTER` y Doxygen lo invoca automáticamente
+en cada fichero `.vhd`.
+
+\subsection subsec_filter_que_hace Qué hace
+
+El script usa pyGHDL para parsear el AST real del VHDL (no regex) y genera
+automáticamente, sin tocar el código fuente:
+
+| Elemento | Fuente en el AST |
+|----------|-----------------|
+| Tabla de genéricos | `entity.GenericItems` |
+| Tabla de puertos | `entity.PortItems` |
+| Diagrama de entidad | Puertos + señales internas |
+| Tabla de señales internas | `arch.DeclaredItems` (Signal) |
+| Tabla de constantes | `arch.DeclaredItems` (Constant) |
+| Diagrama FSM | `arch.Statements` → ProcessStatement → CaseStatement |
+
+\subsection subsec_filter_convencion Convención de comentarios en el .vhd
+
+El ingeniero solo necesita escribir:
+
+1. `\brief` en el comentario de la entidad (título de la página)
+2. Comentarios `--!` inline en cada puerto (descripción)
+3. Bloque `\htmlonly` con WaveDrom si se necesita timing diagram (opcional)
+
+El script genera todo lo demás automáticamente.
+
+Ejemplo mínimo:
+@verbatim
+--! \brief Módulo de control con FSM de 3 estados
+--! \htmlonly
+--! <script type="WaveDrom">
+--! { "signal": [
+--!   { "name": "clk", "wave": "P......." },
+--!   { "name": "rst", "wave": "10......" }
+--! ]}
+--! </script>
+--! \endhtmlonly
+entity mi_modulo is
+    port (
+        clk : in  std_logic;  --! Reloj del sistema (activo en flanco de subida)
+        rst : in  std_logic;  --! Reset síncrono activo alto
+        y   : out std_logic   --! Salida del módulo
+    );
+end entity;
+@endverbatim
+
+\subsection subsec_filter_doxyfile Configuración en el Doxyfile
+
+@code{.sh}
+FILTER_PATTERNS    = *.vhd="py -3.11 scripts/vhdl_dox_filter.py" \
+                     *.vhdl="py -3.11 scripts/vhdl_dox_filter.py"
+PLANTUML_JAR_PATH  = C:/tools/plantuml.jar
+MARKDOWN_SUPPORT   = YES
+@endcode
+
+\subsection subsec_filter_test Verificar el script manualmente
+
+Para probar el script sin lanzar Doxygen completo:
+@code{.sh}
+py -3.11 scripts/vhdl_dox_filter.py rtl/mi_modulo.vhd
+@endcode
+
+La salida muestra el fichero .vhd enriquecido con todos los bloques generados.
+
+---
+
+\section sec_setup_latex LATEX
+
+Instalar MiKTex para Windows:
+@htmlonly
+<a href="https://miktex.org/download" target="_blank">
+   <button class="dl-button">⬇ Descargar MiKtex</button>
+</a>
+@endhtmlonly
+
+\section sec_setup_teroshdl TEROSHDL
+
+Extensión de VS Code para diseño digital. Proporciona visualización de entidades,
+diagramas de estados y timing diagrams de forma interactiva mientras se edita.
+
+\note TerosHDL no es compatible directamente con los comandos de Doxygen en
+los comentarios. Se usa como herramienta de visualización durante el desarrollo,
+no para generar la documentación final del proyecto.
+
+Instalar desde VS Code: buscar "TerosHDL" en las extensiones.
+
+\subsection subsec_teroshdl_cli TEROSHDL CLI
+
+Para usar la CLI de TerosHDL (colibri) para generar artefactos que luego
+se inserten en Doxygen, se necesita Node.js y npm.
+
+\warning La versión 24 de Node.js da problemas con TerosHDL. Instalar la versión 18.
+
+Instalar TerosHDL CLI:
+@code{.sh}
+npm install -g teroshdl
+@endcode
+
+Parche necesario para que funcione en entornos Node.js sin entorno de navegador:
+@code{powershell}
+$treeSitter = "$env:APPDATA\npm\node_modules\teroshdl\node_modules\web-tree-sitter\tree-sitter.js"
+$content = Get-Content $treeSitter -Raw
+
+# Parche 1: inyectar wasmBinary al inicio
+$patch = "var Module=Module||{};Module.wasmBinary=require('fs').readFileSync(require('path').join(__dirname,'tree-sitter.wasm'));`n"
+$content = $patch + $content
+
+# Parche 2: forzar entorno Node.js
+$content = $content -replace 'a=!1,_=!1;a=\"object\"==typeof window,_=\"function\"==typeof importScripts,n=\"object\"==typeof process&&\"object\"==typeof process\.versions&&\"string\"==typeof process\.versions\.node', 'a=!1,_=!1;a=false,_=false,n=true'
+
+# Parche 3: Uint8Array para carga de .wasm de lenguaje
+$content = $content -replace 'const n=require\(\"fs\"\);t=Promise\.resolve\(n\.readFileSync\(e\)\)', 'const n=require("fs");t=Promise.resolve(new Uint8Array(n.readFileSync(e)))'
+
+Set-Content $treeSitter $content
+Write-Host "Parches aplicados correctamente"
+@endcode
+
+WaveDrom CLI (para generar imágenes WaveDrom desde línea de comandos):
+@code{.sh}
+npm install -g wavedrom-cli
+@endcode
+
+*/

@@ -1,0 +1,25 @@
+/*!
+\page page_workmethodology WORK METHODOLOGY
+
+\section sec_work_tools Tools
+
+\subsection sec_vscode VSCODE
+
+Lorem Ipsum
+
+@htmlonly
+<!-- Aquí poner el enlace de Gitea para poder descargar los archivos ACTUALIZADOS que sean -->
+<a href="https://google.com" target="_blank">
+   <button class="dl-button">⬇ Descargar perfil para FW</button>
+</a>
+@endhtmlonly
+
+
+\subsection sec_teroshdl TEROSHDL
+
+Lorem Ipsum
+
+\subsection sec_systemRDL SYSTEMRDL
+
+Lorem Ipsum
+*/
