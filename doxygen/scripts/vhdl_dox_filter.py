@@ -544,29 +544,31 @@ class DoxygenGenerator:
         row_height = 28
         port_box_height = max_ports * row_height + 20
 
-        # Construir filas de puertos
         port_rows = ''
         for i in range(max_ports):
             left  = inputs[i]  if i < len(inputs)  else None
             right = outputs[i] if i < len(outputs) else None
         
-            left_td = (
-                f'<td style="width:50%;padding:4px 10px;text-align:left;color:#1a1a1a;'
-                f'font-family:monospace;font-size:13px;white-space:nowrap;">'
+            left_cell = (
+                f'<div style="font-family:monospace;font-size:13px;color:#1a1a1a;white-space:nowrap;">'
                 f'← <b>{left.name}</b> '
-                f'<span style="font-size:11px;color:inherit;">{left.type_str}</span>'
-                f'</td>'
-            ) if left else '<td style="width:50%;"></td>'
-            
-            right_td = (
-                f'<td style="width:50%;padding:4px 10px;text-align:right;color:#1a1a1a;'
-                f'font-family:monospace;font-size:13px;white-space:nowrap;">'
-                f'<span style="font-size:11px;color:inherit;">{right.type_str}</span>'
-                f' <b>{right.name}</b> →'
-                f'</td>'
-            ) if right else '<td style="width:50%;"></td>'
+                f'<span style="font-size:11px;">{left.type_str}</span>'
+                f'</div>'
+            ) if left else '<div></div>'
         
-            port_rows += f'<tr>{left_td}{right_td}</tr>'
+            right_cell = (
+                f'<div style="font-family:monospace;font-size:13px;color:#1a1a1a;white-space:nowrap;">'
+                f'<span style="font-size:11px;">{right.type_str}</span>'
+                f' <b>{right.name}</b> →'
+                f'</div>'
+            ) if right else '<div></div>'
+        
+            port_rows += (
+                f'<div style="display:flex;justify-content:space-between;'
+                f'padding:4px 10px;gap:20px;">'
+                f'{left_cell}{right_cell}'
+                f'</div>'
+            )
 
         internal_rows = ''
         for g in entity.generics:
@@ -601,10 +603,8 @@ class DoxygenGenerator:
         --!   </div>'''
         
         html += f'''
-        --!   <div style="background:#fff9c4;padding:6px 0;white-space:nowrap;">
-        --!     <table style="width:100%;border-collapse:collapse;">
-        --!       {port_rows}
-        --!     </table>
+        --!   <div style="background:#fff9c4;padding:6px 0;">
+        --!     {port_rows}
         --!   </div>
         --! </div>
         --! \\endhtmlonly
