@@ -1482,6 +1482,7 @@ HTML_EXTRA_FILES       = style/doxygen-awesome-darkmode-toggle.js \
                          style/extra_js/wavedrom.min.js \
                          style/extra_js/default.js \
                          style/extra_js/ldark.js \
+                         content/cmgomezji.png \
 
 # The HTML_COLORSTYLE tag can be used to specify if the generated HTML output
 # should be rendered with a dark or light theme.

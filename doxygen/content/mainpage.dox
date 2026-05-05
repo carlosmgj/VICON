@@ -1,9 +1,10 @@
 /*!
 \mainpage MAIN PAGE
  
-
+\ref page_reports
 \section sec_desc DESCRIPTION
 
+Proyecto encargado de ...
 
 \section sec_source_code SOURCE CODE
 
@@ -18,8 +19,7 @@
 
 \ref page_setup
 
-\section sec_author AUTHOR
-Carlos Manuel Gomez Jimenez
+\ref page_team
 
 \htmlonly
 <p style="color:gray;font-size:0.9em;">Documentation generated: <span id="bdate"></span></p>

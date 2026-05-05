@@ -23,7 +23,7 @@
  * - <A HREF="clock__generator_8vhd_source.html"><B>AGENTE CLK & RST </B></A>
  *
  * \section author AUTOR
- * Carlos Manuel Gomez Jimenez
+ * \ref page_team
  * \page Tools Herramientas Utilizadas
  * \section tool_rtl_design DISEÑO RTL
  * \section tool_timing_diagrams GENERACION DE DIAGRAMAS DE TIEMPO

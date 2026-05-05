@@ -5,7 +5,8 @@
 
 La documentación se puede realizar o bien dentro de los mismos .vhd o con archivos independientes con contenido plano, preferiblemente .dox o .md
 
-Mi recomendación es: Si es simple ponerlo dentro del propio .vhd y si no, ponerlo en un archivo aparte.  <b> Para hacerlo con un archivo aparte es necesario crear un .dox con el mismo nombre que el .vhd y en su misma carpeta </b>
+Mi recomendación: Si es simple ponerlo dentro del propio .vhd y si no, ponerlo en un archivo aparte.
+<b> Para hacerlo con un archivo aparte es necesario crear un .dox con el mismo nombre que el .vhd y en su misma carpeta </b>
 
 \subsection subsec_comments_wavedrom WAVEFORMS
 
@@ -68,7 +69,7 @@ Para poder hacer diagramas dinámicos de señal pondremos en la <b> descripción
 Lorem Ipsum
 
 @htmlonly
-<!-- Aquí poner el enlace de Gitea para poder descargar los archivos ACTUALIZADOS que sean -->
+<!-- -->
 <a href="https://google.com" target="_blank">
    <button class="dl-button">⬇ Descargar perfil para FW</button>
 </a>

@@ -6,6 +6,19 @@ Esta página documenta la instalación completa del entorno de desarrollo y docu
 \tableofcontents
 
 ---
+\section sec_setup_autosetup AUTO SETUP
+
+\note Ejecutar el siguiente archivo para configurar todas las herramientas necesarias en el ordenador.
+Para una instalación manual o independiente de alguna de las herramientas seguir leyendo más abajo
+
+\todo Realizar Script de autoconfiguración, incluyendo: comprobación de entorno, instalación de herramientas, verificación de instalación.
+
+@htmlonly
+<a href="TODO" target="_blank">
+   <button class="dl-button">⬇ Descargar Script de Configuración</button>
+</a>
+@endhtmlonly
+
 
 \section sec_setup_python PYTHON
 
