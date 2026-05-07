@@ -1,14 +1,26 @@
 /*!
+\htmlonly
+<p style="color:gray;font-size:0.9em;">Documentation generated: <span id="bdate"></span></p>
+<script>
+document.getElementById('bdate').innerText = document.lastModified;
+</script>
+\endhtmlonly
+
 \mainpage MAIN PAGE
  
-\ref page_reports
+
 \section sec_desc DESCRIPTION
 
 Proyecto encargado de ...
 
+\ref page_reports
+
 \section sec_source_code SOURCE CODE
 
 \ref page_hierarchy "DESIGN UNITS"
+\todo Podría ser interesante incluir en la tabla de \ref page_hierarchy alguna columna adicional
+
+
 
 [FILE LIST](files.html)
  
@@ -21,11 +33,6 @@ Proyecto encargado de ...
 
 \ref page_team
 
-\htmlonly
-<p style="color:gray;font-size:0.9em;">Documentation generated: <span id="bdate"></span></p>
-<script>
-document.getElementById('bdate').innerText = document.lastModified;
-</script>
-\endhtmlonly
+
 
 */

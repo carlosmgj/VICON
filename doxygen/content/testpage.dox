@@ -20,5 +20,10 @@ Cross Reference test: \ref sec_setup_python
 </div>
 \endhtmlonly
 
+@htmlonly
+<iframe src="vicon_drawio.html"
+        style="border:none;">
+</iframe>
+@endhtmlonly
 
 */

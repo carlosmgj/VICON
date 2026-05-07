@@ -1147,7 +1147,7 @@ EXAMPLE_RECURSIVE      = NO
 # that contain images that are to be included in the documentation (see the
 # \image command).
 
-IMAGE_PATH             = ./../projects/vicon_cmgj/diagram/
+IMAGE_PATH             = ./../projects/vicon_cmgj/diagram/ ./content/
 
 # The INPUT_FILTER tag can be used to specify a program that Doxygen should
 # invoke to filter for each input file. Doxygen will invoke the filter program
@@ -1483,6 +1483,7 @@ HTML_EXTRA_FILES       = style/doxygen-awesome-darkmode-toggle.js \
                          style/extra_js/default.js \
                          style/extra_js/ldark.js \
                          content/cmgomezji.png \
+                         content/GitFlow.png \
 
 # The HTML_COLORSTYLE tag can be used to specify if the generated HTML output
 # should be rendered with a dark or light theme.

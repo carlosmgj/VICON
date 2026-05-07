@@ -1,0 +1,10 @@
+/*!
+\page page_GHDL GHDL
+
+Analiza el código para ver errores de Sintaxis.
+
+\todo Hace falta definir un orden de compilación para que no de error al intentar cargar módulos no compilados
+
+\todo ¿Qué es lo que puede detectar?
+
+*/

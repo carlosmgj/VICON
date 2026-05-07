@@ -19,6 +19,9 @@ Para una instalación manual o independiente de alguna de las herramientas segui
 </a>
 @endhtmlonly
 
+Para cada proyecto, hay que configurar las siguientes variables de entorno:
+
+\todo Definir la ubicación de cada variable de entorno que es dependiente de la estructura del proyecto. ¿Alguna ruta absoluta?
 
 \section sec_setup_python PYTHON
 
@@ -203,7 +206,7 @@ automáticamente, sin tocar el código fuente:
 
 \subsection subsec_filter_convencion Convención de comentarios en el .vhd
 
-El ingeniero solo necesita escribir:
+Solo necesitamos escribir:
 
 1. `\brief` en el comentario de la entidad (título de la página)
 2. Comentarios `--!` inline en cada puerto (descripción)
@@ -233,6 +236,8 @@ end entity;
 
 \subsection subsec_filter_doxyfile Configuración en el Doxyfile
 
+\todo Completar esta subsección si se quiere mantener. Explicar por qué se ha puesto cada elemento del Doxyfile.
+
 @code{.sh}
 FILTER_PATTERNS    = *.vhd="py -3.11 scripts/vhdl_dox_filter.py" \
                      *.vhdl="py -3.11 scripts/vhdl_dox_filter.py"
@@ -252,6 +257,8 @@ La salida muestra el fichero .vhd enriquecido con todos los bloques generados.
 ---
 
 \section sec_setup_latex LATEX
+
+\todo Si no usamos LaTeX esta sección se puede quitar
 
 Instalar MiKTex para Windows:
 @htmlonly
@@ -302,9 +309,43 @@ Set-Content $treeSitter $content
 Write-Host "Parches aplicados correctamente"
 @endcode
 
-WaveDrom CLI (para generar imágenes WaveDrom desde línea de comandos):
+Para ver como quedaría lanzar el comando mostrado en \ref page_teroshdldoc
+
+
+\subsection subsec_wavedromcli WaveDrom CLI 
+
+Para generar imágenes WaveDrom desde línea de comandos:
 @code{.sh}
 npm install -g wavedrom-cli
 @endcode
+
+\section sec_vgs VGS
+
+VGS establece una guía de estilo para escribir VHDL. Podemos configurar las reglas que queramos en el archivo de /doxygen/scripts/vsg_config.yaml (está en JSON). 
+
+\todo Definir reglas de guía de estilo
+
+Las reglas de guía de estilo son:
+
+- Las entradas y las salidas tendrán un prefijo para indicar su dirección (i_, o_)
+
+Dentro del .bat podemos definir si queremos que sea detallado y si queremos o no que la doc se pare al encontrar algún Error 
+
+\section sec_yosys YOSYS
+
+\todo Ver cómo generar diagramas con Yosis e incluirlos en la doc. ¿Merece la Pena?
+
+@htmlonly
+<a href="https://github.com/YosysHQ/oss-cad-suite-build/releases/latest" target="_blank">
+   <button class="dl-button">⬇ Descargar YOSYS para Windows (~300MB) </button>
+</a>
+@endhtmlonly
+
+Ocupa mucho todo el toolchain. Yosys tiene compatibilidad nativa con Verilog pero no con VHDL. Habría que instalar un plugin para yosys-vhdl. 
+
+El problema en Windows es que ghdl-yosys-plugin no tiene binarios precompilados para Windows — hay que compilarlo desde fuente, lo que requiere un entorno MINGW/MSYS2 y puede ser tedioso.
+La opción más práctica en Windows es el oss-cad-suite. 
+
+En mi opinión No merece la pena si es únicamente para diagramas de esquemático. Pero si lo queremos lo podemos explorar
 
 */
