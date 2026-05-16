@@ -1,0 +1,13 @@
+<map id="parse" name="parse">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,79,64,104"/>
+<area shape="rect" id="Node000002" href="$classvhdl__dox__filter_1_1_ghdl_parser.html#aeabac43510d2f524adf4d01b91e61752" title=" " alt="" coords="112,79,219,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="64,89,98,89,98,94,64,94"/>
+<area shape="rect" id="Node000003" href="$classvhdl__dox__filter_1_1_ghdl_parser.html#aa675902fc0196418a11e58332c2ff07a" title="Recorre todo el código buscando asignaciones a señales puntero para recoger todos sus posibles valore..." alt="" coords="281,5,455,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="188,76,224,57,266,40,290,32,292,37,268,44,226,62,190,81"/>
+<area shape="rect" id="Node000004" href="$classvhdl__dox__filter_1_1_ghdl_parser.html#a41b23311d7a10090bb600af641b28105" title=" " alt="" coords="267,79,469,104"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="219,89,253,89,253,94,219,94"/>
+<area shape="rect" id="Node000005" href="$classvhdl__dox__filter_1_1_ghdl_parser.html#a7d46ea7fa11a6a571ee63b99f50459e2" title="Busca CaseStatements recursivamente en cualquier nivel de anidamiento." alt="" coords="283,152,453,177"/>
+<area shape="poly" id="edge5_Node000002_Node000005" title=" " alt="" coords="202,102,320,145,318,150,201,107"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="335,80,328,70,331,60,345,54,368,52,396,56,408,65,404,69,394,61,368,57,346,59,335,64,333,70,339,77"/>
+<area shape="poly" id="edge6_Node000005_Node000005" title=" " alt="" coords="335,154,328,144,331,134,345,128,368,125,396,129,408,138,404,142,394,134,368,131,346,133,335,137,333,143,339,150"/>
+</map>

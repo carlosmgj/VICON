@@ -1,0 +1,11 @@
+<map id="_extract_fsm" name="_extract_fsm">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,79,112,104"/>
+<area shape="rect" id="Node000002" href="$classvhdl__dox__filter_1_1_ghdl_parser.html#aa675902fc0196418a11e58332c2ff07a" title="Recorre todo el código buscando asignaciones a señales puntero para recoger todos sus posibles valore..." alt="" coords="174,5,349,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="81,76,117,57,159,40,184,32,185,37,161,44,119,62,84,81"/>
+<area shape="rect" id="Node000003" href="$classvhdl__dox__filter_1_1_ghdl_parser.html#a41b23311d7a10090bb600af641b28105" title=" " alt="" coords="160,79,363,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="112,89,146,89,146,94,112,94"/>
+<area shape="rect" id="Node000004" href="$classvhdl__dox__filter_1_1_ghdl_parser.html#a7d46ea7fa11a6a571ee63b99f50459e2" title="Busca CaseStatements recursivamente en cualquier nivel de anidamiento." alt="" coords="176,152,347,177"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="96,102,213,145,212,150,94,107"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="228,80,221,70,225,60,238,54,261,52,290,56,301,65,297,69,287,61,261,57,240,59,228,64,226,70,232,77"/>
+<area shape="poly" id="edge5_Node000004_Node000004" title=" " alt="" coords="228,154,221,144,225,134,238,128,261,125,290,129,301,138,297,142,287,134,261,131,240,133,228,137,226,143,232,150"/>
+</map>

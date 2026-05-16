@@ -1,0 +1,871 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.12.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<!-- BEGIN opengraph metadata -->
+<meta property="og:title" content="Doxygen Awesome" />
+<meta property="og:image" content="https://repository-images.githubusercontent.com/348492097/4f16df80-88fb-11eb-9d31-4015ff22c452" />
+<meta property="og:description" content="Custom CSS theme for doxygen html-documentation with lots of customization parameters." />
+<meta property="og:url" content="https://jothepro.github.io/doxygen-awesome-css/" />
+<!-- END opengraph metadata -->
+<!-- BEGIN twitter metadata -->
+<meta name="twitter:image:src" content="https://repository-images.githubusercontent.com/348492097/4f16df80-88fb-11eb-9d31-4015ff22c452" />
+<meta name="twitter:title" content="Doxygen Awesome" />
+<meta name="twitter:description" content="Custom CSS theme for doxygen html-documentation with lots of customization parameters." />
+<!-- END twitter metadata -->
+<title>VICON: DoxygenGenerator Class Reference</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link rel="icon" type="image/svg+xml" href="logo.drawio.svg"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="doxygen-awesome-darkmode-toggle.js"></script>
+<script type="text/javascript" src="doxygen-awesome-fragment-copy-button.js"></script>
+<script type="text/javascript" src="doxygen-awesome-paragraph-link.js"></script>
+<script type="text/javascript" src="doxygen-awesome-interactive-toc.js"></script>
+<script type="text/javascript" src="doxygen-awesome-tabs.js"></script>
+<script type="text/javascript" src="toggle-alternative-theme.js"></script>
+<script type="text/javascript">
+    DoxygenAwesomeFragmentCopyButton.init()
+    DoxygenAwesomeDarkModeToggle.init()
+    DoxygenAwesomeParagraphLink.init()
+    DoxygenAwesomeInteractiveToc.init()
+    DoxygenAwesomeTabs.init()
+</script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  extensions: ["tex2jax.js"],
+  jax: ["input/TeX","output/HTML-CSS"],
+});
+</script>
+<script type="text/javascript" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="theme-round.css" rel="stylesheet" type="text/css"/>
+<link href="theme-robot.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">
+(function() {
+    var COLLAPSE_DELAY = 3000;
+    var timer = null;
+    function collapse() {
+        document.body.classList.add('sidebar-collapsed');
+        document.body.classList.remove('sidebar-hovered');
+    }
+    function expand() {
+        document.body.classList.add('sidebar-hovered');
+    }
+    function scheduleCollapse() {
+        clearTimeout(timer);
+        timer = setTimeout(collapse, COLLAPSE_DELAY);
+    }
+    function init() {
+        var zones = ['top', 'side-nav'].map(function(id) {
+            return document.getElementById(id);
+        }).filter(Boolean);
+        if (zones.length === 0) return;
+        // Crear botón toggle
+        var btn = document.createElement('div');
+        btn.id = 'sidebar-toggle';
+        btn.title = 'Fijar/soltar sidebar';
+        btn.innerHTML = '📌';
+        document.body.appendChild(btn);
+        var disabled = localStorage.getItem('sidebar-autohide') === 'off';
+        function updateBtn() {
+            btn.innerHTML = disabled ? '📌' : '📍';
+            btn.title = disabled ? 'Activar auto-hide' : 'Desactivar auto-hide';
+            if (disabled) {
+                document.body.classList.add('sidebar-disabled');
+            } else {
+                document.body.classList.remove('sidebar-disabled');
+            }
+        }
+        btn.addEventListener('click', function() {
+            disabled = !disabled;
+            localStorage.setItem('sidebar-autohide', disabled ? 'off' : 'on');
+            updateBtn();
+            if (!disabled) scheduleCollapse();
+            else {
+                clearTimeout(timer);
+                document.body.classList.remove('sidebar-collapsed');
+                document.body.classList.add('sidebar-hovered');
+            }
+        });
+        updateBtn();
+        if (!disabled) scheduleCollapse();
+        zones.forEach(function(el) {
+            el.addEventListener('mouseenter', function() {
+                if (disabled) return;
+                clearTimeout(timer);
+                expand();
+            });
+            el.addEventListener('mouseleave', function(e) {
+                if (disabled) return;
+                var related = e.relatedTarget;
+                var stillInZone = zones.some(function(z) {
+                    return z && (z === related || z.contains(related));
+                });
+                if (!stillInZone) {
+                    scheduleCollapse();
+                }
+            });
+        });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+</script>
+<script src="wavedrom.min.js" type="text/javascript"></script>
+<script src="default.js" type="text/javascript" id="wavedrom-skin-light"></script>
+<script src="dark.js" type="text/javascript" id="wavedrom-skin-dark"></script>
+<script type="text/javascript">
+function updateWaveDromSkin() {
+    var isDark = document.documentElement.classList.contains('dark-mode');
+    document.getElementById('wavedrom-skin-light').disabled = isDark;
+    document.getElementById('wavedrom-skin-dark').disabled = !isDark;
+    if (typeof WaveDrom !== 'undefined') WaveDrom.ProcessAll();
+}
+document.addEventListener('DOMContentLoaded', function() {
+    updateWaveDromSkin();
+    new MutationObserver(function() {
+        updateWaveDromSkin();
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+});
+</script>
+</head>
+<body>
+<!-- github-corner -->
+<a href="https://github.com/carlosmgj/VICON" class="github-corner" title="View source on Gitea" target="_blank" rel="noopener noreferrer">
+    <svg viewBox="0 0 250 250" width="40" height="40" style="position: absolute; top: 0; border: 0; right: 0; z-index: 99;" aria-hidden="true">
+    <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+<div id="top">
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">VICON
+   &#160;<span id="projectnumber">v1.0</span>
+   </div>
+   <div id="projectbrief">Sistema de Visión configurable</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+<div id="theme-selection">
+ <label for="theme-select">Theme:</label>
+ <select id="theme-select">
+  <option value="theme-default">Default</option>
+  <option value="theme-round">Round</option>
+  <option value="theme-robot">Robot</option>
+ </select>
+</div>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.12.0 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() { codefold.init(0); });
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','Search',true);
+  $(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function(){initNavTree('classvhdl__dox__filter_1_1_doxygen_generator.html',''); initResizable(true); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pro-methods">Protected Member Functions</a> &#124;
+<a href="classvhdl__dox__filter_1_1_doxygen_generator-members.html">List of all members</a>  </div>
+  <div class="headertitle"><div class="title">DoxygenGenerator Class Reference</div></div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
+Protected Member Functions</h2></td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock">
+<p class="definition">Definition at line <a class="el" href="vhdl__dox__filter_8py_source.html#l00442">442</a> of file <a class="el" href="vhdl__dox__filter_8py_source.html">vhdl_dox_filter.py</a>.</p>
+</div><h2 class="groupheader">Member Function/Procedure/Process Documentation</h2>
+<a id="a89f9754dd49daddd2c74b8ff8574ec1f" name="a89f9754dd49daddd2c74b8ff8574ec1f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a89f9754dd49daddd2c74b8ff8574ec1f">&#9670;&#160;</a></span>_constant_table()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"> str _constant_table </td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">list[Constant]</td>          <td class="paramname"><span class="paramname"><em>constants</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="vhdl__dox__filter_8py_source.html#l00518">518</a> of file <a class="el" href="vhdl__dox__filter_8py_source.html">vhdl_dox_filter.py</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  518</span>    <span class="keyword">def </span>_constant_table(self, constants: list[Constant]) -&gt; str:</div>
+<div class="line"><span class="lineno">  519</span>        lines = [</div>
+<div class="line"><span class="lineno">  520</span>            <span class="stringliteral">&#39;--! \\par Constants&#39;</span>,</div>
+<div class="line"><span class="lineno">  521</span>            <span class="stringliteral">&#39;--! | Name | Type | Value | Description |&#39;</span>,</div>
+<div class="line"><span class="lineno">  522</span>            <span class="stringliteral">&#39;--! |------|------|-------|-------------|&#39;</span>,</div>
+<div class="line"><span class="lineno">  523</span>        ]</div>
+<div class="line"><span class="lineno">  524</span>        <span class="keywordflow">for</span> c <span class="keywordflow">in</span> constants:</div>
+<div class="line"><span class="lineno">  525</span>            comment = c.comment <span class="keywordflow">or</span> <span class="stringliteral">&#39;&#39;</span></div>
+<div class="line"><span class="lineno">  526</span>            lines.append(</div>
+<div class="line"><span class="lineno">  527</span>                f<span class="stringliteral">&#39;--! | `{c.name}` | `{c.type_str}` | `{c.value}` | {comment} |&#39;</span></div>
+<div class="line"><span class="lineno">  528</span>            )</div>
+<div class="line"><span class="lineno">  529</span>        lines.append(<span class="stringliteral">&#39;--!&#39;</span>)</div>
+<div class="line"><span class="lineno">  530</span>        <span class="keywordflow">return</span> <span class="stringliteral">&#39;\n&#39;</span>.join(lines)</div>
+<div class="line"><span class="lineno">  531</span> </div>
+</div><!-- fragment --><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classvhdl__dox__filter_1_1_doxygen_generator_a89f9754dd49daddd2c74b8ff8574ec1f_icgraph.svg" width="264" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
+<a id="a6c93278e7be3e160dd016ec49d492fda" name="a6c93278e7be3e160dd016ec49d492fda"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6c93278e7be3e160dd016ec49d492fda">&#9670;&#160;</a></span>_entity_diagram()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"> str _entity_diagram </td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">VhdlEntity</td>          <td class="paramname"><span class="paramname"><em>entity</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="vhdl__dox__filter_8py_source.html#l00619">619</a> of file <a class="el" href="vhdl__dox__filter_8py_source.html">vhdl_dox_filter.py</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  619</span>    <span class="keyword">def </span>_entity_diagram(self, entity: VhdlEntity) -&gt; str:</div>
+<div class="line"><span class="lineno">  620</span>        inputs  = [p <span class="keywordflow">for</span> p <span class="keywordflow">in</span> entity.ports <span class="keywordflow">if</span> p.direction <span class="keywordflow">in</span> (<span class="stringliteral">&#39;in&#39;</span>, <span class="stringliteral">&#39;inout&#39;</span>)]</div>
+<div class="line"><span class="lineno">  621</span>        outputs = [p <span class="keywordflow">for</span> p <span class="keywordflow">in</span> entity.ports <span class="keywordflow">if</span> p.direction <span class="keywordflow">in</span> (<span class="stringliteral">&#39;out&#39;</span>, <span class="stringliteral">&#39;buffer&#39;</span>, <span class="stringliteral">&#39;inout&#39;</span>)]</div>
+<div class="line"><span class="lineno">  622</span> </div>
+<div class="line"><span class="lineno">  623</span>        lines = [</div>
+<div class="line"><span class="lineno">  624</span>            <span class="stringliteral">&#39;--! \\par Entity Diagram&#39;</span>,</div>
+<div class="line"><span class="lineno">  625</span>            <span class="stringliteral">&#39;--! \\startuml&#39;</span>,</div>
+<div class="line"><span class="lineno">  626</span>            <span class="stringliteral">&#39;--! skinparam componentStyle rectangle&#39;</span>,</div>
+<div class="line"><span class="lineno">  627</span>            <span class="stringliteral">&#39;--! skinparam defaultFontName Helvetica&#39;</span>,</div>
+<div class="line"><span class="lineno">  628</span>            <span class="stringliteral">&#39;--! skinparam component {&#39;</span>,</div>
+<div class="line"><span class="lineno">  629</span>            <span class="stringliteral">&#39;--!   BackgroundColor #E8F4FD&#39;</span>,</div>
+<div class="line"><span class="lineno">  630</span>            <span class="stringliteral">&#39;--!   BorderColor #2E86AB&#39;</span>,</div>
+<div class="line"><span class="lineno">  631</span>            <span class="stringliteral">&#39;--! }&#39;</span>,</div>
+<div class="line"><span class="lineno">  632</span>            <span class="stringliteral">&#39;--! left to right direction&#39;</span>,</div>
+<div class="line"><span class="lineno">  633</span>            <span class="stringliteral">&#39;--!&#39;</span>,</div>
+<div class="line"><span class="lineno">  634</span>        ]</div>
+<div class="line"><span class="lineno">  635</span> </div>
+<div class="line"><span class="lineno">  636</span>        <span class="keywordflow">for</span> p <span class="keywordflow">in</span> inputs:</div>
+<div class="line"><span class="lineno">  637</span>            lines.append(f<span class="stringliteral">&#39;--! () &quot;{p.name}\\n[{p.type_str}]&quot; as i_{p.name}&#39;</span>)</div>
+<div class="line"><span class="lineno">  638</span>        <span class="keywordflow">for</span> p <span class="keywordflow">in</span> outputs:</div>
+<div class="line"><span class="lineno">  639</span>            lines.append(f<span class="stringliteral">&#39;--! () &quot;{p.name}\\n[{p.type_str}]&quot; as o_{p.name}&#39;</span>)</div>
+<div class="line"><span class="lineno">  640</span>        lines.append(<span class="stringliteral">&#39;--!&#39;</span>)</div>
+<div class="line"><span class="lineno">  641</span> </div>
+<div class="line"><span class="lineno">  642</span>        lines.append(f<span class="stringliteral">&#39;--! [{entity.name}] as ENT&#39;</span>)</div>
+<div class="line"><span class="lineno">  643</span>        lines.append(<span class="stringliteral">&#39;--!&#39;</span>)</div>
+<div class="line"><span class="lineno">  644</span> </div>
+<div class="line"><span class="lineno">  645</span>        note_lines = []</div>
+<div class="line"><span class="lineno">  646</span>        </div>
+<div class="line"><span class="lineno">  647</span>        <span class="comment"># Solo genéricos en la nota</span></div>
+<div class="line"><span class="lineno">  648</span>        <span class="keywordflow">if</span> entity.generics:</div>
+<div class="line"><span class="lineno">  649</span>            note_lines.append(<span class="stringliteral">&#39;--!   **Generics**&#39;</span>)</div>
+<div class="line"><span class="lineno">  650</span>            <span class="keywordflow">for</span> g <span class="keywordflow">in</span> entity.generics:</div>
+<div class="line"><span class="lineno">  651</span>                default = f<span class="stringliteral">&#39; = {g.default}&#39;</span> <span class="keywordflow">if</span> g.default <span class="keywordflow">else</span> <span class="stringliteral">&#39;&#39;</span></div>
+<div class="line"><span class="lineno">  652</span>                note_lines.append(f<span class="stringliteral">&#39;--!   {g.name} : {g.type_str}{default}&#39;</span>)</div>
+<div class="line"><span class="lineno">  653</span> </div>
+<div class="line"><span class="lineno">  654</span>        <span class="comment"># Nota con señales internas, enums y constantes</span></div>
+<div class="line"><span class="lineno">  655</span>        <span class="comment"># note_lines = []</span></div>
+<div class="line"><span class="lineno">  656</span>        <span class="comment"># internals = [s for s in entity.signals if &#39;next&#39; not in s.name.lower()]</span></div>
+<div class="line"><span class="lineno">  657</span>        <span class="comment"># if internals:</span></div>
+<div class="line"><span class="lineno">  658</span>        <span class="comment">#     note_lines.append(&#39;--!   **Internal Signals**&#39;)</span></div>
+<div class="line"><span class="lineno">  659</span>        <span class="comment">#     for s in internals:</span></div>
+<div class="line"><span class="lineno">  660</span>        <span class="comment">#         note_lines.append(f&#39;--!   {s.name} : {s.type_str}&#39;)</span></div>
+<div class="line"><span class="lineno">  661</span> </div>
+<div class="line"><span class="lineno">  662</span>        <span class="comment"># for t in entity.enum_types:</span></div>
+<div class="line"><span class="lineno">  663</span>        <span class="comment">#     if note_lines:</span></div>
+<div class="line"><span class="lineno">  664</span>        <span class="comment">#         note_lines.append(&#39;--!   ----&#39;)</span></div>
+<div class="line"><span class="lineno">  665</span>        <span class="comment">#     note_lines.append(f&#39;--!   **{t.name}**&#39;)</span></div>
+<div class="line"><span class="lineno">  666</span>        <span class="comment">#     note_lines.append(f&#39;--!   {&quot;, &quot;.join(t.states)}&#39;)</span></div>
+<div class="line"><span class="lineno">  667</span> </div>
+<div class="line"><span class="lineno">  668</span>        <span class="comment"># if entity.constants:</span></div>
+<div class="line"><span class="lineno">  669</span>        <span class="comment">#     if note_lines:</span></div>
+<div class="line"><span class="lineno">  670</span>        <span class="comment">#         note_lines.append(&#39;--!   ----&#39;)</span></div>
+<div class="line"><span class="lineno">  671</span>        <span class="comment">#     note_lines.append(&#39;--!   **Constants**&#39;)</span></div>
+<div class="line"><span class="lineno">  672</span>        <span class="comment">#     for c in entity.constants:</span></div>
+<div class="line"><span class="lineno">  673</span>        <span class="comment">#         note_lines.append(f&#39;--!   {c.name} = {c.value}&#39;)</span></div>
+<div class="line"><span class="lineno">  674</span> </div>
+<div class="line"><span class="lineno">  675</span>        <span class="keywordflow">if</span> note_lines:</div>
+<div class="line"><span class="lineno">  676</span>            lines.append(<span class="stringliteral">&#39;--! note right of ENT&#39;</span>)</div>
+<div class="line"><span class="lineno">  677</span>            lines.extend(note_lines)</div>
+<div class="line"><span class="lineno">  678</span>            lines.append(<span class="stringliteral">&#39;--! end note&#39;</span>)</div>
+<div class="line"><span class="lineno">  679</span> </div>
+<div class="line"><span class="lineno">  680</span>        lines.append(<span class="stringliteral">&#39;--!&#39;</span>)</div>
+<div class="line"><span class="lineno">  681</span> </div>
+<div class="line"><span class="lineno">  682</span>        <span class="keywordflow">for</span> p <span class="keywordflow">in</span> inputs:</div>
+<div class="line"><span class="lineno">  683</span>            lines.append(f<span class="stringliteral">&#39;--! i_{p.name} --&gt; ENT&#39;</span>)</div>
+<div class="line"><span class="lineno">  684</span>        <span class="keywordflow">for</span> p <span class="keywordflow">in</span> outputs:</div>
+<div class="line"><span class="lineno">  685</span>            lines.append(f<span class="stringliteral">&#39;--! ENT --&gt; o_{p.name}&#39;</span>)</div>
+<div class="line"><span class="lineno">  686</span> </div>
+<div class="line"><span class="lineno">  687</span>        lines.append(<span class="stringliteral">&#39;--! \\enduml&#39;</span>)</div>
+<div class="line"><span class="lineno">  688</span>        lines.append(<span class="stringliteral">&#39;--!&#39;</span>)</div>
+<div class="line"><span class="lineno">  689</span>        <span class="keywordflow">return</span> <span class="stringliteral">&#39;\n&#39;</span>.join(lines)</div>
+<div class="line"><span class="lineno">  690</span> </div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a29a9f700484632d62efd69bcfe2f8218" name="a29a9f700484632d62efd69bcfe2f8218"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a29a9f700484632d62efd69bcfe2f8218">&#9670;&#160;</a></span>_entity_diagram2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"> str _entity_diagram2 </td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">VhdlEntity</td>          <td class="paramname"><span class="paramname"><em>entity</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Diagrama de entidad estilo TerosHDL generado como HTML inline. </p>
+<p>Caja verde para parámetros/señales internas, caja amarilla para puertos. </p>
+
+<p class="definition">Definition at line <a class="el" href="vhdl__dox__filter_8py_source.html#l00534">534</a> of file <a class="el" href="vhdl__dox__filter_8py_source.html">vhdl_dox_filter.py</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  534</span>    <span class="keyword">def </span>_entity_diagram2(self, entity: VhdlEntity) -&gt; str:</div>
+<div class="line"><span class="lineno">  535</span>        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="lineno">  536</span><span class="stringliteral">        Diagrama de entidad estilo TerosHDL generado como HTML inline.</span></div>
+<div class="line"><span class="lineno">  537</span><span class="stringliteral">        Caja verde para parámetros/señales internas, caja amarilla para puertos.</span></div>
+<div class="line"><span class="lineno">  538</span><span class="stringliteral">        &quot;&quot;&quot;</span></div>
+<div class="line"><span class="lineno">  539</span>        inputs  = [p <span class="keywordflow">for</span> p <span class="keywordflow">in</span> entity.ports <span class="keywordflow">if</span> p.direction <span class="keywordflow">in</span> (<span class="stringliteral">&#39;in&#39;</span>, <span class="stringliteral">&#39;inout&#39;</span>)]</div>
+<div class="line"><span class="lineno">  540</span>        outputs = [p <span class="keywordflow">for</span> p <span class="keywordflow">in</span> entity.ports <span class="keywordflow">if</span> p.direction <span class="keywordflow">in</span> (<span class="stringliteral">&#39;out&#39;</span>, <span class="stringliteral">&#39;buffer&#39;</span>, <span class="stringliteral">&#39;inout&#39;</span>)]</div>
+<div class="line"><span class="lineno">  541</span> </div>
+<div class="line"><span class="lineno">  542</span>        <span class="comment"># Calcular altura de la caja de puertos</span></div>
+<div class="line"><span class="lineno">  543</span>        max_ports = max(len(inputs), len(outputs), 1)</div>
+<div class="line"><span class="lineno">  544</span>        row_height = 28</div>
+<div class="line"><span class="lineno">  545</span>        port_box_height = max_ports * row_height + 20</div>
+<div class="line"><span class="lineno">  546</span> </div>
+<div class="line"><span class="lineno">  547</span>        port_rows = <span class="stringliteral">&#39;&#39;</span></div>
+<div class="line"><span class="lineno">  548</span>        <span class="keywordflow">for</span> i <span class="keywordflow">in</span> range(max_ports):</div>
+<div class="line"><span class="lineno">  549</span>            left  = inputs[i]  <span class="keywordflow">if</span> i &lt; len(inputs)  <span class="keywordflow">else</span> <span class="keywordtype">None</span></div>
+<div class="line"><span class="lineno">  550</span>            right = outputs[i] <span class="keywordflow">if</span> i &lt; len(outputs) <span class="keywordflow">else</span> <span class="keywordtype">None</span></div>
+<div class="line"><span class="lineno">  551</span>        </div>
+<div class="line"><span class="lineno">  552</span>            left_cell = (</div>
+<div class="line"><span class="lineno">  553</span>                f<span class="stringliteral">&#39;&lt;div style=&quot;font-family:monospace;font-size:13px;color:#1a1a1a;white-space:nowrap;&quot;&gt;&#39;</span></div>
+<div class="line"><span class="lineno">  554</span>                f<span class="stringliteral">&#39;← &lt;b&gt;{left.name}&lt;/b&gt; &#39;</span></div>
+<div class="line"><span class="lineno">  555</span>                f<span class="stringliteral">&#39;&lt;span style=&quot;font-size:11px;&quot;&gt;{left.type_str}&lt;/span&gt;&#39;</span></div>
+<div class="line"><span class="lineno">  556</span>                f<span class="stringliteral">&#39;&lt;/div&gt;&#39;</span></div>
+<div class="line"><span class="lineno">  557</span>            ) <span class="keywordflow">if</span> left <span class="keywordflow">else</span> <span class="stringliteral">&#39;&lt;div&gt;&lt;/div&gt;&#39;</span></div>
+<div class="line"><span class="lineno">  558</span>        </div>
+<div class="line"><span class="lineno">  559</span>            right_cell = (</div>
+<div class="line"><span class="lineno">  560</span>                f<span class="stringliteral">&#39;&lt;div style=&quot;font-family:monospace;font-size:13px;color:#1a1a1a;white-space:nowrap;&quot;&gt;&#39;</span></div>
+<div class="line"><span class="lineno">  561</span>                f<span class="stringliteral">&#39;&lt;span style=&quot;font-size:11px;&quot;&gt;{right.type_str}&lt;/span&gt;&#39;</span></div>
+<div class="line"><span class="lineno">  562</span>                f<span class="stringliteral">&#39; &lt;b&gt;{right.name}&lt;/b&gt; →&#39;</span></div>
+<div class="line"><span class="lineno">  563</span>                f<span class="stringliteral">&#39;&lt;/div&gt;&#39;</span></div>
+<div class="line"><span class="lineno">  564</span>            ) <span class="keywordflow">if</span> right <span class="keywordflow">else</span> <span class="stringliteral">&#39;&lt;div&gt;&lt;/div&gt;&#39;</span></div>
+<div class="line"><span class="lineno">  565</span>        </div>
+<div class="line"><span class="lineno">  566</span>            port_rows += (</div>
+<div class="line"><span class="lineno">  567</span>                f<span class="stringliteral">&#39;&lt;div style=&quot;display:flex;justify-content:space-between;&#39;</span></div>
+<div class="line"><span class="lineno">  568</span>                f<span class="stringliteral">&#39;padding:4px 10px;gap:20px;&quot;&gt;&#39;</span></div>
+<div class="line"><span class="lineno">  569</span>                f<span class="stringliteral">&#39;{left_cell}{right_cell}&#39;</span></div>
+<div class="line"><span class="lineno">  570</span>                f<span class="stringliteral">&#39;&lt;/div&gt;&#39;</span></div>
+<div class="line"><span class="lineno">  571</span>            )</div>
+<div class="line"><span class="lineno">  572</span> </div>
+<div class="line"><span class="lineno">  573</span>        internal_rows = <span class="stringliteral">&#39;&#39;</span></div>
+<div class="line"><span class="lineno">  574</span>        <span class="keywordflow">for</span> g <span class="keywordflow">in</span> entity.generics:</div>
+<div class="line"><span class="lineno">  575</span>            default = f<span class="stringliteral">&#39; = {g.default}&#39;</span> <span class="keywordflow">if</span> g.default <span class="keywordflow">else</span> <span class="stringliteral">&#39;&#39;</span></div>
+<div class="line"><span class="lineno">  576</span>            internal_rows += f<span class="stringliteral">&#39;&lt;tr&gt;&lt;td style=&quot;padding:2px 10px;font-family:monospace;font-size:12px;color:#1a1a1a;&quot;&gt;&lt;b&gt;{g.name}&lt;/b&gt; : {g.type_str}{default}&lt;/td&gt;&lt;/tr&gt;&#39;</span></div>
+<div class="line"><span class="lineno">  577</span>        </div>
+<div class="line"><span class="lineno">  578</span>        </div>
+<div class="line"><span class="lineno">  579</span>        <span class="comment"># Construir filas de parámetros/constantes/señales internas</span></div>
+<div class="line"><span class="lineno">  580</span>        <span class="comment"># internal_rows = &#39;&#39;</span></div>
+<div class="line"><span class="lineno">  581</span>        <span class="comment"># for t in entity.enum_types:</span></div>
+<div class="line"><span class="lineno">  582</span>        <span class="comment">#     internal_rows += f&#39;&lt;tr&gt;&lt;td style=&quot;padding:2px 10px;font-family:monospace;font-size:12px;color:#1a1a1a;&quot;&gt;&lt;b&gt;{t.name}&lt;/b&gt;: {&quot;, &quot;.join(t.states)}&lt;/td&gt;&lt;/tr&gt;&#39;</span></div>
+<div class="line"><span class="lineno">  583</span>        <span class="comment"># for c in entity.constants:</span></div>
+<div class="line"><span class="lineno">  584</span>        <span class="comment">#     internal_rows += f&#39;&lt;tr&gt;&lt;td style=&quot;padding:2px 10px;font-family:monospace;font-size:12px;color:#1a1a1a;&quot;&gt;{c.name} = {c.value}&lt;/td&gt;&lt;/tr&gt;&#39;</span></div>
+<div class="line"><span class="lineno">  585</span>        <span class="comment"># internals = [s for s in entity.signals if &#39;next&#39; not in s.name.lower()]</span></div>
+<div class="line"><span class="lineno">  586</span>        <span class="comment"># for s in internals:</span></div>
+<div class="line"><span class="lineno">  587</span>        <span class="comment">#     internal_rows += f&#39;&lt;tr&gt;&lt;td style=&quot;padding:2px 10px;font-family:monospace;font-size:12px;color:#1a1a1a;&quot;&gt;{s.name} : {s.type_str}&lt;/td&gt;&lt;/tr&gt;&#39;</span></div>
+<div class="line"><span class="lineno">  588</span> </div>
+<div class="line"><span class="lineno">  589</span>        html = f<span class="stringliteral">&#39;&#39;&#39;--! \\par Entity Diagram</span></div>
+<div class="line"><span class="lineno">  590</span><span class="stringliteral">        --! \\htmlonly</span></div>
+<div class="line"><span class="lineno">  591</span><span class="stringliteral">        --! &lt;div style=&quot;display:inline-block;border:2px solid #888;border-radius:4px;overflow:hidden;font-family:sans-serif;min-width:max-content;&quot;&gt;</span></div>
+<div class="line"><span class="lineno">  592</span><span class="stringliteral">        --!   &lt;div style=&quot;background:#4a4a4a;color:white;text-align:center;padding:6px 16px;font-size:15px;font-weight:bold;letter-spacing:1px;white-space:nowrap;&quot;&gt;</span></div>
+<div class="line"><span class="lineno">  593</span><span class="stringliteral">        --!     {entity.name}</span></div>
+<div class="line"><span class="lineno">  594</span><span class="stringliteral">        --!   &lt;/div&gt;</span></div>
+<div class="line"><span class="lineno">  595</span><span class="stringliteral">        --!   &lt;!-- Caja verde: parámetros, constantes, señales internas --&gt;&#39;&#39;&#39;</span></div>
+<div class="line"><span class="lineno">  596</span>        </div>
+<div class="line"><span class="lineno">  597</span>        <span class="keywordflow">if</span> internal_rows:</div>
+<div class="line"><span class="lineno">  598</span>            html += f<span class="stringliteral">&#39;&#39;&#39;</span></div>
+<div class="line"><span class="lineno">  599</span><span class="stringliteral">        --!   &lt;div style=&quot;background:#c8e6c9;padding:6px 0;border-bottom:1px solid #888;white-space:nowrap;&quot;&gt;</span></div>
+<div class="line"><span class="lineno">  600</span><span class="stringliteral">        --!     &lt;table style=&quot;width:100%;border-collapse:collapse;&quot;&gt;</span></div>
+<div class="line"><span class="lineno">  601</span><span class="stringliteral">        --!       {internal_rows}</span></div>
+<div class="line"><span class="lineno">  602</span><span class="stringliteral">        --!     &lt;/table&gt;</span></div>
+<div class="line"><span class="lineno">  603</span><span class="stringliteral">        --!   &lt;/div&gt;&#39;&#39;&#39;</span></div>
+<div class="line"><span class="lineno">  604</span>        </div>
+<div class="line"><span class="lineno">  605</span>        html += f<span class="stringliteral">&#39;&#39;&#39;</span></div>
+<div class="line"><span class="lineno">  606</span><span class="stringliteral">        --!   &lt;div style=&quot;background:#fff9c4;padding:6px 0;&quot;&gt;</span></div>
+<div class="line"><span class="lineno">  607</span><span class="stringliteral">        --!     {port_rows}</span></div>
+<div class="line"><span class="lineno">  608</span><span class="stringliteral">        --!   &lt;/div&gt;</span></div>
+<div class="line"><span class="lineno">  609</span><span class="stringliteral">        --! &lt;/div&gt;</span></div>
+<div class="line"><span class="lineno">  610</span><span class="stringliteral">        --! \\endhtmlonly</span></div>
+<div class="line"><span class="lineno">  611</span><span class="stringliteral">        --!&#39;&#39;&#39;</span></div>
+<div class="line"><span class="lineno">  612</span> </div>
+<div class="line"><span class="lineno">  613</span>        <span class="comment"># Convertir a líneas --!</span></div>
+<div class="line"><span class="lineno">  614</span>        lines = []</div>
+<div class="line"><span class="lineno">  615</span>        <span class="keywordflow">for</span> line <span class="keywordflow">in</span> html.split(<span class="stringliteral">&#39;\n&#39;</span>):</div>
+<div class="line"><span class="lineno">  616</span>            lines.append(line)</div>
+<div class="line"><span class="lineno">  617</span>        <span class="keywordflow">return</span> <span class="stringliteral">&#39;\n&#39;</span>.join(lines)</div>
+<div class="line"><span class="lineno">  618</span> </div>
+</div><!-- fragment --><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classvhdl__dox__filter_1_1_doxygen_generator_a29a9f700484632d62efd69bcfe2f8218_icgraph.svg" width="275" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
+<a id="a54d35e933fd573811af0dc9666d573e7" name="a54d35e933fd573811af0dc9666d573e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54d35e933fd573811af0dc9666d573e7">&#9670;&#160;</a></span>_fsm_diagram()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"> str _fsm_diagram </td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">VhdlEntity</td>          <td class="paramname"><span class="paramname"><em>entity</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool </td>          <td class="paramname"><span class="paramname"><em>show_actions</em></span><span class="paramdefsep"> = </span><span class="paramdefval">False</span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="vhdl__dox__filter_8py_source.html#l00691">691</a> of file <a class="el" href="vhdl__dox__filter_8py_source.html">vhdl_dox_filter.py</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  691</span>    <span class="keyword">def </span>_fsm_diagram(self, entity: VhdlEntity, show_actions: bool = <span class="keyword">False</span>) -&gt; str:</div>
+<div class="line"><span class="lineno">  692</span>        initial = entity.enum_types[0].states[0] <span class="keywordflow">if</span> entity.enum_types <span class="keywordflow">else</span> <span class="keywordtype">None</span></div>
+<div class="line"><span class="lineno">  693</span> </div>
+<div class="line"><span class="lineno">  694</span> </div>
+<div class="line"><span class="lineno">  695</span>        lines = [</div>
+<div class="line"><span class="lineno">  696</span>            <span class="stringliteral">&#39;--! \\par FSM State Diagram&#39;</span>,</div>
+<div class="line"><span class="lineno">  697</span>            <span class="stringliteral">&#39;--! \\startuml&#39;</span>,</div>
+<div class="line"><span class="lineno">  698</span>            <span class="stringliteral">&#39;--! skinparam state {&#39;</span>,</div>
+<div class="line"><span class="lineno">  699</span>            <span class="stringliteral">&#39;--!   BackgroundColor #E8F4FD&#39;</span>,</div>
+<div class="line"><span class="lineno">  700</span>            <span class="stringliteral">&#39;--!   BorderColor #2E86AB&#39;</span>,</div>
+<div class="line"><span class="lineno">  701</span>            <span class="stringliteral">&#39;--!   FontName Helvetica&#39;</span>,</div>
+<div class="line"><span class="lineno">  702</span>            <span class="stringliteral">&#39;--! }&#39;</span>,</div>
+<div class="line"><span class="lineno">  703</span>            <span class="stringliteral">&#39;--!&#39;</span>,</div>
+<div class="line"><span class="lineno">  704</span>        ]</div>
+<div class="line"><span class="lineno">  705</span> </div>
+<div class="line"><span class="lineno">  706</span>        <span class="keywordflow">if</span> initial:</div>
+<div class="line"><span class="lineno">  707</span>            lines.append(f<span class="stringliteral">&#39;--! [*] --&gt; {initial}&#39;</span>)</div>
+<div class="line"><span class="lineno">  708</span>            lines.append(<span class="stringliteral">&#39;--!&#39;</span>)</div>
+<div class="line"><span class="lineno">  709</span> </div>
+<div class="line"><span class="lineno">  710</span>        <span class="comment"># Declarar explícitamente todos los estados</span></div>
+<div class="line"><span class="lineno">  711</span>        all_states = entity.enum_types[0].states <span class="keywordflow">if</span> entity.enum_types <span class="keywordflow">else</span> []</div>
+<div class="line"><span class="lineno">  712</span>        <span class="keywordflow">for</span> state <span class="keywordflow">in</span> all_states:</div>
+<div class="line"><span class="lineno">  713</span>            lines.append(f<span class="stringliteral">&#39;--! state {state}&#39;</span>)</div>
+<div class="line"><span class="lineno">  714</span>        lines.append(<span class="stringliteral">&#39;--!&#39;</span>)</div>
+<div class="line"><span class="lineno">  715</span> </div>
+<div class="line"><span class="lineno">  716</span>        <span class="comment"># Mapa de acciones por estado</span></div>
+<div class="line"><span class="lineno">  717</span>        actions_map = {s.name: s.actions <span class="keywordflow">for</span> s <span class="keywordflow">in</span> entity.fsm_states} <span class="keywordflow">if</span> show_actions <span class="keywordflow">else</span> {}</div>
+<div class="line"><span class="lineno">  718</span>        </div>
+<div class="line"><span class="lineno">  719</span>        <span class="comment"># Declarar estados con acciones si show_actions está activo</span></div>
+<div class="line"><span class="lineno">  720</span>        all_states = entity.enum_types[0].states <span class="keywordflow">if</span> entity.enum_types <span class="keywordflow">else</span> []</div>
+<div class="line"><span class="lineno">  721</span>        <span class="keywordflow">for</span> state <span class="keywordflow">in</span> all_states:</div>
+<div class="line"><span class="lineno">  722</span>            lines.append(f<span class="stringliteral">&#39;--! state {state}&#39;</span>)</div>
+<div class="line"><span class="lineno">  723</span>            <span class="keywordflow">if</span> show_actions <span class="keywordflow">and</span> state <span class="keywordflow">in</span> actions_map <span class="keywordflow">and</span> actions_map[state]:</div>
+<div class="line"><span class="lineno">  724</span>                <span class="keywordflow">for</span> action <span class="keywordflow">in</span> actions_map[state]:</div>
+<div class="line"><span class="lineno">  725</span>                    lines.append(f<span class="stringliteral">&#39;--! {state} : {action}&#39;</span>)</div>
+<div class="line"><span class="lineno">  726</span>        lines.append(<span class="stringliteral">&#39;--!&#39;</span>)</div>
+<div class="line"><span class="lineno">  727</span>        </div>
+<div class="line"><span class="lineno">  728</span>        <span class="keywordflow">for</span> tr <span class="keywordflow">in</span> entity.fsm_transitions:</div>
+<div class="line"><span class="lineno">  729</span>            label = f<span class="stringliteral">&#39; : {tr.condition}&#39;</span> <span class="keywordflow">if</span> tr.condition <span class="keywordflow">else</span> <span class="stringliteral">&#39;&#39;</span></div>
+<div class="line"><span class="lineno">  730</span>            lines.append(f<span class="stringliteral">&#39;--! {tr.from_state} --&gt; {tr.to_state}{label}&#39;</span>)</div>
+<div class="line"><span class="lineno">  731</span>        </div>
+<div class="line"><span class="lineno">  732</span>        <span class="comment"># Nodos especiales para punteros de retorno</span></div>
+<div class="line"><span class="lineno">  733</span>        <span class="keywordflow">if</span> entity.fsm_pointers:</div>
+<div class="line"><span class="lineno">  734</span>            lines.append(<span class="stringliteral">&#39;--!&#39;</span>)</div>
+<div class="line"><span class="lineno">  735</span>            <span class="keywordflow">for</span> ptr <span class="keywordflow">in</span> entity.fsm_pointers:</div>
+<div class="line"><span class="lineno">  736</span>                ptr_node = f<span class="stringliteral">&#39;PTR_{ptr.name}&#39;</span></div>
+<div class="line"><span class="lineno">  737</span>                <span class="comment"># Declarar nodo puntero con estilo diferenciado</span></div>
+<div class="line"><span class="lineno">  738</span>                lines.append(f<span class="stringliteral">&#39;--! state {ptr_node} : {ptr.name}\\n(dynamic return)&#39;</span>)</div>
+<div class="line"><span class="lineno">  739</span>                <span class="comment"># Flechas desde estados que usan el puntero</span></div>
+<div class="line"><span class="lineno">  740</span>                <span class="keywordflow">for</span> from_state <span class="keywordflow">in</span> ptr.used_from:</div>
+<div class="line"><span class="lineno">  741</span>                    lines.append(f<span class="stringliteral">&#39;--! {from_state} --&gt; {ptr_node}&#39;</span>)</div>
+<div class="line"><span class="lineno">  742</span>                <span class="comment"># Flechas hacia posibles valores</span></div>
+<div class="line"><span class="lineno">  743</span>                <span class="keywordflow">for</span> val <span class="keywordflow">in</span> ptr.possible_values:</div>
+<div class="line"><span class="lineno">  744</span>                    lines.append(f<span class="stringliteral">&#39;--! {ptr_node} --&gt; {val}&#39;</span>)</div>
+<div class="line"><span class="lineno">  745</span> </div>
+<div class="line"><span class="lineno">  746</span>        lines.append(<span class="stringliteral">&#39;--! \\enduml&#39;</span>)</div>
+<div class="line"><span class="lineno">  747</span>        lines.append(<span class="stringliteral">&#39;--!&#39;</span>)</div>
+<div class="line"><span class="lineno">  748</span>        <span class="keywordflow">return</span> <span class="stringliteral">&#39;\n&#39;</span>.join(lines)</div>
+<div class="line"><span class="lineno">  749</span> </div>
+<div class="line"><span class="lineno">  750</span><span class="comment"># ---------------------------------------------------------------------------</span></div>
+<div class="line"><span class="lineno">  751</span><span class="comment"># Inyector: inserta los bloques justo antes de &quot;entity X is&quot;</span></div>
+<div class="line"><span class="lineno">  752</span><span class="comment"># ---------------------------------------------------------------------------</span></div>
+<div class="line"><span class="lineno">  753</span> </div>
+</div><!-- fragment --><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classvhdl__dox__filter_1_1_doxygen_generator_a54d35e933fd573811af0dc9666d573e7_icgraph.svg" width="254" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
+<a id="a11e5601bf468551461af80d4b702724e" name="a11e5601bf468551461af80d4b702724e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a11e5601bf468551461af80d4b702724e">&#9670;&#160;</a></span>_generic_table()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"> str _generic_table </td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">list[Generic]</td>          <td class="paramname"><span class="paramname"><em>generics</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="vhdl__dox__filter_8py_source.html#l00488">488</a> of file <a class="el" href="vhdl__dox__filter_8py_source.html">vhdl_dox_filter.py</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  488</span>    <span class="keyword">def </span>_generic_table(self, generics: list[Generic]) -&gt; str:</div>
+<div class="line"><span class="lineno">  489</span>        lines = [</div>
+<div class="line"><span class="lineno">  490</span>            <span class="stringliteral">&#39;--! \\par Generics&#39;</span>,</div>
+<div class="line"><span class="lineno">  491</span>            <span class="stringliteral">&#39;--! | Name | Type | Default | Description |&#39;</span>,</div>
+<div class="line"><span class="lineno">  492</span>            <span class="stringliteral">&#39;--! |------|------|---------|-------------|&#39;</span>,</div>
+<div class="line"><span class="lineno">  493</span>        ]</div>
+<div class="line"><span class="lineno">  494</span>        <span class="keywordflow">for</span> g <span class="keywordflow">in</span> generics:</div>
+<div class="line"><span class="lineno">  495</span>            default = f<span class="stringliteral">&#39;`{g.default}`&#39;</span> <span class="keywordflow">if</span> g.default <span class="keywordflow">else</span> <span class="stringliteral">&#39;—&#39;</span></div>
+<div class="line"><span class="lineno">  496</span>            comment = g.comment <span class="keywordflow">or</span> <span class="stringliteral">&#39;&#39;</span></div>
+<div class="line"><span class="lineno">  497</span>            lines.append(</div>
+<div class="line"><span class="lineno">  498</span>                f<span class="stringliteral">&#39;--! | `{g.name}` | `{g.type_str}` | {default} | {comment} |&#39;</span></div>
+<div class="line"><span class="lineno">  499</span>            )</div>
+<div class="line"><span class="lineno">  500</span>        lines.append(<span class="stringliteral">&#39;--!&#39;</span>)</div>
+<div class="line"><span class="lineno">  501</span>        <span class="keywordflow">return</span> <span class="stringliteral">&#39;\n&#39;</span>.join(lines)</div>
+<div class="line"><span class="lineno">  502</span> </div>
+</div><!-- fragment --><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classvhdl__dox__filter_1_1_doxygen_generator_a11e5601bf468551461af80d4b702724e_icgraph.svg" width="256" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
+<a id="addf9b6635a43fa9df61a6c11bf8daf04" name="addf9b6635a43fa9df61a6c11bf8daf04"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#addf9b6635a43fa9df61a6c11bf8daf04">&#9670;&#160;</a></span>_port_table()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"> str _port_table </td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">list[Port]</td>          <td class="paramname"><span class="paramname"><em>ports</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="vhdl__dox__filter_8py_source.html#l00473">473</a> of file <a class="el" href="vhdl__dox__filter_8py_source.html">vhdl_dox_filter.py</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  473</span>    <span class="keyword">def </span>_port_table(self, ports: list[Port]) -&gt; str:</div>
+<div class="line"><span class="lineno">  474</span>        lines = [</div>
+<div class="line"><span class="lineno">  475</span>            <span class="stringliteral">&#39;--! \\par Ports&#39;</span>,</div>
+<div class="line"><span class="lineno">  476</span>            <span class="stringliteral">&#39;--! | Name | Direction | Type | Default | Description |&#39;</span>,</div>
+<div class="line"><span class="lineno">  477</span>            <span class="stringliteral">&#39;--! |------|:---------:|------|---------|-------------|&#39;</span>,</div>
+<div class="line"><span class="lineno">  478</span>        ]</div>
+<div class="line"><span class="lineno">  479</span>        <span class="keywordflow">for</span> p <span class="keywordflow">in</span> ports:</div>
+<div class="line"><span class="lineno">  480</span>            default = f<span class="stringliteral">&#39;`{p.default}`&#39;</span> <span class="keywordflow">if</span> p.default <span class="keywordflow">else</span> <span class="stringliteral">&#39;—&#39;</span></div>
+<div class="line"><span class="lineno">  481</span>            comment = p.comment <span class="keywordflow">or</span> <span class="stringliteral">&#39;&#39;</span></div>
+<div class="line"><span class="lineno">  482</span>            lines.append(</div>
+<div class="line"><span class="lineno">  483</span>                f<span class="stringliteral">&#39;--! | `{p.name}` | `{p.direction}` | `{p.type_str}` | {default} | {comment} |&#39;</span></div>
+<div class="line"><span class="lineno">  484</span>            )</div>
+<div class="line"><span class="lineno">  485</span>        lines.append(<span class="stringliteral">&#39;--!&#39;</span>)</div>
+<div class="line"><span class="lineno">  486</span>        <span class="keywordflow">return</span> <span class="stringliteral">&#39;\n&#39;</span>.join(lines)</div>
+<div class="line"><span class="lineno">  487</span> </div>
+</div><!-- fragment --><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classvhdl__dox__filter_1_1_doxygen_generator_addf9b6635a43fa9df61a6c11bf8daf04_icgraph.svg" width="234" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
+<a id="aa033fdb0321759f39b0fd093c3a3b36e" name="aa033fdb0321759f39b0fd093c3a3b36e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa033fdb0321759f39b0fd093c3a3b36e">&#9670;&#160;</a></span>_signal_table()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"> str _signal_table </td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">list[Signal]</td>          <td class="paramname"><span class="paramname"><em>signals</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="vhdl__dox__filter_8py_source.html#l00503">503</a> of file <a class="el" href="vhdl__dox__filter_8py_source.html">vhdl_dox_filter.py</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  503</span>    <span class="keyword">def </span>_signal_table(self, signals: list[Signal]) -&gt; str:</div>
+<div class="line"><span class="lineno">  504</span>        lines = [</div>
+<div class="line"><span class="lineno">  505</span>            <span class="stringliteral">&#39;--! \\par Internal Signals&#39;</span>,</div>
+<div class="line"><span class="lineno">  506</span>            <span class="stringliteral">&#39;--! | Name | Type | Default | Description |&#39;</span>,</div>
+<div class="line"><span class="lineno">  507</span>            <span class="stringliteral">&#39;--! |------|------|---------|-------------|&#39;</span>,</div>
+<div class="line"><span class="lineno">  508</span>        ]</div>
+<div class="line"><span class="lineno">  509</span>        <span class="keywordflow">for</span> s <span class="keywordflow">in</span> signals:</div>
+<div class="line"><span class="lineno">  510</span>            default = f<span class="stringliteral">&#39;`{s.default}`&#39;</span> <span class="keywordflow">if</span> s.default <span class="keywordflow">else</span> <span class="stringliteral">&#39;—&#39;</span></div>
+<div class="line"><span class="lineno">  511</span>            comment = s.comment <span class="keywordflow">or</span> <span class="stringliteral">&#39;&#39;</span></div>
+<div class="line"><span class="lineno">  512</span>            lines.append(</div>
+<div class="line"><span class="lineno">  513</span>                f<span class="stringliteral">&#39;--! | `{s.name}` | `{s.type_str}` | {default} | {comment} |&#39;</span></div>
+<div class="line"><span class="lineno">  514</span>            )</div>
+<div class="line"><span class="lineno">  515</span>        lines.append(<span class="stringliteral">&#39;--!&#39;</span>)</div>
+<div class="line"><span class="lineno">  516</span>        <span class="keywordflow">return</span> <span class="stringliteral">&#39;\n&#39;</span>.join(lines)</div>
+<div class="line"><span class="lineno">  517</span> </div>
+</div><!-- fragment --><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classvhdl__dox__filter_1_1_doxygen_generator_aa033fdb0321759f39b0fd093c3a3b36e_icgraph.svg" width="247" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
+<a id="a2c3eef88b1226c8877bd1252383de3f9" name="a2c3eef88b1226c8877bd1252383de3f9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c3eef88b1226c8877bd1252383de3f9">&#9670;&#160;</a></span>generate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> str generate </td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">VhdlEntity</td>          <td class="paramname"><span class="paramname"><em>entity</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool </td>          <td class="paramname"><span class="paramname"><em>existing_uml</em></span><span class="paramdefsep"> = </span><span class="paramdefval">False</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool </td>          <td class="paramname"><span class="paramname"><em>fsm_show_actions</em></span><span class="paramdefsep"> = </span><span class="paramdefval">False</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="vhdl__dox__filter_8py_source.html#l00444">444</a> of file <a class="el" href="vhdl__dox__filter_8py_source.html">vhdl_dox_filter.py</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  444</span>    <span class="keyword">def </span>generate(self, entity: VhdlEntity, existing_uml: bool = <span class="keyword">False</span>, fsm_show_actions: bool = <span class="keyword">False</span>) -&gt; str:</div>
+<div class="line"><span class="lineno">  445</span>        blocks = []</div>
+<div class="line"><span class="lineno">  446</span> </div>
+<div class="line"><span class="lineno">  447</span>        <span class="keywordflow">if</span> entity.generics:</div>
+<div class="line"><span class="lineno">  448</span>            blocks.append(self._generic_table(entity.generics))</div>
+<div class="line"><span class="lineno">  449</span> </div>
+<div class="line"><span class="lineno">  450</span>        <span class="keywordflow">if</span> entity.ports:</div>
+<div class="line"><span class="lineno">  451</span>            blocks.append(self._port_table(entity.ports))</div>
+<div class="line"><span class="lineno">  452</span>        </div>
+<div class="line"><span class="lineno">  453</span>        <span class="keywordflow">if</span> <span class="keywordflow">not</span> existing_uml:</div>
+<div class="line"><span class="lineno">  454</span>            <span class="comment"># Descomentar la siguiete línea y comentar la que está activa para UML similar a TEROSHDL</span></div>
+<div class="line"><span class="lineno">  455</span>            blocks.append(self._entity_diagram2(entity))</div>
+<div class="line"><span class="lineno">  456</span>            <span class="comment"># blocks.append(self._entity_diagram(entity))</span></div>
+<div class="line"><span class="lineno">  457</span> </div>
+<div class="line"><span class="lineno">  458</span>        <span class="keywordflow">if</span> entity.signals:</div>
+<div class="line"><span class="lineno">  459</span>            visible_signals = [s <span class="keywordflow">for</span> s <span class="keywordflow">in</span> entity.signals <span class="keywordflow">if</span> <span class="stringliteral">&#39;next&#39;</span> <span class="keywordflow">not</span> <span class="keywordflow">in</span> s.name.lower()]</div>
+<div class="line"><span class="lineno">  460</span>            <span class="keywordflow">if</span> visible_signals:</div>
+<div class="line"><span class="lineno">  461</span>                blocks.append(self._signal_table(visible_signals))</div>
+<div class="line"><span class="lineno">  462</span> </div>
+<div class="line"><span class="lineno">  463</span>        <span class="keywordflow">if</span> entity.constants:</div>
+<div class="line"><span class="lineno">  464</span>            blocks.append(self._constant_table(entity.constants))</div>
+<div class="line"><span class="lineno">  465</span> </div>
+<div class="line"><span class="lineno">  466</span>        <span class="keywordflow">if</span> entity.fsm_transitions:</div>
+<div class="line"><span class="lineno">  467</span>            blocks.append(self._fsm_diagram(entity, fsm_show_actions))</div>
+<div class="line"><span class="lineno">  468</span> </div>
+<div class="line"><span class="lineno">  469</span>        <span class="keywordflow">return</span> <span class="stringliteral">&#39;\n&#39;</span>.join(blocks) + <span class="stringliteral">&#39;\n&#39;</span></div>
+<div class="line"><span class="lineno">  470</span> </div>
+</div><!-- fragment --><div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classvhdl__dox__filter_1_1_doxygen_generator_a2c3eef88b1226c8877bd1252383de3f9_cgraph.svg" width="275" height="283"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
+<hr/>The documentation for this design unit was generated from the following file:<ul>
+<li>scripts/<a class="el" href="vhdl__dox__filter_8py_source.html">vhdl_dox_filter.py</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespacevhdl__dox__filter.html">vhdl_dox_filter</a></li><li class="navelem"><a class="el" href="classvhdl__dox__filter_1_1_doxygen_generator.html">DoxygenGenerator</a></li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.12.0 </li>
+  </ul>
+</div>
+</body>
+</html>

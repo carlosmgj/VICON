@@ -1,0 +1,933 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.12.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<!-- BEGIN opengraph metadata -->
+<meta property="og:title" content="Doxygen Awesome" />
+<meta property="og:image" content="https://repository-images.githubusercontent.com/348492097/4f16df80-88fb-11eb-9d31-4015ff22c452" />
+<meta property="og:description" content="Custom CSS theme for doxygen html-documentation with lots of customization parameters." />
+<meta property="og:url" content="https://jothepro.github.io/doxygen-awesome-css/" />
+<!-- END opengraph metadata -->
+<!-- BEGIN twitter metadata -->
+<meta name="twitter:image:src" content="https://repository-images.githubusercontent.com/348492097/4f16df80-88fb-11eb-9d31-4015ff22c452" />
+<meta name="twitter:title" content="Doxygen Awesome" />
+<meta name="twitter:description" content="Custom CSS theme for doxygen html-documentation with lots of customization parameters." />
+<!-- END twitter metadata -->
+<title>VICON: GhdlParser Class Reference</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link rel="icon" type="image/svg+xml" href="logo.drawio.svg"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="doxygen-awesome-darkmode-toggle.js"></script>
+<script type="text/javascript" src="doxygen-awesome-fragment-copy-button.js"></script>
+<script type="text/javascript" src="doxygen-awesome-paragraph-link.js"></script>
+<script type="text/javascript" src="doxygen-awesome-interactive-toc.js"></script>
+<script type="text/javascript" src="doxygen-awesome-tabs.js"></script>
+<script type="text/javascript" src="toggle-alternative-theme.js"></script>
+<script type="text/javascript">
+    DoxygenAwesomeFragmentCopyButton.init()
+    DoxygenAwesomeDarkModeToggle.init()
+    DoxygenAwesomeParagraphLink.init()
+    DoxygenAwesomeInteractiveToc.init()
+    DoxygenAwesomeTabs.init()
+</script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  extensions: ["tex2jax.js"],
+  jax: ["input/TeX","output/HTML-CSS"],
+});
+</script>
+<script type="text/javascript" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="theme-round.css" rel="stylesheet" type="text/css"/>
+<link href="theme-robot.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">
+(function() {
+    var COLLAPSE_DELAY = 3000;
+    var timer = null;
+    function collapse() {
+        document.body.classList.add('sidebar-collapsed');
+        document.body.classList.remove('sidebar-hovered');
+    }
+    function expand() {
+        document.body.classList.add('sidebar-hovered');
+    }
+    function scheduleCollapse() {
+        clearTimeout(timer);
+        timer = setTimeout(collapse, COLLAPSE_DELAY);
+    }
+    function init() {
+        var zones = ['top', 'side-nav'].map(function(id) {
+            return document.getElementById(id);
+        }).filter(Boolean);
+        if (zones.length === 0) return;
+        // Crear botón toggle
+        var btn = document.createElement('div');
+        btn.id = 'sidebar-toggle';
+        btn.title = 'Fijar/soltar sidebar';
+        btn.innerHTML = '📌';
+        document.body.appendChild(btn);
+        var disabled = localStorage.getItem('sidebar-autohide') === 'off';
+        function updateBtn() {
+            btn.innerHTML = disabled ? '📌' : '📍';
+            btn.title = disabled ? 'Activar auto-hide' : 'Desactivar auto-hide';
+            if (disabled) {
+                document.body.classList.add('sidebar-disabled');
+            } else {
+                document.body.classList.remove('sidebar-disabled');
+            }
+        }
+        btn.addEventListener('click', function() {
+            disabled = !disabled;
+            localStorage.setItem('sidebar-autohide', disabled ? 'off' : 'on');
+            updateBtn();
+            if (!disabled) scheduleCollapse();
+            else {
+                clearTimeout(timer);
+                document.body.classList.remove('sidebar-collapsed');
+                document.body.classList.add('sidebar-hovered');
+            }
+        });
+        updateBtn();
+        if (!disabled) scheduleCollapse();
+        zones.forEach(function(el) {
+            el.addEventListener('mouseenter', function() {
+                if (disabled) return;
+                clearTimeout(timer);
+                expand();
+            });
+            el.addEventListener('mouseleave', function(e) {
+                if (disabled) return;
+                var related = e.relatedTarget;
+                var stillInZone = zones.some(function(z) {
+                    return z && (z === related || z.contains(related));
+                });
+                if (!stillInZone) {
+                    scheduleCollapse();
+                }
+            });
+        });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+</script>
+<script src="wavedrom.min.js" type="text/javascript"></script>
+<script src="default.js" type="text/javascript" id="wavedrom-skin-light"></script>
+<script src="dark.js" type="text/javascript" id="wavedrom-skin-dark"></script>
+<script type="text/javascript">
+function updateWaveDromSkin() {
+    var isDark = document.documentElement.classList.contains('dark-mode');
+    document.getElementById('wavedrom-skin-light').disabled = isDark;
+    document.getElementById('wavedrom-skin-dark').disabled = !isDark;
+    if (typeof WaveDrom !== 'undefined') WaveDrom.ProcessAll();
+}
+document.addEventListener('DOMContentLoaded', function() {
+    updateWaveDromSkin();
+    new MutationObserver(function() {
+        updateWaveDromSkin();
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+});
+</script>
+</head>
+<body>
+<!-- github-corner -->
+<a href="https://github.com/carlosmgj/VICON" class="github-corner" title="View source on Gitea" target="_blank" rel="noopener noreferrer">
+    <svg viewBox="0 0 250 250" width="40" height="40" style="position: absolute; top: 0; border: 0; right: 0; z-index: 99;" aria-hidden="true">
+    <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+<div id="top">
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">VICON
+   &#160;<span id="projectnumber">v1.0</span>
+   </div>
+   <div id="projectbrief">Sistema de Visión configurable</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+<div id="theme-selection">
+ <label for="theme-select">Theme:</label>
+ <select id="theme-select">
+  <option value="theme-default">Default</option>
+  <option value="theme-round">Round</option>
+  <option value="theme-robot">Robot</option>
+ </select>
+</div>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.12.0 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() { codefold.init(0); });
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','Search',true);
+  $(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function(){initNavTree('classvhdl__dox__filter_1_1_ghdl_parser.html',''); initResizable(true); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pro-methods">Protected Member Functions</a> &#124;
+<a href="#pro-attribs">Protected Attributes</a> &#124;
+<a href="classvhdl__dox__filter_1_1_ghdl_parser-members.html">List of all members</a>  </div>
+  <div class="headertitle"><div class="title">GhdlParser Class Reference</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>Parsea un fichero VHDL con pyGHDL y devuelve un <a class="el" href="classvhdl__dox__filter_1_1_vhdl_entity.html">VhdlEntity</a>.  
+ <a href="#details">More...</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
+Protected Member Functions</h2></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
+Protected Attributes</h2></td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Parsea un fichero VHDL con pyGHDL y devuelve un <a class="el" href="classvhdl__dox__filter_1_1_vhdl_entity.html">VhdlEntity</a>. </p>
+<p>Si pyGHDL no está disponible lanza ImportError. </p>
+
+<p class="definition">Definition at line <a class="el" href="vhdl__dox__filter_8py_source.html#l00140">140</a> of file <a class="el" href="vhdl__dox__filter_8py_source.html">vhdl_dox_filter.py</a>.</p>
+</div><h2 class="groupheader">Member Function/Procedure/Process Documentation</h2>
+<a id="aa675902fc0196418a11e58332c2ff07a" name="aa675902fc0196418a11e58332c2ff07a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa675902fc0196418a11e58332c2ff07a">&#9670;&#160;</a></span>_collect_pointer_values()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">_collect_pointer_values </td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>statements</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>pointer_names</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>known_states</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>SequentialSimpleSignalAssignment</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>IfStatement</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Recorre todo el código buscando asignaciones a señales puntero para recoger todos sus posibles valores. </p>
+
+<p class="definition">Definition at line <a class="el" href="vhdl__dox__filter_8py_source.html#l00411">411</a> of file <a class="el" href="vhdl__dox__filter_8py_source.html">vhdl_dox_filter.py</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  412</span>                                 SequentialSimpleSignalAssignment, IfStatement):</div>
+<div class="line"><span class="lineno">  413</span>        <span class="stringliteral">&quot;&quot;&quot;</span></div>
+<div class="line"><span class="lineno">  414</span><span class="stringliteral">        Recorre todo el código buscando asignaciones a señales puntero</span></div>
+<div class="line"><span class="lineno">  415</span><span class="stringliteral">        para recoger todos sus posibles valores.</span></div>
+<div class="line"><span class="lineno">  416</span><span class="stringliteral">        &quot;&quot;&quot;</span></div>
+<div class="line"><span class="lineno">  417</span>        values = {p: [] <span class="keywordflow">for</span> p <span class="keywordflow">in</span> pointer_names}</div>
+<div class="line"><span class="lineno">  418</span>    </div>
+<div class="line"><span class="lineno">  419</span>        <span class="keyword">def </span>search(stmts):</div>
+<div class="line"><span class="lineno">  420</span>            <span class="keywordflow">for</span> s <span class="keywordflow">in</span> stmts:</div>
+<div class="line"><span class="lineno">  421</span>                <span class="keywordflow">if</span> isinstance(s, SequentialSimpleSignalAssignment):</div>
+<div class="line"><span class="lineno">  422</span>                    target = _clean(str(s.Target)).lower()</div>
+<div class="line"><span class="lineno">  423</span>                    <span class="keywordflow">if</span> target <span class="keywordflow">in</span> pointer_names:</div>
+<div class="line"><span class="lineno">  424</span>                        <span class="keywordflow">for</span> wave <span class="keywordflow">in</span> s.Waveform:</div>
+<div class="line"><span class="lineno">  425</span>                            val = _clean(str(wave.Expression))</div>
+<div class="line"><span class="lineno">  426</span>                            <span class="keywordflow">if</span> known_states <span class="keywordflow">and</span> val.lower() <span class="keywordflow">in</span> known_states:</div>
+<div class="line"><span class="lineno">  427</span>                                <span class="keywordflow">if</span> val <span class="keywordflow">not</span> <span class="keywordflow">in</span> values[target]:</div>
+<div class="line"><span class="lineno">  428</span>                                    values[target].append(val)</div>
+<div class="line"><span class="lineno">  429</span>                <span class="keywordflow">elif</span> isinstance(s, IfStatement):</div>
+<div class="line"><span class="lineno">  430</span>                    search(getattr(s.IfBranch, <span class="stringliteral">&#39;Statements&#39;</span>, []))</div>
+<div class="line"><span class="lineno">  431</span>                    <span class="keywordflow">if</span> s.ElseBranch:</div>
+<div class="line"><span class="lineno">  432</span>                        search(getattr(s.ElseBranch, <span class="stringliteral">&#39;Statements&#39;</span>, []))</div>
+<div class="line"><span class="lineno">  433</span>    </div>
+<div class="line"><span class="lineno">  434</span>        <span class="keywordflow">for</span> stmt <span class="keywordflow">in</span> statements:</div>
+<div class="line"><span class="lineno">  435</span>            search(getattr(stmt, <span class="stringliteral">&#39;Statements&#39;</span>, []))</div>
+<div class="line"><span class="lineno">  436</span>    </div>
+<div class="line"><span class="lineno">  437</span>        <span class="keywordflow">return</span> values</div>
+<div class="line"><span class="lineno">  438</span><span class="comment"># ---------------------------------------------------------------------------</span></div>
+<div class="line"><span class="lineno">  439</span><span class="comment"># Generador de bloques Doxygen</span></div>
+<div class="line"><span class="lineno">  440</span><span class="comment"># ---------------------------------------------------------------------------</span></div>
+<div class="line"><span class="lineno">  441</span> </div>
+</div><!-- fragment --><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classvhdl__dox__filter_1_1_ghdl_parser_aa675902fc0196418a11e58332c2ff07a_icgraph.svg" width="447" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
+<a id="a41b23311d7a10090bb600af641b28105" name="a41b23311d7a10090bb600af641b28105"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a41b23311d7a10090bb600af641b28105">&#9670;&#160;</a></span>_extract_branch_transitions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">_extract_branch_transitions </td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>statements</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>from_state</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>state_signals</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>transitions</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>CaseStatement</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>SequentialSimpleSignalAssignment</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>IfStatement</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>condition</em></span><span class="paramdefsep"> = </span><span class="paramdefval">None</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>known_states</em></span><span class="paramdefsep"> = </span><span class="paramdefval">None</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>state_actions</em></span><span class="paramdefsep"> = </span><span class="paramdefval">None</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>pointer_uses</em></span><span class="paramdefsep"> = </span><span class="paramdefval">None</span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="vhdl__dox__filter_8py_source.html#l00348">348</a> of file <a class="el" href="vhdl__dox__filter_8py_source.html">vhdl_dox_filter.py</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  352</span>                                     state_actions=<span class="keywordtype">None</span>, pointer_uses=<span class="keywordtype">None</span>):</div>
+<div class="line"><span class="lineno">  353</span>        <span class="keywordflow">for</span> bs <span class="keywordflow">in</span> statements:</div>
+<div class="line"><span class="lineno">  354</span>            <span class="keywordflow">if</span> isinstance(bs, IfStatement):</div>
+<div class="line"><span class="lineno">  355</span>                cond = _format_condition(bs.IfBranch._condition)</div>
+<div class="line"><span class="lineno">  356</span>                self._extract_branch_transitions(</div>
+<div class="line"><span class="lineno">  357</span>                    bs.IfBranch.Statements, from_state, state_signals,</div>
+<div class="line"><span class="lineno">  358</span>                    transitions, CaseStatement,</div>
+<div class="line"><span class="lineno">  359</span>                    SequentialSimpleSignalAssignment, IfStatement,</div>
+<div class="line"><span class="lineno">  360</span>                    condition=cond, known_states=known_states,</div>
+<div class="line"><span class="lineno">  361</span>                    state_actions=state_actions, pointer_uses=pointer_uses</div>
+<div class="line"><span class="lineno">  362</span>                )</div>
+<div class="line"><span class="lineno">  363</span>                <span class="comment"># ElsIf branches</span></div>
+<div class="line"><span class="lineno">  364</span>                <span class="keywordflow">for</span> elsif <span class="keywordflow">in</span> getattr(bs, <span class="stringliteral">&#39;ElsIfBranches&#39;</span>, []) <span class="keywordflow">or</span> []:</div>
+<div class="line"><span class="lineno">  365</span>                    elsif_cond = _format_condition(elsif._condition)</div>
+<div class="line"><span class="lineno">  366</span>                    self._extract_branch_transitions(</div>
+<div class="line"><span class="lineno">  367</span>                        getattr(elsif, <span class="stringliteral">&#39;Statements&#39;</span>, []), from_state, state_signals,</div>
+<div class="line"><span class="lineno">  368</span>                        transitions, CaseStatement,</div>
+<div class="line"><span class="lineno">  369</span>                        SequentialSimpleSignalAssignment, IfStatement,</div>
+<div class="line"><span class="lineno">  370</span>                        condition=elsif_cond, known_states=known_states,</div>
+<div class="line"><span class="lineno">  371</span>                        state_actions=state_actions, pointer_uses=pointer_uses</div>
+<div class="line"><span class="lineno">  372</span>                    )</div>
+<div class="line"><span class="lineno">  373</span>                <span class="comment"># Else branch</span></div>
+<div class="line"><span class="lineno">  374</span>                <span class="keywordflow">if</span> bs.ElseBranch:</div>
+<div class="line"><span class="lineno">  375</span>                    self._extract_branch_transitions(</div>
+<div class="line"><span class="lineno">  376</span>                        bs.ElseBranch.Statements, from_state, state_signals,</div>
+<div class="line"><span class="lineno">  377</span>                        transitions, CaseStatement,</div>
+<div class="line"><span class="lineno">  378</span>                        SequentialSimpleSignalAssignment, IfStatement,</div>
+<div class="line"><span class="lineno">  379</span>                        condition=f<span class="stringliteral">&#39;not ({cond})&#39;</span>, known_states=known_states,</div>
+<div class="line"><span class="lineno">  380</span>                        state_actions=state_actions, pointer_uses=pointer_uses</div>
+<div class="line"><span class="lineno">  381</span>                    )</div>
+<div class="line"><span class="lineno">  382</span>    </div>
+<div class="line"><span class="lineno">  383</span>            <span class="keywordflow">elif</span> isinstance(bs, SequentialSimpleSignalAssignment):</div>
+<div class="line"><span class="lineno">  384</span>                target = _clean(str(bs.Target)).lower()</div>
+<div class="line"><span class="lineno">  385</span>                <span class="keywordflow">if</span> any(sig <span class="keywordflow">in</span> target <span class="keywordflow">for</span> sig <span class="keywordflow">in</span> state_signals):</div>
+<div class="line"><span class="lineno">  386</span>                    <span class="keywordflow">for</span> wave <span class="keywordflow">in</span> bs.Waveform:</div>
+<div class="line"><span class="lineno">  387</span>                        to_state = _clean(str(wave.Expression))</div>
+<div class="line"><span class="lineno">  388</span>                        <span class="keywordflow">if</span> to_state.upper() <span class="keywordflow">in</span> (<span class="stringliteral">&#39;OTHERS&#39;</span>, <span class="stringliteral">&#39;NULL&#39;</span>, <span class="stringliteral">&#39;&#39;</span>):</div>
+<div class="line"><span class="lineno">  389</span>                            <span class="keywordflow">continue</span></div>
+<div class="line"><span class="lineno">  390</span>                        <span class="keywordflow">if</span> known_states <span class="keywordflow">and</span> to_state.lower() <span class="keywordflow">not</span> <span class="keywordflow">in</span> known_states:</div>
+<div class="line"><span class="lineno">  391</span>                            <span class="keywordflow">if</span> pointer_uses <span class="keywordflow">is</span> <span class="keywordflow">not</span> <span class="keywordtype">None</span>:</div>
+<div class="line"><span class="lineno">  392</span>                                key = to_state</div>
+<div class="line"><span class="lineno">  393</span>                                <span class="keywordflow">if</span> key <span class="keywordflow">not</span> <span class="keywordflow">in</span> pointer_uses:</div>
+<div class="line"><span class="lineno">  394</span>                                    pointer_uses[key] = []</div>
+<div class="line"><span class="lineno">  395</span>                                <span class="keywordflow">if</span> from_state <span class="keywordflow">not</span> <span class="keywordflow">in</span> pointer_uses[key]:</div>
+<div class="line"><span class="lineno">  396</span>                                    pointer_uses[key].append(from_state)</div>
+<div class="line"><span class="lineno">  397</span>                            <span class="keywordflow">continue</span></div>
+<div class="line"><span class="lineno">  398</span>                        transitions.append(FsmTransition(</div>
+<div class="line"><span class="lineno">  399</span>                            from_state=from_state,</div>
+<div class="line"><span class="lineno">  400</span>                            to_state=to_state,</div>
+<div class="line"><span class="lineno">  401</span>                            condition=condition,</div>
+<div class="line"><span class="lineno">  402</span>                        ))</div>
+<div class="line"><span class="lineno">  403</span>                <span class="keywordflow">else</span>:</div>
+<div class="line"><span class="lineno">  404</span>                    <span class="keywordflow">if</span> state_actions <span class="keywordflow">is</span> <span class="keywordflow">not</span> <span class="keywordtype">None</span> <span class="keywordflow">and</span> from_state <span class="keywordflow">not</span> <span class="keywordflow">in</span> [<span class="keywordtype">None</span>, <span class="stringliteral">&#39;&#39;</span>]:</div>
+<div class="line"><span class="lineno">  405</span>                        <span class="keywordflow">for</span> wave <span class="keywordflow">in</span> bs.Waveform:</div>
+<div class="line"><span class="lineno">  406</span>                            value = _clean(str(wave.Expression))</div>
+<div class="line"><span class="lineno">  407</span>                            action = f<span class="stringliteral">&#39;{_clean(str(bs.Target))} &lt;= {value}&#39;</span></div>
+<div class="line"><span class="lineno">  408</span>                            <span class="keywordflow">if</span> action <span class="keywordflow">not</span> <span class="keywordflow">in</span> state_actions:</div>
+<div class="line"><span class="lineno">  409</span>                                state_actions.append(action)</div>
+<div class="line"><span class="lineno">  410</span> </div>
+</div><!-- fragment --><div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classvhdl__dox__filter_1_1_ghdl_parser_a41b23311d7a10090bb600af641b28105_cgraph.svg" width="214" height="60"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classvhdl__dox__filter_1_1_ghdl_parser_a41b23311d7a10090bb600af641b28105_icgraph.svg" width="475" height="60"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
+<a id="aeabac43510d2f524adf4d01b91e61752" name="aeabac43510d2f524adf4d01b91e61752"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeabac43510d2f524adf4d01b91e61752">&#9670;&#160;</a></span>_extract_fsm()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">_extract_fsm </td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>statements</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>state_signals</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>known_states</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>CaseStatement</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>SequentialSimpleSignalAssignment</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>IfStatement</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="vhdl__dox__filter_8py_source.html#l00261">261</a> of file <a class="el" href="vhdl__dox__filter_8py_source.html">vhdl_dox_filter.py</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  262</span>                     CaseStatement, SequentialSimpleSignalAssignment, IfStatement):</div>
+<div class="line"><span class="lineno">  263</span>        transitions = []</div>
+<div class="line"><span class="lineno">  264</span>        fsm_states_dict = {}</div>
+<div class="line"><span class="lineno">  265</span>        pointer_uses = {}</div>
+<div class="line"><span class="lineno">  266</span> </div>
+<div class="line"><span class="lineno">  267</span> </div>
+<div class="line"><span class="lineno">  268</span>        <span class="keywordflow">for</span> stmt <span class="keywordflow">in</span> statements:</div>
+<div class="line"><span class="lineno">  269</span>            proc_stmts = getattr(stmt, <span class="stringliteral">&#39;Statements&#39;</span>, [])</div>
+<div class="line"><span class="lineno">  270</span>            case_stmts = self._find_case_statements(proc_stmts, CaseStatement, IfStatement)</div>
+<div class="line"><span class="lineno">  271</span>    </div>
+<div class="line"><span class="lineno">  272</span>            <span class="keywordflow">for</span> case_stmt <span class="keywordflow">in</span> case_stmts:</div>
+<div class="line"><span class="lineno">  273</span>                case_expr = _clean(str(case_stmt._expression)).lower()</div>
+<div class="line"><span class="lineno">  274</span>                <span class="keywordflow">if</span> <span class="keywordflow">not</span> any(sig <span class="keywordflow">in</span> case_expr <span class="keywordflow">for</span> sig <span class="keywordflow">in</span> state_signals):</div>
+<div class="line"><span class="lineno">  275</span>                    <span class="keywordflow">continue</span></div>
+<div class="line"><span class="lineno">  276</span>    </div>
+<div class="line"><span class="lineno">  277</span>                <span class="keywordflow">for</span> branch <span class="keywordflow">in</span> case_stmt.Cases:</div>
+<div class="line"><span class="lineno">  278</span>                    choices = getattr(branch, <span class="stringliteral">&#39;Choices&#39;</span>, [])</div>
+<div class="line"><span class="lineno">  279</span>                    <span class="keywordflow">if</span> <span class="keywordflow">not</span> choices:</div>
+<div class="line"><span class="lineno">  280</span>                        <span class="keywordflow">continue</span></div>
+<div class="line"><span class="lineno">  281</span>                    from_state = _clean(str(choices[0].Expression))</div>
+<div class="line"><span class="lineno">  282</span>                    <span class="keywordflow">if</span> from_state.upper() <span class="keywordflow">in</span> (<span class="stringliteral">&#39;OTHERS&#39;</span>, <span class="stringliteral">&#39;NULL&#39;</span>, <span class="stringliteral">&#39;&#39;</span>):</div>
+<div class="line"><span class="lineno">  283</span>                        <span class="keywordflow">continue</span></div>
+<div class="line"><span class="lineno">  284</span>    </div>
+<div class="line"><span class="lineno">  285</span>                    state_actions = []</div>
+<div class="line"><span class="lineno">  286</span>                    fsm_states_dict[from_state] = state_actions</div>
+<div class="line"><span class="lineno">  287</span>    </div>
+<div class="line"><span class="lineno">  288</span>                    self._extract_branch_transitions(</div>
+<div class="line"><span class="lineno">  289</span>                        branch.Statements, from_state, state_signals,</div>
+<div class="line"><span class="lineno">  290</span>                        transitions, CaseStatement,</div>
+<div class="line"><span class="lineno">  291</span>                        SequentialSimpleSignalAssignment, IfStatement,</div>
+<div class="line"><span class="lineno">  292</span>                        known_states=known_states,</div>
+<div class="line"><span class="lineno">  293</span>                        state_actions=state_actions,</div>
+<div class="line"><span class="lineno">  294</span>                        pointer_uses=pointer_uses</div>
+<div class="line"><span class="lineno">  295</span>                    )</div>
+<div class="line"><span class="lineno">  296</span>        <span class="comment"># Recoger valores posibles de cada puntero</span></div>
+<div class="line"><span class="lineno">  297</span>        pointer_values = {}</div>
+<div class="line"><span class="lineno">  298</span>        <span class="keywordflow">if</span> pointer_uses:</div>
+<div class="line"><span class="lineno">  299</span>            pointer_values = self._collect_pointer_values(</div>
+<div class="line"><span class="lineno">  300</span>                statements, </div>
+<div class="line"><span class="lineno">  301</span>                {k.lower() <span class="keywordflow">for</span> k <span class="keywordflow">in</span> pointer_uses.keys()},</div>
+<div class="line"><span class="lineno">  302</span>                known_states,</div>
+<div class="line"><span class="lineno">  303</span>                SequentialSimpleSignalAssignment, IfStatement</div>
+<div class="line"><span class="lineno">  304</span>            )</div>
+<div class="line"><span class="lineno">  305</span>        </div>
+<div class="line"><span class="lineno">  306</span>        self._last_fsm_pointers = [</div>
+<div class="line"><span class="lineno">  307</span>            FsmPointer(</div>
+<div class="line"><span class="lineno">  308</span>                name=ptr_name,</div>
+<div class="line"><span class="lineno">  309</span>                used_from=used_from,</div>
+<div class="line"><span class="lineno">  310</span>                possible_values=pointer_values.get(ptr_name.lower(), [])</div>
+<div class="line"><span class="lineno">  311</span>            )</div>
+<div class="line"><span class="lineno">  312</span>            <span class="keywordflow">for</span> ptr_name, used_from <span class="keywordflow">in</span> pointer_uses.items()</div>
+<div class="line"><span class="lineno">  313</span>        ]</div>
+<div class="line"><span class="lineno">  314</span>        self._last_fsm_states = [</div>
+<div class="line"><span class="lineno">  315</span>            FsmState(name=name, actions=actions)</div>
+<div class="line"><span class="lineno">  316</span>            <span class="keywordflow">for</span> name, actions <span class="keywordflow">in</span> fsm_states_dict.items()</div>
+<div class="line"><span class="lineno">  317</span>        ]</div>
+<div class="line"><span class="lineno">  318</span> </div>
+<div class="line"><span class="lineno">  319</span>        <span class="comment"># Deduplicar transiciones</span></div>
+<div class="line"><span class="lineno">  320</span>        seen = set()</div>
+<div class="line"><span class="lineno">  321</span>        unique_transitions = []</div>
+<div class="line"><span class="lineno">  322</span>        <span class="keywordflow">for</span> tr <span class="keywordflow">in</span> transitions:</div>
+<div class="line"><span class="lineno">  323</span>            key = (tr.from_state, tr.to_state, tr.condition)</div>
+<div class="line"><span class="lineno">  324</span>            <span class="keywordflow">if</span> key <span class="keywordflow">not</span> <span class="keywordflow">in</span> seen:</div>
+<div class="line"><span class="lineno">  325</span>                seen.add(key)</div>
+<div class="line"><span class="lineno">  326</span>                unique_transitions.append(tr)</div>
+<div class="line"><span class="lineno">  327</span>        transitions = unique_transitions</div>
+<div class="line"><span class="lineno">  328</span> </div>
+<div class="line"><span class="lineno">  329</span>        <span class="keywordflow">return</span> transitions</div>
+<div class="line"><span class="lineno">  330</span> </div>
+</div><!-- fragment --><div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classvhdl__dox__filter_1_1_ghdl_parser_aeabac43510d2f524adf4d01b91e61752_cgraph.svg" width="368" height="183"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classvhdl__dox__filter_1_1_ghdl_parser_aeabac43510d2f524adf4d01b91e61752_icgraph.svg" width="224" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
+<a id="a7d46ea7fa11a6a571ee63b99f50459e2" name="a7d46ea7fa11a6a571ee63b99f50459e2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7d46ea7fa11a6a571ee63b99f50459e2">&#9670;&#160;</a></span>_find_case_statements()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">_find_case_statements </td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>statements</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>CaseStatement</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>IfStatement</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Busca CaseStatements recursivamente en cualquier nivel de anidamiento. </p>
+
+<p class="definition">Definition at line <a class="el" href="vhdl__dox__filter_8py_source.html#l00331">331</a> of file <a class="el" href="vhdl__dox__filter_8py_source.html">vhdl_dox_filter.py</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  331</span>    <span class="keyword">def </span>_find_case_statements(self, statements, CaseStatement, IfStatement):</div>
+<div class="line"><span class="lineno">  332</span>        <span class="stringliteral">&quot;&quot;&quot;Busca CaseStatements recursivamente en cualquier nivel de anidamiento.&quot;&quot;&quot;</span></div>
+<div class="line"><span class="lineno">  333</span>        result = []</div>
+<div class="line"><span class="lineno">  334</span>        <span class="keywordflow">for</span> s <span class="keywordflow">in</span> statements:</div>
+<div class="line"><span class="lineno">  335</span>            <span class="keywordflow">if</span> isinstance(s, CaseStatement):</div>
+<div class="line"><span class="lineno">  336</span>                result.append(s)</div>
+<div class="line"><span class="lineno">  337</span>            <span class="keywordflow">elif</span> isinstance(s, IfStatement):</div>
+<div class="line"><span class="lineno">  338</span>                <span class="keywordflow">for</span> branch <span class="keywordflow">in</span> [s.IfBranch] + list(getattr(s, <span class="stringliteral">&#39;ElsIfBranches&#39;</span>, []) <span class="keywordflow">or</span> []):</div>
+<div class="line"><span class="lineno">  339</span>                    result.extend(self._find_case_statements(</div>
+<div class="line"><span class="lineno">  340</span>                        getattr(branch, <span class="stringliteral">&#39;Statements&#39;</span>, []), CaseStatement, IfStatement</div>
+<div class="line"><span class="lineno">  341</span>                    ))</div>
+<div class="line"><span class="lineno">  342</span>                <span class="keywordflow">if</span> s.ElseBranch:</div>
+<div class="line"><span class="lineno">  343</span>                    result.extend(self._find_case_statements(</div>
+<div class="line"><span class="lineno">  344</span>                        getattr(s.ElseBranch, <span class="stringliteral">&#39;Statements&#39;</span>, []), CaseStatement, IfStatement</div>
+<div class="line"><span class="lineno">  345</span>                    ))</div>
+<div class="line"><span class="lineno">  346</span>        <span class="keywordflow">return</span> result</div>
+<div class="line"><span class="lineno">  347</span> </div>
+</div><!-- fragment --><div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classvhdl__dox__filter_1_1_ghdl_parser_a7d46ea7fa11a6a571ee63b99f50459e2_cgraph.svg" width="182" height="60"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classvhdl__dox__filter_1_1_ghdl_parser_a7d46ea7fa11a6a571ee63b99f50459e2_icgraph.svg" width="443" height="60"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
+<a id="ae802864abb52b172da0cc2a364d2c7fa" name="ae802864abb52b172da0cc2a364d2c7fa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae802864abb52b172da0cc2a364d2c7fa">&#9670;&#160;</a></span>parse()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> Optional[VhdlEntity] parse </td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Path</td>          <td class="paramname"><span class="paramname"><em>path</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str</td>          <td class="paramname"><span class="paramname"><em>source</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="vhdl__dox__filter_8py_source.html#l00146">146</a> of file <a class="el" href="vhdl__dox__filter_8py_source.html">vhdl_dox_filter.py</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  146</span>    <span class="keyword">def </span>parse(self, path: Path, source: str) -&gt; Optional[VhdlEntity]:</div>
+<div class="line"><span class="lineno">  147</span>        <span class="keyword">from</span> pyGHDL.dom.NonStandard <span class="keyword">import</span> Document</div>
+<div class="line"><span class="lineno">  148</span>        <span class="keyword">from</span> pyGHDL.dom.Object <span class="keyword">import</span> Signal <span class="keyword">as</span> GhdlSignal, Constant <span class="keyword">as</span> GhdlConstant</div>
+<div class="line"><span class="lineno">  149</span>        <span class="keyword">from</span> pyGHDL.dom.Type <span class="keyword">import</span> EnumeratedType</div>
+<div class="line"><span class="lineno">  150</span>        <span class="keyword">from</span> pyGHDL.dom.Concurrent <span class="keyword">import</span> ProcessStatement</div>
+<div class="line"><span class="lineno">  151</span>        <span class="keyword">from</span> pyGHDL.dom.Sequential <span class="keyword">import</span> (</div>
+<div class="line"><span class="lineno">  152</span>            CaseStatement,</div>
+<div class="line"><span class="lineno">  153</span>            SequentialSimpleSignalAssignment,</div>
+<div class="line"><span class="lineno">  154</span>            IfStatement,</div>
+<div class="line"><span class="lineno">  155</span>        )</div>
+<div class="line"><span class="lineno">  156</span>        <span class="comment"># pyGHDL necesita UTF-8 — si el fichero es UTF-16 lo convertimos</span></div>
+<div class="line"><span class="lineno">  157</span>        raw = path.read_bytes()</div>
+<div class="line"><span class="lineno">  158</span>        tmp = <span class="keywordtype">None</span></div>
+<div class="line"><span class="lineno">  159</span>        parse_path = path</div>
+<div class="line"><span class="lineno">  160</span>        <span class="keywordflow">if</span> raw[:2] <span class="keywordflow">in</span> (b<span class="stringliteral">&#39;\xff\xfe&#39;</span>, b<span class="stringliteral">&#39;\xfe\xff&#39;</span>):</div>
+<div class="line"><span class="lineno">  161</span>            tmp = tempfile.NamedTemporaryFile(suffix=<span class="stringliteral">&#39;.vhd&#39;</span>, delete=<span class="keyword">False</span>,</div>
+<div class="line"><span class="lineno">  162</span>                                            mode=<span class="stringliteral">&#39;w&#39;</span>, encoding=<span class="stringliteral">&#39;utf-8&#39;</span>)</div>
+<div class="line"><span class="lineno">  163</span>            tmp.write(source)</div>
+<div class="line"><span class="lineno">  164</span>            tmp.close()</div>
+<div class="line"><span class="lineno">  165</span>            parse_path = Path(tmp.name)</div>
+<div class="line"><span class="lineno">  166</span>        <span class="keywordflow">try</span>:</div>
+<div class="line"><span class="lineno">  167</span>            doc = Document(path)</div>
+<div class="line"><span class="lineno">  168</span>        <span class="keywordflow">except</span> Exception <span class="keyword">as</span> e:</div>
+<div class="line"><span class="lineno">  169</span>            print(f<span class="stringliteral">&quot;[vhdl_dox_filter] pyGHDL error en {path}: {e}&quot;</span>, file=sys.stderr)</div>
+<div class="line"><span class="lineno">  170</span>            <span class="keywordflow">return</span> <span class="keywordtype">None</span></div>
+<div class="line"><span class="lineno">  171</span> </div>
+<div class="line"><span class="lineno">  172</span>        <span class="keywordflow">if</span> <span class="keywordflow">not</span> doc.Entities:</div>
+<div class="line"><span class="lineno">  173</span>            <span class="keywordflow">return</span> <span class="keywordtype">None</span></div>
+<div class="line"><span class="lineno">  174</span> </div>
+<div class="line"><span class="lineno">  175</span>        comment_map = _build_comment_map(source)</div>
+<div class="line"><span class="lineno">  176</span> </div>
+<div class="line"><span class="lineno">  177</span>        <span class="comment"># Tomamos la primera entidad del fichero</span></div>
+<div class="line"><span class="lineno">  178</span>        entity_name, ghdl_entity = next(iter(doc.Entities.items()))</div>
+<div class="line"><span class="lineno">  179</span>        entity = VhdlEntity(name=_clean(entity_name))</div>
+<div class="line"><span class="lineno">  180</span> </div>
+<div class="line"><span class="lineno">  181</span>        <span class="comment"># --- Genéricos ---</span></div>
+<div class="line"><span class="lineno">  182</span>        <span class="keywordflow">for</span> g <span class="keywordflow">in</span> ghdl_entity.GenericItems:</div>
+<div class="line"><span class="lineno">  183</span>            <span class="keywordflow">for</span> ident <span class="keywordflow">in</span> g.Identifiers:</div>
+<div class="line"><span class="lineno">  184</span>                line = getattr(g, <span class="stringliteral">&#39;Position&#39;</span>, <span class="keywordtype">None</span>)</div>
+<div class="line"><span class="lineno">  185</span>                line_no = line.Line <span class="keywordflow">if</span> line <span class="keywordflow">else</span> <span class="keywordtype">None</span></div>
+<div class="line"><span class="lineno">  186</span>                entity.generics.append(Generic(</div>
+<div class="line"><span class="lineno">  187</span>                    name=_clean(ident),</div>
+<div class="line"><span class="lineno">  188</span>                    type_str=_clean(g.Subtype),</div>
+<div class="line"><span class="lineno">  189</span>                    default=_clean(g.DefaultExpression) <span class="keywordflow">if</span> g.DefaultExpression <span class="keywordflow">else</span> <span class="keywordtype">None</span>,</div>
+<div class="line"><span class="lineno">  190</span>                    comment=comment_map.get(line_no),</div>
+<div class="line"><span class="lineno">  191</span>                ))</div>
+<div class="line"><span class="lineno">  192</span> </div>
+<div class="line"><span class="lineno">  193</span>        <span class="comment"># --- Puertos ---</span></div>
+<div class="line"><span class="lineno">  194</span>        <span class="keywordflow">for</span> p <span class="keywordflow">in</span> ghdl_entity.PortItems:</div>
+<div class="line"><span class="lineno">  195</span>            <span class="keywordflow">for</span> ident <span class="keywordflow">in</span> p.Identifiers:</div>
+<div class="line"><span class="lineno">  196</span>                line = getattr(p, <span class="stringliteral">&#39;Position&#39;</span>, <span class="keywordtype">None</span>)</div>
+<div class="line"><span class="lineno">  197</span>                line_no = line.Line <span class="keywordflow">if</span> line <span class="keywordflow">else</span> <span class="keywordtype">None</span></div>
+<div class="line"><span class="lineno">  198</span>                entity.ports.append(Port(</div>
+<div class="line"><span class="lineno">  199</span>                    name=_clean(ident),</div>
+<div class="line"><span class="lineno">  200</span>                    direction=_clean(p.Mode).lower(),</div>
+<div class="line"><span class="lineno">  201</span>                    type_str=_clean(p.Subtype),</div>
+<div class="line"><span class="lineno">  202</span>                    default=_clean(p.DefaultExpression) <span class="keywordflow">if</span> p.DefaultExpression <span class="keywordflow">else</span> <span class="keywordtype">None</span>,</div>
+<div class="line"><span class="lineno">  203</span>                    comment=comment_map.get(line_no),</div>
+<div class="line"><span class="lineno">  204</span>                ))</div>
+<div class="line"><span class="lineno">  205</span> </div>
+<div class="line"><span class="lineno">  206</span>        <span class="comment"># --- Arquitectura ---</span></div>
+<div class="line"><span class="lineno">  207</span>        <span class="keywordflow">if</span> <span class="keywordflow">not</span> doc.Architectures:</div>
+<div class="line"><span class="lineno">  208</span>            <span class="keywordflow">return</span> entity</div>
+<div class="line"><span class="lineno">  209</span> </div>
+<div class="line"><span class="lineno">  210</span>        _, archs = next(iter(doc.Architectures.items()))</div>
+<div class="line"><span class="lineno">  211</span>        _, arch  = next(iter(archs.items()))</div>
+<div class="line"><span class="lineno">  212</span> </div>
+<div class="line"><span class="lineno">  213</span>        <span class="comment"># Señales y constantes en la sección declarativa</span></div>
+<div class="line"><span class="lineno">  214</span>        <span class="keywordflow">for</span> item <span class="keywordflow">in</span> arch.DeclaredItems:</div>
+<div class="line"><span class="lineno">  215</span>            line = getattr(item, <span class="stringliteral">&#39;Position&#39;</span>, <span class="keywordtype">None</span>)</div>
+<div class="line"><span class="lineno">  216</span>            line_no = line.Line <span class="keywordflow">if</span> line <span class="keywordflow">else</span> <span class="keywordtype">None</span></div>
+<div class="line"><span class="lineno">  217</span> </div>
+<div class="line"><span class="lineno">  218</span>            <span class="keywordflow">if</span> isinstance(item, GhdlSignal):</div>
+<div class="line"><span class="lineno">  219</span>                <span class="keywordflow">for</span> ident <span class="keywordflow">in</span> item.Identifiers:</div>
+<div class="line"><span class="lineno">  220</span>                    entity.signals.append(Signal(</div>
+<div class="line"><span class="lineno">  221</span>                        name=_clean(ident),</div>
+<div class="line"><span class="lineno">  222</span>                        type_str=_clean(item.Subtype),</div>
+<div class="line"><span class="lineno">  223</span>                        default=_clean(item.DefaultExpression) <span class="keywordflow">if</span> item.DefaultExpression <span class="keywordflow">else</span> <span class="keywordtype">None</span>,</div>
+<div class="line"><span class="lineno">  224</span>                        comment=comment_map.get(line_no),</div>
+<div class="line"><span class="lineno">  225</span>                    ))</div>
+<div class="line"><span class="lineno">  226</span> </div>
+<div class="line"><span class="lineno">  227</span>            <span class="keywordflow">elif</span> isinstance(item, GhdlConstant):</div>
+<div class="line"><span class="lineno">  228</span>                <span class="keywordflow">for</span> ident <span class="keywordflow">in</span> item.Identifiers:</div>
+<div class="line"><span class="lineno">  229</span>                    entity.constants.append(Constant(</div>
+<div class="line"><span class="lineno">  230</span>                        name=_clean(ident),</div>
+<div class="line"><span class="lineno">  231</span>                        type_str=_clean(item.Subtype),</div>
+<div class="line"><span class="lineno">  232</span>                        value=_clean(item.DefaultExpression) <span class="keywordflow">if</span> item.DefaultExpression <span class="keywordflow">else</span> <span class="stringliteral">&#39;?&#39;</span>,</div>
+<div class="line"><span class="lineno">  233</span>                        comment=comment_map.get(line_no),</div>
+<div class="line"><span class="lineno">  234</span>                    ))</div>
+<div class="line"><span class="lineno">  235</span> </div>
+<div class="line"><span class="lineno">  236</span>            <span class="keywordflow">elif</span> isinstance(item, EnumeratedType):</div>
+<div class="line"><span class="lineno">  237</span>                entity.enum_types.append(EnumType(</div>
+<div class="line"><span class="lineno">  238</span>                    name=_clean(item.Identifier),</div>
+<div class="line"><span class="lineno">  239</span>                    states=[_clean(lit) <span class="keywordflow">for</span> lit <span class="keywordflow">in</span> item.Literals],</div>
+<div class="line"><span class="lineno">  240</span>                ))</div>
+<div class="line"><span class="lineno">  241</span> </div>
+<div class="line"><span class="lineno">  242</span>        <span class="comment"># --- FSM: buscar CaseStatement sobre señal de estado ---</span></div>
+<div class="line"><span class="lineno">  243</span>        enum_names = {t.name.lower() <span class="keywordflow">for</span> t <span class="keywordflow">in</span> entity.enum_types}</div>
+<div class="line"><span class="lineno">  244</span>        state_signals = {</div>
+<div class="line"><span class="lineno">  245</span>            s.name.lower() <span class="keywordflow">for</span> s <span class="keywordflow">in</span> entity.signals</div>
+<div class="line"><span class="lineno">  246</span>            <span class="keywordflow">if</span> s.type_str.lower() <span class="keywordflow">in</span> enum_names <span class="keywordflow">and</span> <span class="stringliteral">&#39;next&#39;</span> <span class="keywordflow">not</span> <span class="keywordflow">in</span> s.name.lower()</div>
+<div class="line"><span class="lineno">  247</span>        }</div>
+<div class="line"><span class="lineno">  248</span> </div>
+<div class="line"><span class="lineno">  249</span>        <span class="keywordflow">if</span> state_signals:</div>
+<div class="line"><span class="lineno">  250</span>            known_states = {s.lower() <span class="keywordflow">for</span> t <span class="keywordflow">in</span> entity.enum_types <span class="keywordflow">for</span> s <span class="keywordflow">in</span> t.states}</div>
+<div class="line"><span class="lineno">  251</span>            entity.fsm_transitions = self._extract_fsm(</div>
+<div class="line"><span class="lineno">  252</span>                arch.Statements, state_signals, known_states,</div>
+<div class="line"><span class="lineno">  253</span>                CaseStatement, SequentialSimpleSignalAssignment, IfStatement</div>
+<div class="line"><span class="lineno">  254</span>            )</div>
+<div class="line"><span class="lineno">  255</span>            entity.fsm_states = getattr(self, <span class="stringliteral">&#39;_last_fsm_states&#39;</span>, [])</div>
+<div class="line"><span class="lineno">  256</span>            entity.fsm_pointers = getattr(self, <span class="stringliteral">&#39;_last_fsm_pointers&#39;</span>, [])</div>
+<div class="line"><span class="lineno">  257</span> </div>
+<div class="line"><span class="lineno">  258</span>        <span class="keywordflow">return</span> entity</div>
+<div class="line"><span class="lineno">  259</span> </div>
+<div class="line"><span class="lineno">  260</span> </div>
+</div><!-- fragment --><div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classvhdl__dox__filter_1_1_ghdl_parser_ae802864abb52b172da0cc2a364d2c7fa_cgraph.svg" width="475" height="183"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a10a8d4018c8eb9a046d062c46168ea5b" name="a10a8d4018c8eb9a046d062c46168ea5b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a10a8d4018c8eb9a046d062c46168ea5b">&#9670;&#160;</a></span>_last_fsm_pointers</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">list _last_fsm_pointers</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">=  [</div>
+<div class="line">            FsmPointer(</div>
+<div class="line">                name=ptr_name,</div>
+<div class="line">                used_from=used_from,</div>
+<div class="line">                possible_values=pointer_values.get(ptr_name.lower(), [])</div>
+<div class="line">            )</div>
+<div class="line">            <span class="keywordflow">for</span> ptr_name, used_from <span class="keywordflow">in</span> pointer_uses.items()</div>
+<div class="line">        ]</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="vhdl__dox__filter_8py_source.html#l00306">306</a> of file <a class="el" href="vhdl__dox__filter_8py_source.html">vhdl_dox_filter.py</a>.</p>
+
+</div>
+</div>
+<a id="a9b83a4467a3335d9a306fbcf296e1130" name="a9b83a4467a3335d9a306fbcf296e1130"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b83a4467a3335d9a306fbcf296e1130">&#9670;&#160;</a></span>_last_fsm_states</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">list _last_fsm_states</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">=  [</div>
+<div class="line">            FsmState(name=name, actions=actions)</div>
+<div class="line">            <span class="keywordflow">for</span> name, actions <span class="keywordflow">in</span> fsm_states_dict.items()</div>
+<div class="line">        ]</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="vhdl__dox__filter_8py_source.html#l00314">314</a> of file <a class="el" href="vhdl__dox__filter_8py_source.html">vhdl_dox_filter.py</a>.</p>
+
+</div>
+</div>
+<hr/>The documentation for this design unit was generated from the following file:<ul>
+<li>scripts/<a class="el" href="vhdl__dox__filter_8py_source.html">vhdl_dox_filter.py</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespacevhdl__dox__filter.html">vhdl_dox_filter</a></li><li class="navelem"><a class="el" href="classvhdl__dox__filter_1_1_ghdl_parser.html">GhdlParser</a></li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.12.0 </li>
+  </ul>
+</div>
+</body>
+</html>

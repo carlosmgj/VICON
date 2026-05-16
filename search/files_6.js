@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['testbench_2evhd_0',['testbench.vhd',['../testbench_8vhd.html',1,'']]],
-  ['top_2evhd_1',['TOP.vhd',['../_t_o_p_8vhd.html',1,'']]]
+  ['reports_2edox_0',['reports.dox',['../reports_8dox.html',1,'']]],
+  ['run_5fclean_5fsim_2etcl_1',['run_clean_sim.tcl',['../run__clean__sim_8tcl.html',1,'']]]
 ];

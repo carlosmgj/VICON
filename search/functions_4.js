@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['obtener_5finfo_5farchivo_0',['obtener_info_archivo',['../namespacerecortar__json__wavedrom.html#acfb2c938559c69bd4deebdff15bd16d3',1,'recortar_json_wavedrom']]]
+  ['main_0',['main',['../namespacegenerate__hierarchy.html#a51af30a60f9f02777c6396b8247e356f',1,'generate_hierarchy.main()'],['../namespacegenerate__reports.html#a51af30a60f9f02777c6396b8247e356f',1,'generate_reports.main()'],['../namespacevhdl__dox__filter.html#a51af30a60f9f02777c6396b8247e356f',1,'vhdl_dox_filter.main()']]]
 ];

@@ -1,0 +1,832 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.12.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<!-- BEGIN opengraph metadata -->
+<meta property="og:title" content="Doxygen Awesome" />
+<meta property="og:image" content="https://repository-images.githubusercontent.com/348492097/4f16df80-88fb-11eb-9d31-4015ff22c452" />
+<meta property="og:description" content="Custom CSS theme for doxygen html-documentation with lots of customization parameters." />
+<meta property="og:url" content="https://jothepro.github.io/doxygen-awesome-css/" />
+<!-- END opengraph metadata -->
+<!-- BEGIN twitter metadata -->
+<meta name="twitter:image:src" content="https://repository-images.githubusercontent.com/348492097/4f16df80-88fb-11eb-9d31-4015ff22c452" />
+<meta name="twitter:title" content="Doxygen Awesome" />
+<meta name="twitter:description" content="Custom CSS theme for doxygen html-documentation with lots of customization parameters." />
+<!-- END twitter metadata -->
+<title>VICON: REPORTS</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link rel="icon" type="image/svg+xml" href="logo.drawio.svg"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="doxygen-awesome-darkmode-toggle.js"></script>
+<script type="text/javascript" src="doxygen-awesome-fragment-copy-button.js"></script>
+<script type="text/javascript" src="doxygen-awesome-paragraph-link.js"></script>
+<script type="text/javascript" src="doxygen-awesome-interactive-toc.js"></script>
+<script type="text/javascript" src="doxygen-awesome-tabs.js"></script>
+<script type="text/javascript" src="toggle-alternative-theme.js"></script>
+<script type="text/javascript">
+    DoxygenAwesomeFragmentCopyButton.init()
+    DoxygenAwesomeDarkModeToggle.init()
+    DoxygenAwesomeParagraphLink.init()
+    DoxygenAwesomeInteractiveToc.init()
+    DoxygenAwesomeTabs.init()
+</script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  extensions: ["tex2jax.js"],
+  jax: ["input/TeX","output/HTML-CSS"],
+});
+</script>
+<script type="text/javascript" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="theme-round.css" rel="stylesheet" type="text/css"/>
+<link href="theme-robot.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">
+(function() {
+    var COLLAPSE_DELAY = 3000;
+    var timer = null;
+    function collapse() {
+        document.body.classList.add('sidebar-collapsed');
+        document.body.classList.remove('sidebar-hovered');
+    }
+    function expand() {
+        document.body.classList.add('sidebar-hovered');
+    }
+    function scheduleCollapse() {
+        clearTimeout(timer);
+        timer = setTimeout(collapse, COLLAPSE_DELAY);
+    }
+    function init() {
+        var zones = ['top', 'side-nav'].map(function(id) {
+            return document.getElementById(id);
+        }).filter(Boolean);
+        if (zones.length === 0) return;
+        // Crear botón toggle
+        var btn = document.createElement('div');
+        btn.id = 'sidebar-toggle';
+        btn.title = 'Fijar/soltar sidebar';
+        btn.innerHTML = '📌';
+        document.body.appendChild(btn);
+        var disabled = localStorage.getItem('sidebar-autohide') === 'off';
+        function updateBtn() {
+            btn.innerHTML = disabled ? '📌' : '📍';
+            btn.title = disabled ? 'Activar auto-hide' : 'Desactivar auto-hide';
+            if (disabled) {
+                document.body.classList.add('sidebar-disabled');
+            } else {
+                document.body.classList.remove('sidebar-disabled');
+            }
+        }
+        btn.addEventListener('click', function() {
+            disabled = !disabled;
+            localStorage.setItem('sidebar-autohide', disabled ? 'off' : 'on');
+            updateBtn();
+            if (!disabled) scheduleCollapse();
+            else {
+                clearTimeout(timer);
+                document.body.classList.remove('sidebar-collapsed');
+                document.body.classList.add('sidebar-hovered');
+            }
+        });
+        updateBtn();
+        if (!disabled) scheduleCollapse();
+        zones.forEach(function(el) {
+            el.addEventListener('mouseenter', function() {
+                if (disabled) return;
+                clearTimeout(timer);
+                expand();
+            });
+            el.addEventListener('mouseleave', function(e) {
+                if (disabled) return;
+                var related = e.relatedTarget;
+                var stillInZone = zones.some(function(z) {
+                    return z && (z === related || z.contains(related));
+                });
+                if (!stillInZone) {
+                    scheduleCollapse();
+                }
+            });
+        });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+</script>
+<script src="wavedrom.min.js" type="text/javascript"></script>
+<script src="default.js" type="text/javascript" id="wavedrom-skin-light"></script>
+<script src="dark.js" type="text/javascript" id="wavedrom-skin-dark"></script>
+<script type="text/javascript">
+function updateWaveDromSkin() {
+    var isDark = document.documentElement.classList.contains('dark-mode');
+    document.getElementById('wavedrom-skin-light').disabled = isDark;
+    document.getElementById('wavedrom-skin-dark').disabled = !isDark;
+    if (typeof WaveDrom !== 'undefined') WaveDrom.ProcessAll();
+}
+document.addEventListener('DOMContentLoaded', function() {
+    updateWaveDromSkin();
+    new MutationObserver(function() {
+        updateWaveDromSkin();
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+});
+</script>
+</head>
+<body>
+<!-- github-corner -->
+<a href="https://github.com/carlosmgj/VICON" class="github-corner" title="View source on Gitea" target="_blank" rel="noopener noreferrer">
+    <svg viewBox="0 0 250 250" width="40" height="40" style="position: absolute; top: 0; border: 0; right: 0; z-index: 99;" aria-hidden="true">
+    <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+<div id="top">
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">VICON
+   &#160;<span id="projectnumber">v1.0</span>
+   </div>
+   <div id="projectbrief">Sistema de Visión configurable</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+<div id="theme-selection">
+ <label for="theme-select">Theme:</label>
+ <select id="theme-select">
+  <option value="theme-default">Default</option>
+  <option value="theme-round">Round</option>
+  <option value="theme-robot">Robot</option>
+ </select>
+</div>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.12.0 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() { codefold.init(0); });
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','Search',true);
+  $(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function(){initNavTree('page_reports.html',''); initResizable(true); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div><div class="header">
+  <div class="headertitle"><div class="title">REPORTS</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="toc"><h3>Table of Contents</h3>
+<ul>
+  <li class="level1">
+    <a href="#sec_report_ghdl">GHDL — ❌ 1 errors, 2 warnings</a>
+    <ul>
+      <li class="level2">
+        <a href="#sec_ghdl_TOP_vhd">TOP.vhd (0 errors, 1 warnings)</a>
+      </li>
+      <li class="level2">
+        <a href="#sec_ghdl_testbench_vhd">testbench.vhd (1 errors, 1 warnings)</a>
+      </li>
+    </ul>
+  </li>
+  <li class="level1">
+    <a href="#sec_report_vsg">VSG — ❌ 232 errors, 0 warnings</a>
+    <ul>
+      <li class="level2">
+        <a href="#sec_vsg_TOP_vhd">TOP.vhd (20 errors, 0 warnings)</a>
+      </li>
+      <li class="level2">
+        <a href="#sec_vsg_clock_generator_vhd">clock_generator.vhd (9 errors, 0 warnings)</a>
+      </li>
+      <li class="level2">
+        <a href="#sec_vsg_i2c_controller_vhd">i2c_controller.vhd (86 errors, 0 warnings)</a>
+      </li>
+      <li class="level2">
+        <a href="#sec_vsg_mt9v111_vhd">mt9v111.vhd (68 errors, 0 warnings)</a>
+      </li>
+      <li class="level2">
+        <a href="#sec_vsg_sim_utils_pkg_vhd">sim_utils_pkg.vhd (29 errors, 0 warnings)</a>
+      </li>
+      <li class="level2">
+        <a href="#sec_vsg_testbench_vhd">testbench.vhd (20 errors, 0 warnings)</a>
+      </li>
+    </ul>
+  </li>
+</ul>
+</div>
+<div class="textblock"><p>Reportes de análisis estático y verificación de estilo del código VHDL.</p>
+<p>Generated: 06/05/2026 11:10</p>
+<h1><a class="anchor" id="sec_report_ghdl"></a>
+GHDL — ❌ 1 errors, 2 warnings</h1>
+<dl class="section user"><dt>Summary</dt><dd><table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Tool   </th><th class="markdownTableHeadNone">Total   </th><th class="markdownTableHeadNone">Errors   </th><th class="markdownTableHeadNone">Warnings    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>GHDL</code>   </td><td class="markdownTableBodyNone">3   </td><td class="markdownTableBodyNone">1   </td><td class="markdownTableBodyNone">2   </td></tr>
+</table>
+</dd></dl>
+<dl class="section user"><dt>Issues by file</dt><dd></dd></dl>
+<h2><a class="anchor" id="sec_ghdl_TOP_vhd"></a>
+TOP.vhd (0 errors, 1 warnings)</h2>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Line   </th><th class="markdownTableHeadNone">Col   </th><th class="markdownTableHeadNone">Severity   </th><th class="markdownTableHeadNone">Rule   </th><th class="markdownTableHeadNone">Message    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">102   </td><td class="markdownTableBodyNone">27   </td><td class="markdownTableBodyNone">🟡 warning   </td><td class="markdownTableBodyNone">—   </td><td class="markdownTableBodyNone">unit "clk_wiz_0" not found in library "work"   </td></tr>
+</table>
+<h2><a class="anchor" id="sec_ghdl_testbench_vhd"></a>
+testbench.vhd (1 errors, 1 warnings)</h2>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Line   </th><th class="markdownTableHeadNone">Col   </th><th class="markdownTableHeadNone">Severity   </th><th class="markdownTableHeadNone">Rule   </th><th class="markdownTableHeadNone">Message    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">28   </td><td class="markdownTableBodyNone">25   </td><td class="markdownTableBodyNone">🟡 warning   </td><td class="markdownTableBodyNone">—   </td><td class="markdownTableBodyNone">unit "top" not found in library "work"    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">39   </td><td class="markdownTableBodyNone">28   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone">—   </td><td class="markdownTableBodyNone">entity "mt9v111_agent" is obsoleted by package "sim_utils_pkg"   </td></tr>
+</table>
+<h1><a class="anchor" id="sec_report_vsg"></a>
+VSG — ❌ 232 errors, 0 warnings</h1>
+<dl class="section user"><dt>Summary</dt><dd><table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Tool   </th><th class="markdownTableHeadNone">Total   </th><th class="markdownTableHeadNone">Errors   </th><th class="markdownTableHeadNone">Warnings    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>VSG</code>   </td><td class="markdownTableBodyNone">232   </td><td class="markdownTableBodyNone">232   </td><td class="markdownTableBodyNone">0   </td></tr>
+</table>
+</dd></dl>
+<dl class="section user"><dt>Issues by file</dt><dd></dd></dl>
+<h2><a class="anchor" id="sec_vsg_TOP_vhd"></a>
+TOP.vhd (20 errors, 0 warnings)</h2>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Line   </th><th class="markdownTableHeadNone">Col   </th><th class="markdownTableHeadNone">Severity   </th><th class="markdownTableHeadNone">Rule   </th><th class="markdownTableHeadNone">Message    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">79   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">83   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">101   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">109   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">110   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">113   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">149   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>process_012</code>   </td><td class="markdownTableBodyNone">Add <em>is</em> keyword    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">149   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>process_016</code>   </td><td class="markdownTableBodyNone">Add label for process statement    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">152   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">185   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">189   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">199   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">209   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">211   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">219   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">229   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">231   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">241   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">245   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">268   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>process_018</code>   </td><td class="markdownTableBodyNone">Add a label for the "end process".   </td></tr>
+</table>
+<h2><a class="anchor" id="sec_vsg_clock_generator_vhd"></a>
+clock_generator.vhd (9 errors, 0 warnings)</h2>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Line   </th><th class="markdownTableHeadNone">Col   </th><th class="markdownTableHeadNone">Severity   </th><th class="markdownTableHeadNone">Rule   </th><th class="markdownTableHeadNone">Message    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">9   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>entity_015</code>   </td><td class="markdownTableBodyNone">Add <em>entity</em> keyword    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">17   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">18   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>process_012</code>   </td><td class="markdownTableBodyNone">Add <em>is</em> keyword    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">18   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>process_016</code>   </td><td class="markdownTableBodyNone">Add label for process statement    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">24   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>process_018</code>   </td><td class="markdownTableBodyNone">Add a label for the "end process".    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">27   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>process_012</code>   </td><td class="markdownTableBodyNone">Add <em>is</em> keyword    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">27   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>process_016</code>   </td><td class="markdownTableBodyNone">Add label for process statement    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">33   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>process_018</code>   </td><td class="markdownTableBodyNone">Add a label for the "end process".    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">39   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>architecture_010</code>   </td><td class="markdownTableBodyNone">Add architecture keyword.   </td></tr>
+</table>
+<h2><a class="anchor" id="sec_vsg_i2c_controller_vhd"></a>
+i2c_controller.vhd (86 errors, 0 warnings)</h2>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Line   </th><th class="markdownTableHeadNone">Col   </th><th class="markdownTableHeadNone">Severity   </th><th class="markdownTableHeadNone">Rule   </th><th class="markdownTableHeadNone">Message    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">233   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>conditional_waveforms_001</code>   </td><td class="markdownTableBodyNone">move code after else to next line.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">234   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>conditional_waveforms_001</code>   </td><td class="markdownTableBodyNone">move code after else to next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">239   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>process_012</code>   </td><td class="markdownTableBodyNone">Add <em>is</em> keyword    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">244   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">245   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>sequential_007</code>   </td><td class="markdownTableBodyNone">Move code after the ; to the next line.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">245   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>sequential_007</code>   </td><td class="markdownTableBodyNone">Move code after the ; to the next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">249   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">253   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">256   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">256   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_024</code>   </td><td class="markdownTableBodyNone">Move code after <em>then</em> keyword to the next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">257   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">257   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_024</code>   </td><td class="markdownTableBodyNone">Move code after <em>then</em> keyword to the next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">266   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>conditional_waveforms_001</code>   </td><td class="markdownTableBodyNone">move code after else to next line.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">267   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>conditional_waveforms_001</code>   </td><td class="markdownTableBodyNone">move code after else to next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">272   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>process_012</code>   </td><td class="markdownTableBodyNone">Add <em>is</em> keyword    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">277   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">278   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>sequential_007</code>   </td><td class="markdownTableBodyNone">Move code after the ; to the next line.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">278   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>sequential_007</code>   </td><td class="markdownTableBodyNone">Move code after the ; to the next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">282   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">286   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">289   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">289   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_024</code>   </td><td class="markdownTableBodyNone">Move code after <em>then</em> keyword to the next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">290   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">290   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_024</code>   </td><td class="markdownTableBodyNone">Move code after <em>then</em> keyword to the next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">299   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>process_012</code>   </td><td class="markdownTableBodyNone">Add <em>is</em> keyword    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">302   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">305   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">306   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>sequential_007</code>   </td><td class="markdownTableBodyNone">Move code after the ; to the next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">306   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">318   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>process_012</code>   </td><td class="markdownTableBodyNone">Add <em>is</em> keyword    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">321   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">359   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">360   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">379   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">380   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>sequential_007</code>   </td><td class="markdownTableBodyNone">Move code after the ; to the next line.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">380   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>sequential_007</code>   </td><td class="markdownTableBodyNone">Move code after the ; to the next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">385   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">386   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>sequential_007</code>   </td><td class="markdownTableBodyNone">Move code after the ; to the next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">390   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">396   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">399   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">414   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">422   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">423   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>sequential_007</code>   </td><td class="markdownTableBodyNone">Move code after the ; to the next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">427   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">432   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">434   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">447   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">448   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>sequential_007</code>   </td><td class="markdownTableBodyNone">Move code after the ; to the next line.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">448   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>sequential_007</code>   </td><td class="markdownTableBodyNone">Move code after the ; to the next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">452   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">453   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>sequential_007</code>   </td><td class="markdownTableBodyNone">Move code after the ; to the next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">457   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">458   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">466   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">467   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>sequential_007</code>   </td><td class="markdownTableBodyNone">Move code after the ; to the next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">485   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">486   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">520   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">524   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">557   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">570   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">574   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">591   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">592   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>sequential_007</code>   </td><td class="markdownTableBodyNone">Move code after the ; to the next line.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">592   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>sequential_007</code>   </td><td class="markdownTableBodyNone">Move code after the ; to the next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">596   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">597   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>sequential_007</code>   </td><td class="markdownTableBodyNone">Move code after the ; to the next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">601   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">602   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>sequential_007</code>   </td><td class="markdownTableBodyNone">Move code after the ; to the next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">606   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">608   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">621   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">629   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">630   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>sequential_007</code>   </td><td class="markdownTableBodyNone">Move code after the ; to the next line.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">634   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">639   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">640   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>sequential_007</code>   </td><td class="markdownTableBodyNone">Move code after the ; to the next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">647   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">648   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>sequential_007</code>   </td><td class="markdownTableBodyNone">Move code after the ; to the next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">648   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>sequential_007</code>   </td><td class="markdownTableBodyNone">Move code after the ; to the next line.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">653   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">654   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>sequential_007</code>   </td><td class="markdownTableBodyNone">Move code after the ; to the next line.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">658   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">664   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">695   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>conditional_waveforms_001</code>   </td><td class="markdownTableBodyNone">move code after else to next line.   </td></tr>
+</table>
+<h2><a class="anchor" id="sec_vsg_mt9v111_vhd"></a>
+mt9v111.vhd (68 errors, 0 warnings)</h2>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Line   </th><th class="markdownTableHeadNone">Col   </th><th class="markdownTableHeadNone">Severity   </th><th class="markdownTableHeadNone">Rule   </th><th class="markdownTableHeadNone">Message    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">25   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>entity_015</code>   </td><td class="markdownTableBodyNone">Add <em>entity</em> keyword    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">69   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>process_012</code>   </td><td class="markdownTableBodyNone">Add <em>is</em> keyword    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">71   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>variable_007</code>   </td><td class="markdownTableBodyNone">Remove default assignment.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">88   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">90   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">93   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">99   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">101   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">107   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">110   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">116   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">123   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">125   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">131   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">141   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">145   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">153   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">155   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">159   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">164   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">165   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">170   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">181   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">188   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">192   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">193   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">194   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">199   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">204   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">206   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">207   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">215   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">217   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">218   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">219   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">224   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">235   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">236   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">238   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">239   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">249   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">253   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">254   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">255   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">257   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">261   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">262   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">271   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">276   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">277   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">285   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">295   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">297   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">302   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">303   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">304   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">309   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">320   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">325   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">331   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">332   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">341   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">347   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">348   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">356   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">363   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">364   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">378   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>architecture_010</code>   </td><td class="markdownTableBodyNone">Add architecture keyword.   </td></tr>
+</table>
+<h2><a class="anchor" id="sec_vsg_sim_utils_pkg_vhd"></a>
+sim_utils_pkg.vhd (29 errors, 0 warnings)</h2>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Line   </th><th class="markdownTableHeadNone">Col   </th><th class="markdownTableHeadNone">Severity   </th><th class="markdownTableHeadNone">Rule   </th><th class="markdownTableHeadNone">Message    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">12   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>function_019</code>   </td><td class="markdownTableBodyNone">Move parenthesis to next line.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">12   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>function_019</code>   </td><td class="markdownTableBodyNone">Move parenthesis to next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">13   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>function_019</code>   </td><td class="markdownTableBodyNone">Move parenthesis to next line.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">13   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>function_019</code>   </td><td class="markdownTableBodyNone">Move parenthesis to next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">13   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>function_019</code>   </td><td class="markdownTableBodyNone">Move parenthesis to next line.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">14   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">31   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>package_014</code>   </td><td class="markdownTableBodyNone">Add package name.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">35   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>function_019</code>   </td><td class="markdownTableBodyNone">Move parenthesis to next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">35   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>function_019</code>   </td><td class="markdownTableBodyNone">Move parenthesis to next line.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">39   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">39   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_024</code>   </td><td class="markdownTableBodyNone">Move code after <em>then</em> keyword to the next line.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">40   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">40   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_024</code>   </td><td class="markdownTableBodyNone">Move code after <em>then</em> keyword to the next line.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">41   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_022</code>   </td><td class="markdownTableBodyNone">Move code after <em>else</em> keyword to the next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">45   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>function_020</code>   </td><td class="markdownTableBodyNone">Add function designator    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">47   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>function_019</code>   </td><td class="markdownTableBodyNone">Move parenthesis to next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">47   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>function_019</code>   </td><td class="markdownTableBodyNone">Move parenthesis to next line.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">47   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>function_019</code>   </td><td class="markdownTableBodyNone">Move parenthesis to next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">59   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>function_020</code>   </td><td class="markdownTableBodyNone">Add function designator    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">70   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_002</code>   </td><td class="markdownTableBodyNone">Enclose condition in ()'s.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">70   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_020</code>   </td><td class="markdownTableBodyNone">Move <em>end if</em> keywords to their own line.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">70   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_021</code>   </td><td class="markdownTableBodyNone">Move <em>else</em> keyword to its own line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">70   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_022</code>   </td><td class="markdownTableBodyNone">Move code after <em>else</em> keyword to the next line.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">70   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>if_024</code>   </td><td class="markdownTableBodyNone">Move code after <em>then</em> keyword to the next line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">71   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">76   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>procedure_014</code>   </td><td class="markdownTableBodyNone">Add procedure designator    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">92   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>report_statement_002</code>   </td><td class="markdownTableBodyNone">Place <b>severity</b> keyword on its own line.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">94   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>procedure_014</code>   </td><td class="markdownTableBodyNone">Add procedure designator    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">96   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>package_body_003</code>   </td><td class="markdownTableBodyNone">Add package name.   </td></tr>
+</table>
+<h2><a class="anchor" id="sec_vsg_testbench_vhd"></a>
+testbench.vhd (20 errors, 0 warnings)</h2>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Line   </th><th class="markdownTableHeadNone">Col   </th><th class="markdownTableHeadNone">Severity   </th><th class="markdownTableHeadNone">Rule   </th><th class="markdownTableHeadNone">Message    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">4   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>entity_026</code>   </td><td class="markdownTableBodyNone">Move code after the <b>is</b> keyword to the next line.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">4   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">5   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>entity_015</code>   </td><td class="markdownTableBodyNone">Add <em>entity</em> keyword    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">21   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>port_map_010</code>   </td><td class="markdownTableBodyNone">Remove comment.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">22   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>port_map_010</code>   </td><td class="markdownTableBodyNone">Remove comment.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">25   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>whitespace_001</code>   </td><td class="markdownTableBodyNone">Remove trailing whitespace    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">29   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>generic_map_004</code>   </td><td class="markdownTableBodyNone">Move ) to next line.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">29   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>generic_map_005</code>   </td><td class="markdownTableBodyNone">Move generic assignment to its own line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">31   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>port_map_010</code>   </td><td class="markdownTableBodyNone">Remove comment.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">32   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>port_map_010</code>   </td><td class="markdownTableBodyNone">Remove comment.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">33   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>port_map_010</code>   </td><td class="markdownTableBodyNone">Remove comment.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">34   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>port_map_010</code>   </td><td class="markdownTableBodyNone">Remove comment.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">40   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>generic_map_004</code>   </td><td class="markdownTableBodyNone">Move ) to next line.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">40   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>generic_map_005</code>   </td><td class="markdownTableBodyNone">Move generic assignment to its own line.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">42   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>port_map_010</code>   </td><td class="markdownTableBodyNone">Remove comment.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">43   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>port_map_010</code>   </td><td class="markdownTableBodyNone">Remove comment.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">44   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>port_map_009</code>   </td><td class="markdownTableBodyNone">Move multiple port assignments to their own lines.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">44   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>port_map_009</code>   </td><td class="markdownTableBodyNone">Move multiple port assignments to their own lines.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">44   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>port_map_009</code>   </td><td class="markdownTableBodyNone">Move multiple port assignments to their own lines.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">48   </td><td class="markdownTableBodyNone">0   </td><td class="markdownTableBodyNone">🔴 error   </td><td class="markdownTableBodyNone"><code>architecture_010</code>   </td><td class="markdownTableBodyNone">Add architecture keyword.   </td></tr>
+</table>
+</div></div><!-- contents -->
+</div><!-- PageDoc -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.12.0 </li>
+  </ul>
+</div>
+</body>
+</html>

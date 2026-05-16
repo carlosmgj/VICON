@@ -11,7 +11,7 @@
 <g id="clust1" class="cluster">
 <title>clusterdir_14e7b82c78fabe2c40030a4aaeab77bd</title>
 <g id="a_clust1"><a xlink:href="dir_14e7b82c78fabe2c40030a4aaeab77bd.html" target="_top" xlink:title="vicon_cmgj">
-<polygon fill="#e5edff" stroke="#7f7f7f" stroke-dasharray="5,2" points="8,-8 8,-78 119,-78 119,-8 8,-8"/>
+<polygon fill="#daedff" stroke="#7f7f7f" stroke-dasharray="5,2" points="8,-8 8,-78 119,-78 119,-8 8,-8"/>
 <text text-anchor="middle" x="63.5" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">vicon_cmgj</text>
 </a>
 </g>
@@ -19,7 +19,7 @@
 <g id="clust2" class="cluster">
 <title>clusterdir_acfcb7fa45f4f19239f2db40a00c7802</title>
 <g id="a_clust2"><a xlink:href="dir_acfcb7fa45f4f19239f2db40a00c7802.html" target="_top">
-<polygon fill="#e5edff" stroke="#404040" stroke-width="2" points="16,-16 16,-51 111,-51 111,-16 16,-16"/>
+<polygon fill="#daedff" stroke="#404040" stroke-width="2" points="16,-16 16,-51 111,-51 111,-16 16,-16"/>
 </a>
 </g>
 </g>
@@ -32,7 +32,7 @@
 <g id="node2" class="node">
 <title>dir_fbdec70ab0ef30765d24d1da3618c5f5</title>
 <g id="a_node2"><a xlink:href="dir_fbdec70ab0ef30765d24d1da3618c5f5.html" target="_top" xlink:title="rtl">
-<polygon fill="#7aa6ff" stroke="#404040" points="53.5,-43 24.5,-43 24.5,-24 53.5,-24 53.5,-43"/>
+<polygon fill="#4ea9ff" stroke="#404040" points="53.5,-43 24.5,-43 24.5,-24 53.5,-24 53.5,-43"/>
 <text text-anchor="middle" x="39" y="-31" font-family="Helvetica,sans-Serif" font-size="10.00">rtl</text>
 </a>
 </g>

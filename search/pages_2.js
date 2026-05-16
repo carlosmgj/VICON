@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['utilizadas_0',['Herramientas Utilizadas',['../_tools.html',1,'']]]
+  ['hardware_0',['HARDWARE',['../page_hardware.html',1,'']]],
+  ['hierarchy_1',['DESIGN HIERARCHY',['../page_hierarchy.html',1,'']]]
 ];

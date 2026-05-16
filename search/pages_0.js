@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['herramientas_20utilizadas_0',['Herramientas Utilizadas',['../_tools.html',1,'']]]
+  ['design_20hierarchy_0',['DESIGN HIERARCHY',['../page_hierarchy.html',1,'']]]
 ];

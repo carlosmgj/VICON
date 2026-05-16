@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['behavioral_0',['Behavioral',['../classclk__reset__gen_1_1_behavioral.html',1,'clk_reset_gen.Behavioral'],['../classmt9v111__agent_1_1_behavioral.html',1,'mt9v111_agent.Behavioral'],['../class_t_o_p_1_1_behavioral.html',1,'TOP.Behavioral']]]
+  ['doxfilegenerator_0',['DoxFileGenerator',['../classgenerate__hierarchy_1_1_dox_file_generator.html',1,'generate_hierarchy']]],
+  ['doxygengenerator_1',['DoxygenGenerator',['../classvhdl__dox__filter_1_1_doxygen_generator.html',1,'vhdl_dox_filter']]]
 ];
