@@ -35,6 +35,8 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+--! \brief Mi controlador I2C
+--! \fsm_show_actions
 entity i2c_master is
     generic (
         CLK_FREQ_HZ : integer := 50_000_000;

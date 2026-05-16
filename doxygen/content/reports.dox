@@ -1,0 +1,304 @@
+/*!
+\page page_reports REPORTS
+
+\brief Reportes de análisis estático y verificación de estilo del código VHDL.
+
+Generated: 06/05/2026 11:10
+
+\tableofcontents
+
+\section sec_report_ghdl GHDL — ❌ 1 errors, 2 warnings
+
+\par Summary
+| Tool | Total | Errors | Warnings |
+|------|-------|--------|----------|
+| `GHDL` | 3 | 1 | 2 |
+
+\par Issues by file
+
+\subsection sec_ghdl_TOP_vhd TOP.vhd (0 errors, 1 warnings)
+
+| Line | Col | Severity | Rule | Message |
+|------|-----|----------|------|---------|
+| 102 | 27 | 🟡 warning | — | unit "clk_wiz_0" not found in library "work" |
+
+\subsection sec_ghdl_testbench_vhd testbench.vhd (1 errors, 1 warnings)
+
+| Line | Col | Severity | Rule | Message |
+|------|-----|----------|------|---------|
+| 28 | 25 | 🟡 warning | — | unit "top" not found in library "work" |
+| 39 | 28 | 🔴 error | — | entity "mt9v111_agent" is obsoleted by package "sim_utils_pkg" |
+
+\section sec_report_vsg VSG — ❌ 232 errors, 0 warnings
+
+\par Summary
+| Tool | Total | Errors | Warnings |
+|------|-------|--------|----------|
+| `VSG` | 232 | 232 | 0 |
+
+\par Issues by file
+
+\subsection sec_vsg_TOP_vhd TOP.vhd (20 errors, 0 warnings)
+
+| Line | Col | Severity | Rule | Message |
+|------|-----|----------|------|---------|
+| 79 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 83 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 101 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 109 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 110 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 113 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 149 | 0 | 🔴 error | `process_012` | Add *is* keyword |
+| 149 | 0 | 🔴 error | `process_016` | Add label for process statement |
+| 152 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 185 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 189 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 199 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 209 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 211 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 219 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 229 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 231 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 241 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 245 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 268 | 0 | 🔴 error | `process_018` | Add a label for the "end process". |
+
+\subsection sec_vsg_clock_generator_vhd clock_generator.vhd (9 errors, 0 warnings)
+
+| Line | Col | Severity | Rule | Message |
+|------|-----|----------|------|---------|
+| 9 | 0 | 🔴 error | `entity_015` | Add *entity* keyword |
+| 17 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 18 | 0 | 🔴 error | `process_012` | Add *is* keyword |
+| 18 | 0 | 🔴 error | `process_016` | Add label for process statement |
+| 24 | 0 | 🔴 error | `process_018` | Add a label for the "end process". |
+| 27 | 0 | 🔴 error | `process_012` | Add *is* keyword |
+| 27 | 0 | 🔴 error | `process_016` | Add label for process statement |
+| 33 | 0 | 🔴 error | `process_018` | Add a label for the "end process". |
+| 39 | 0 | 🔴 error | `architecture_010` | Add architecture keyword. |
+
+\subsection sec_vsg_i2c_controller_vhd i2c_controller.vhd (86 errors, 0 warnings)
+
+| Line | Col | Severity | Rule | Message |
+|------|-----|----------|------|---------|
+| 233 | 0 | 🔴 error | `conditional_waveforms_001` | move code after else to next line. |
+| 234 | 0 | 🔴 error | `conditional_waveforms_001` | move code after else to next line. |
+| 239 | 0 | 🔴 error | `process_012` | Add *is* keyword |
+| 244 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 245 | 0 | 🔴 error | `sequential_007` | Move code after the ; to the next line. |
+| 245 | 0 | 🔴 error | `sequential_007` | Move code after the ; to the next line. |
+| 249 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 253 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 256 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 256 | 0 | 🔴 error | `if_024` | Move code after *then* keyword to the next line. |
+| 257 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 257 | 0 | 🔴 error | `if_024` | Move code after *then* keyword to the next line. |
+| 266 | 0 | 🔴 error | `conditional_waveforms_001` | move code after else to next line. |
+| 267 | 0 | 🔴 error | `conditional_waveforms_001` | move code after else to next line. |
+| 272 | 0 | 🔴 error | `process_012` | Add *is* keyword |
+| 277 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 278 | 0 | 🔴 error | `sequential_007` | Move code after the ; to the next line. |
+| 278 | 0 | 🔴 error | `sequential_007` | Move code after the ; to the next line. |
+| 282 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 286 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 289 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 289 | 0 | 🔴 error | `if_024` | Move code after *then* keyword to the next line. |
+| 290 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 290 | 0 | 🔴 error | `if_024` | Move code after *then* keyword to the next line. |
+| 299 | 0 | 🔴 error | `process_012` | Add *is* keyword |
+| 302 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 305 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 306 | 0 | 🔴 error | `sequential_007` | Move code after the ; to the next line. |
+| 306 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 318 | 0 | 🔴 error | `process_012` | Add *is* keyword |
+| 321 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 359 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 360 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 379 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 380 | 0 | 🔴 error | `sequential_007` | Move code after the ; to the next line. |
+| 380 | 0 | 🔴 error | `sequential_007` | Move code after the ; to the next line. |
+| 385 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 386 | 0 | 🔴 error | `sequential_007` | Move code after the ; to the next line. |
+| 390 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 396 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 399 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 414 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 422 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 423 | 0 | 🔴 error | `sequential_007` | Move code after the ; to the next line. |
+| 427 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 432 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 434 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 447 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 448 | 0 | 🔴 error | `sequential_007` | Move code after the ; to the next line. |
+| 448 | 0 | 🔴 error | `sequential_007` | Move code after the ; to the next line. |
+| 452 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 453 | 0 | 🔴 error | `sequential_007` | Move code after the ; to the next line. |
+| 457 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 458 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 466 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 467 | 0 | 🔴 error | `sequential_007` | Move code after the ; to the next line. |
+| 485 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 486 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 520 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 524 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 557 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 570 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 574 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 591 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 592 | 0 | 🔴 error | `sequential_007` | Move code after the ; to the next line. |
+| 592 | 0 | 🔴 error | `sequential_007` | Move code after the ; to the next line. |
+| 596 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 597 | 0 | 🔴 error | `sequential_007` | Move code after the ; to the next line. |
+| 601 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 602 | 0 | 🔴 error | `sequential_007` | Move code after the ; to the next line. |
+| 606 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 608 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 621 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 629 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 630 | 0 | 🔴 error | `sequential_007` | Move code after the ; to the next line. |
+| 634 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 639 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 640 | 0 | 🔴 error | `sequential_007` | Move code after the ; to the next line. |
+| 647 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 648 | 0 | 🔴 error | `sequential_007` | Move code after the ; to the next line. |
+| 648 | 0 | 🔴 error | `sequential_007` | Move code after the ; to the next line. |
+| 653 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 654 | 0 | 🔴 error | `sequential_007` | Move code after the ; to the next line. |
+| 658 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 664 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 695 | 0 | 🔴 error | `conditional_waveforms_001` | move code after else to next line. |
+
+\subsection sec_vsg_mt9v111_vhd mt9v111.vhd (68 errors, 0 warnings)
+
+| Line | Col | Severity | Rule | Message |
+|------|-----|----------|------|---------|
+| 25 | 0 | 🔴 error | `entity_015` | Add *entity* keyword |
+| 69 | 0 | 🔴 error | `process_012` | Add *is* keyword |
+| 71 | 0 | 🔴 error | `variable_007` | Remove default assignment. |
+| 88 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 90 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 93 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 99 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 101 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 107 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 110 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 116 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 123 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 125 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 131 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 141 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 145 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 153 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 155 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 159 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 164 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 165 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 170 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 181 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 188 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 192 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 193 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 194 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 199 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 204 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 206 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 207 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 215 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 217 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 218 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 219 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 224 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 235 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 236 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 238 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 239 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 249 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 253 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 254 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 255 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 257 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 261 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 262 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 271 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 276 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 277 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 285 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 295 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 297 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 302 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 303 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 304 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 309 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 320 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 325 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 331 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 332 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 341 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 347 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 348 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 356 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 363 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 364 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 378 | 0 | 🔴 error | `architecture_010` | Add architecture keyword. |
+
+\subsection sec_vsg_sim_utils_pkg_vhd sim_utils_pkg.vhd (29 errors, 0 warnings)
+
+| Line | Col | Severity | Rule | Message |
+|------|-----|----------|------|---------|
+| 12 | 0 | 🔴 error | `function_019` | Move parenthesis to next line. |
+| 12 | 0 | 🔴 error | `function_019` | Move parenthesis to next line. |
+| 13 | 0 | 🔴 error | `function_019` | Move parenthesis to next line. |
+| 13 | 0 | 🔴 error | `function_019` | Move parenthesis to next line. |
+| 13 | 0 | 🔴 error | `function_019` | Move parenthesis to next line. |
+| 14 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 31 | 0 | 🔴 error | `package_014` | Add package name. |
+| 35 | 0 | 🔴 error | `function_019` | Move parenthesis to next line. |
+| 35 | 0 | 🔴 error | `function_019` | Move parenthesis to next line. |
+| 39 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 39 | 0 | 🔴 error | `if_024` | Move code after *then* keyword to the next line. |
+| 40 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 40 | 0 | 🔴 error | `if_024` | Move code after *then* keyword to the next line. |
+| 41 | 0 | 🔴 error | `if_022` | Move code after *else* keyword to the next line. |
+| 45 | 0 | 🔴 error | `function_020` | Add function designator |
+| 47 | 0 | 🔴 error | `function_019` | Move parenthesis to next line. |
+| 47 | 0 | 🔴 error | `function_019` | Move parenthesis to next line. |
+| 47 | 0 | 🔴 error | `function_019` | Move parenthesis to next line. |
+| 59 | 0 | 🔴 error | `function_020` | Add function designator |
+| 70 | 0 | 🔴 error | `if_002` | Enclose condition in ()'s. |
+| 70 | 0 | 🔴 error | `if_020` | Move *end if* keywords to their own line. |
+| 70 | 0 | 🔴 error | `if_021` | Move *else* keyword to its own line. |
+| 70 | 0 | 🔴 error | `if_022` | Move code after *else* keyword to the next line. |
+| 70 | 0 | 🔴 error | `if_024` | Move code after *then* keyword to the next line. |
+| 71 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 76 | 0 | 🔴 error | `procedure_014` | Add procedure designator |
+| 92 | 0 | 🔴 error | `report_statement_002` | Place **severity** keyword on its own line. |
+| 94 | 0 | 🔴 error | `procedure_014` | Add procedure designator |
+| 96 | 0 | 🔴 error | `package_body_003` | Add package name. |
+
+\subsection sec_vsg_testbench_vhd testbench.vhd (20 errors, 0 warnings)
+
+| Line | Col | Severity | Rule | Message |
+|------|-----|----------|------|---------|
+| 4 | 0 | 🔴 error | `entity_026` | Move code after the **is** keyword to the next line. |
+| 4 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 5 | 0 | 🔴 error | `entity_015` | Add *entity* keyword |
+| 21 | 0 | 🔴 error | `port_map_010` | Remove comment. |
+| 22 | 0 | 🔴 error | `port_map_010` | Remove comment. |
+| 25 | 0 | 🔴 error | `whitespace_001` | Remove trailing whitespace |
+| 29 | 0 | 🔴 error | `generic_map_004` | Move ) to next line. |
+| 29 | 0 | 🔴 error | `generic_map_005` | Move generic assignment to its own line. |
+| 31 | 0 | 🔴 error | `port_map_010` | Remove comment. |
+| 32 | 0 | 🔴 error | `port_map_010` | Remove comment. |
+| 33 | 0 | 🔴 error | `port_map_010` | Remove comment. |
+| 34 | 0 | 🔴 error | `port_map_010` | Remove comment. |
+| 40 | 0 | 🔴 error | `generic_map_004` | Move ) to next line. |
+| 40 | 0 | 🔴 error | `generic_map_005` | Move generic assignment to its own line. |
+| 42 | 0 | 🔴 error | `port_map_010` | Remove comment. |
+| 43 | 0 | 🔴 error | `port_map_010` | Remove comment. |
+| 44 | 0 | 🔴 error | `port_map_009` | Move multiple port assignments to their own lines. |
+| 44 | 0 | 🔴 error | `port_map_009` | Move multiple port assignments to their own lines. |
+| 44 | 0 | 🔴 error | `port_map_009` | Move multiple port assignments to their own lines. |
+| 48 | 0 | 🔴 error | `architecture_010` | Add architecture keyword. |
+
+
+*/
