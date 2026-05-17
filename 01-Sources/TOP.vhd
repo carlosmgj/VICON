@@ -2,16 +2,21 @@
 --! \brief Top-level del sistema de comunicación con la cámara MT9V111.
 --!
 --! Secuencia de inicialización al arrancar:
---!   1. ST_CAM_RESET_ASSERT : RESET_BAR='0' durante 1 ms
---!   2. ST_CAM_RESET_WAIT   : RESET_BAR='1', espera 150 ms para que la cámara arranque
---!   3. ST_WR_FILL_FIFO     : Cargar WR FIFO
---!   4. ST_WR_START/WAIT    : Escribir registros por I2C
---!   5. ST_RD_START/WAIT    : Leer registros por I2C
---!   6. ST_RD_DRAIN         : Vaciar RD FIFO
---!   7. ST_FINISH           : LED(0)='1' OK, LED(1)='1' error
+--!   1. ST_CAM_RESET_ASSERT  : RESET_BAR='0' durante 1 ms
+--!   2. ST_CAM_RESET_WAIT    : RESET_BAR='1', espera 150 ms para que la cámara arranque
+--!   3. ST_PAGE_SEL_FILL     : Cargar WR FIFO con page register (R1 = 4 → Sensor Core)
+--!   4. ST_PAGE_SEL_START    : Escribir page register
+--!   5. ST_PAGE_SEL_WAIT     : Esperar done/error
+--!   6. ST_CHIPID_RD_START   : Lanzar lectura del registro 0xFF (Chip ID)
+--!   7. ST_CHIPID_RD_WAIT    : Esperar done/error
+--!   8. ST_CHIPID_RD_DRAIN   : Vaciar RD FIFO
+--!   9. ST_FINISH            : LED(0)='1' si chip ID = 0x823A, LED(1)='1' si error
+--!
+--! El registro 0xFF del Sensor Core contiene el Chip ID = 0x823A.
+--! Leer este valor confirma que la comunicación I2C funciona de extremo a extremo.
 --!
 --! Notas de hardware (Basys 3):
---!   - sclk y sdata son open-drain. Necesitan pull-ups externos de 4.7 kΩ a 3.3 V.
+--!   - sclk y sdata son open-drain. Pull-ups internos activos (1.5 kΩ externos recomendados).
 --!   - cam_mclk se genera dividiendo mclk por 4 → 25 MHz (rango válido: 13-27 MHz).
 --!   - cam_reset_n es activo bajo. La FSM lo controla con un contador de tiempo.
 --!   - BTN(0) resetea el MMCM y reinicia toda la secuencia.
@@ -28,9 +33,9 @@ entity TOP is
         SENSOR_ADDR  : std_logic_vector(6 downto 0) := "1011100"       --! Dirección I2C MT9V111 (0x5C)
     );
     port (
-        -- System CLK 
+        -- System CLK
         clk         : in    std_logic;                     --! Oscilador 100 MHz de la Basys 3
-        -- Dev Board interface 
+        -- Dev Board interface
         SW          : in    std_logic_vector(15 downto 0);
         LED         : out   std_logic_vector(15 downto 0); --! LED(0)=OK  LED(1)=error
         CAT         : out   std_logic_vector(6 downto 0);
@@ -57,6 +62,9 @@ architecture Behavioral of TOP is
     constant RESET_HOLD_CYCLES : integer := CLK_FREQ_HZ / 1000;        --!   1 ms a 100 MHz
     constant RESET_WAIT_CYCLES : integer := CLK_FREQ_HZ / 1000 * 150;  --! 150 ms a 100 MHz
     constant MCLK_DIV          : integer := 2;  --! Toggle cada 2 ciclos → 25 MHz
+
+    --! Chip ID esperado del MT9V111 (registro 0xFF del Sensor Core)
+    constant CHIP_ID_EXPECTED  : std_logic_vector(15 downto 0) := x"823A";
 
     ---------------------------------------------------------------------------
     -- Reloj y reset
@@ -116,48 +124,34 @@ architecture Behavioral of TOP is
     type main_state_t is (
         ST_CAM_RESET_ASSERT,    --! RESET_BAR='0' durante RESET_HOLD_CYCLES
         ST_CAM_RESET_WAIT,      --! Espera 150 ms tras soltar el reset
-        ST_WR_FILL_FIFO,        --! Cargar datos en WR FIFO
-        ST_WR_START,            --! Lanzar transacción Write
-        ST_WR_WAIT,             --! Esperar done/error del Write
-        ST_RD_START,            --! Lanzar transacción Read
-        ST_RD_WAIT,             --! Esperar done/error del Read
-        ST_RD_DRAIN,            --! Vaciar RD FIFO
-        ST_FINISH,
-        ST_ERROR
+        ST_PAGE_SEL_FILL,       --! Cargar WR FIFO con page register (R1 = 4 → Sensor Core)
+        ST_PAGE_SEL_START,      --! Lanzar escritura del page register
+        ST_PAGE_SEL_WAIT,       --! Esperar done/error de la escritura del page register
+        ST_CHIPID_RD_START,     --! Lanzar lectura del registro 0xFF (Chip ID)
+        ST_CHIPID_RD_WAIT,      --! Esperar done/error de la lectura
+        ST_CHIPID_RD_DRAIN,     --! Vaciar RD FIFO y verificar Chip ID
+        ST_FINISH,              --! LED(0)='1' si Chip ID correcto
+        ST_ERROR                --! LED(1)='1' si error I2C o Chip ID incorrecto
     );
     signal state : main_state_t := ST_CAM_RESET_ASSERT;
 
     signal init_cnt    : integer range 0 to RESET_WAIT_CYCLES := 0;
     signal fill_cnt    : integer range 0 to FIFO_DEPTH        := 0;
-    signal rd_cnt      : integer range 0 to 16               := 0;
     signal cam_reset_r : std_logic := '0';
 
-    ---------------------------------------------------------------------------
-    -- Datos de ejemplo
-    ---------------------------------------------------------------------------
-    constant NUM_REGS_WR : integer := 2;
-    constant NUM_REGS_RD : integer := 2;
-
-    type reg_data_array_t is array (0 to NUM_REGS_WR - 1) of std_logic_vector(15 downto 0);
-    constant WR_DATA : reg_data_array_t := (
-        0 => x"823A",   --! Reg 0x04
-        1 => x"0010"    --! Reg 0x05 (auto-increment)
-    );
-
-    type rd_buf_t is array (0 to NUM_REGS_RD - 1) of std_logic_vector(15 downto 0);
-    signal rd_buf : rd_buf_t := (others => (others => '0'));
+    --! Resultado de la lectura del Chip ID
+    signal chip_id : std_logic_vector(15 downto 0) := (others => '0');
 
     ---------------------------------------------------------------------------
     -- ILA / Debug
     ---------------------------------------------------------------------------
-    signal debug_sclk  : std_logic;
-    signal debug_sdata : std_logic;
-    signal debug_mclk : std_logic;
-    signal debug_dout       : std_logic_vector(7 downto 0);
-    signal debug_pixclk     : std_logic;
-    signal debug_fval       : std_logic;
-    signal debug_lval       : std_logic;
-    
+    signal debug_sclk    : std_logic;
+    signal debug_sdata   : std_logic;
+    signal debug_dout    : std_logic_vector(7 downto 0);
+    signal debug_pixclk  : std_logic;
+    signal debug_fval    : std_logic;
+    signal debug_lval    : std_logic;
+
     attribute mark_debug : string;
     attribute dont_touch : string;
 
@@ -175,7 +169,7 @@ architecture Behavioral of TOP is
     attribute mark_debug of debug_pixclk : signal is "true";
     attribute mark_debug of debug_fval   : signal is "true";
     attribute mark_debug of debug_lval   : signal is "true";
-
+    attribute mark_debug of chip_id      : signal is "true";
 
 begin
 
@@ -197,17 +191,20 @@ begin
     ---------------------------------------------------------------------------
     CAT <= (others => '0');
     DP  <= '0';
-    AN  <= (others => '1');  --! Ánodos activos bajos: '1' = display apagado
+    AN  <= (others => '1');
 
+    ---------------------------------------------------------------------------
+    -- Debug
+    ---------------------------------------------------------------------------
     p_debug : process(mclk)
     begin
         if rising_edge(mclk) then
-            debug_sclk  <= scl_out_i;
-            debug_sdata <= sda_in_i;
-            debug_dout       <= dout;
-            debug_pixclk     <= pixclk;
-            debug_fval       <= frame_valid;
-            debug_lval       <= line_valid;
+            debug_sclk   <= scl_out_i;
+            debug_sdata  <= sda_in_i;
+            debug_dout   <= dout;
+            debug_pixclk <= pixclk;
+            debug_fval   <= frame_valid;
+            debug_lval   <= line_valid;
         end if;
     end process p_debug;
 
@@ -285,7 +282,7 @@ begin
         if rising_edge(mclk) then
             if rst_final = '1' then
                 state        <= ST_CAM_RESET_ASSERT;
-                cam_reset_r  <= '0';        --! Mantener cámara en reset
+                cam_reset_r  <= '0';
                 init_cnt     <= 0;
                 i2c_rw       <= '0';
                 i2c_start    <= '0';
@@ -295,9 +292,9 @@ begin
                 i2c_addr_reg <= (others => '0');
                 i2c_wr_data  <= (others => '0');
                 fill_cnt     <= 0;
-                rd_cnt       <= 0;
-                LED(0) <= '0';
-                LED(1) <= '0';
+                chip_id      <= (others => '0');
+                LED(0)       <= '0';
+                LED(1)       <= '0';
             else
                 i2c_start   <= '0';
                 i2c_wr_push <= '0';
@@ -325,85 +322,83 @@ begin
                         if init_cnt = RESET_WAIT_CYCLES - 1 then
                             init_cnt <= 0;
                             fill_cnt <= 0;
-                            rd_cnt   <= 0;
-                            state    <= ST_WR_FILL_FIFO;
+                            state    <= ST_PAGE_SEL_FILL;
                         else
                             init_cnt <= init_cnt + 1;
                         end if;
 
                     -----------------------------------------------------------
-                    -- Cargar WR FIFO
+                    -- Cargar WR FIFO con page register
+                    -- R1 = 0x0004 → selecciona Sensor Core
                     -----------------------------------------------------------
-                    when ST_WR_FILL_FIFO =>
-                        if fill_cnt = NUM_REGS_WR then
-                            fill_cnt <= 0;
-                            state    <= ST_WR_START;
-                        elsif i2c_wr_full = '0' then
-                            i2c_wr_data <= WR_DATA(fill_cnt);
+                    when ST_PAGE_SEL_FILL =>
+                        if i2c_wr_full = '0' then
+                            i2c_wr_data <= x"0004";  --! R1 = 4 → Sensor Core
                             i2c_wr_push <= '1';
-                            fill_cnt    <= fill_cnt + 1;
+                            state       <= ST_PAGE_SEL_START;
                         end if;
 
                     -----------------------------------------------------------
-                    -- Lanzar transacción Write
+                    -- Lanzar escritura del page register (R1 = 0x01)
                     -----------------------------------------------------------
-                    when ST_WR_START =>
+                    when ST_PAGE_SEL_START =>
                         if i2c_busy = '0' then
-                            i2c_rw       <= '0';
-                            i2c_addr_reg <= x"04";
-                            i2c_num_regs <= NUM_REGS_WR;
+                            i2c_rw       <= '0';        --! Write
+                            i2c_addr_reg <= x"01";      --! Registro R1 = page select
+                            i2c_num_regs <= 1;
                             i2c_start    <= '1';
-                            state        <= ST_WR_WAIT;
+                            state        <= ST_PAGE_SEL_WAIT;
                         end if;
 
-                    when ST_WR_WAIT =>
+                    when ST_PAGE_SEL_WAIT =>
                         if i2c_error = '1' then
                             state <= ST_ERROR;
                         elsif i2c_done = '1' then
-                            state <= ST_RD_START;
+                            state <= ST_CHIPID_RD_START;
                         end if;
 
                     -----------------------------------------------------------
-                    -- Lanzar transacción Read
+                    -- Lanzar lectura del Chip ID (registro 0xFF, Sensor Core)
                     -----------------------------------------------------------
-                    when ST_RD_START =>
+                    when ST_CHIPID_RD_START =>
                         if i2c_busy = '0' and i2c_rd_empty = '1' then
-                            i2c_rw       <= '1';
-                            i2c_addr_reg <= x"04";
-                            i2c_num_regs <= NUM_REGS_RD;
+                            i2c_rw       <= '1';        --! Read
+                            i2c_addr_reg <= x"FF";      --! Chip ID register
+                            i2c_num_regs <= 1;
                             i2c_start    <= '1';
-                            state        <= ST_RD_WAIT;
+                            state        <= ST_CHIPID_RD_WAIT;
                         end if;
 
-                    when ST_RD_WAIT =>
+                    when ST_CHIPID_RD_WAIT =>
                         if i2c_error = '1' then
                             state <= ST_ERROR;
                         elsif i2c_done = '1' then
-                            rd_cnt <= 0;
-                            state  <= ST_RD_DRAIN;
+                            state <= ST_CHIPID_RD_DRAIN;
                         end if;
 
                     -----------------------------------------------------------
-                    -- Vaciar RD FIFO
+                    -- Vaciar RD FIFO y verificar Chip ID
                     -----------------------------------------------------------
-                    when ST_RD_DRAIN =>
-                        if i2c_rd_empty = '0' and rd_cnt < NUM_REGS_RD then
-                            i2c_rd_pop     <= '1';
-                            rd_buf(rd_cnt) <= i2c_rd_data;
-                            rd_cnt         <= rd_cnt + 1;
-                        elsif rd_cnt = NUM_REGS_RD then
-                            state <= ST_FINISH;
+                    when ST_CHIPID_RD_DRAIN =>
+                        if i2c_rd_empty = '0' then
+                            i2c_rd_pop <= '1';
+                            chip_id    <= i2c_rd_data;
+                            if i2c_rd_data = CHIP_ID_EXPECTED then
+                                state <= ST_FINISH;   --! 0x823A ✓
+                            else
+                                state <= ST_ERROR;    --! Chip ID incorrecto
+                            end if;
                         end if;
 
                     -----------------------------------------------------------
                     when ST_FINISH =>
-                        LED(0) <= '1';       --! Éxito: rd_buf contiene los datos leídos
+                        LED(0) <= '1';       --! Chip ID correcto: 0x823A ✓
                         LED(1) <= '0';
                         state  <= ST_FINISH;
 
                     when ST_ERROR =>
                         LED(0) <= '0';
-                        LED(1) <= '1';       --! Error visible en LED(1)
+                        LED(1) <= '1';       --! Error: NACK o Chip ID incorrecto
                         state  <= ST_ERROR;
 
                     when others =>
