@@ -1,16 +1,20 @@
 --! \file TOP.vhd
 --! \brief Top-level del sistema de comunicación con la cámara MT9V111.
 --!
---! Secuencia de ejemplo al arrancar:
---!   1. Escribe 2 registros a partir de REG 0x04 (auto-increment)
---!   2. Lee 2 registros a partir de REG 0x04
---!   3. LED(0) = '1' si todo OK, se queda en ST_ERROR si hubo NACK
+--! Secuencia de inicialización al arrancar:
+--!   1. ST_CAM_RESET_ASSERT : RESET_BAR='0' durante 1 ms
+--!   2. ST_CAM_RESET_WAIT   : RESET_BAR='1', espera 150 ms para que la cámara arranque
+--!   3. ST_WR_FILL_FIFO     : Cargar WR FIFO
+--!   4. ST_WR_START/WAIT    : Escribir registros por I2C
+--!   5. ST_RD_START/WAIT    : Leer registros por I2C
+--!   6. ST_RD_DRAIN         : Vaciar RD FIFO
+--!   7. ST_FINISH           : LED(0)='1' OK, LED(1)='1' error
 --!
 --! Notas de hardware (Basys 3):
---!   - sclk y sdata son open-drain: la FPGA solo fuerza '0'; el pull-up
---!     externo (típicamente 4.7kΩ) lleva la línea a '1' cuando está en 'Z'.
---!   - El MMCM genera mclk a partir del oscilador de 100 MHz de la placa.
---!   - BTN(0) resetea el MMCM; el sistema sale de reset cuando locked='1'.
+--!   - sclk y sdata son open-drain. Necesitan pull-ups externos de 4.7 kΩ a 3.3 V.
+--!   - cam_mclk se genera dividiendo mclk por 4 → 25 MHz (rango válido: 13-27 MHz).
+--!   - cam_reset_n es activo bajo. La FSM lo controla con un contador de tiempo.
+--!   - BTN(0) resetea el MMCM y reinicia toda la secuencia.
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -18,90 +22,109 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity TOP is
     generic (
-        CLK_FREQ_HZ : integer                       := 100_000_000;    --! Frecuencia de mclk (Hz)
-        I2C_FREQ_HZ : integer                       := 400_000;         --! Frecuencia I2C deseada (Hz)
-        FIFO_DEPTH  : integer                       := 16;              --! Profundidad de las FIFOs
-        SENSOR_ADDR : std_logic_vector(6 downto 0) := "1011100"         --! Dirección I2C del MT9V111 (0x5C)
+        CLK_FREQ_HZ  : integer                       := 100_000_000;  --! Frecuencia de mclk (Hz)
+        I2C_FREQ_HZ  : integer                       := 400_000;       --! Frecuencia I2C (Hz)
+        FIFO_DEPTH   : integer                       := 16;            --! Profundidad de las FIFOs
+        SENSOR_ADDR  : std_logic_vector(6 downto 0) := "1011100"       --! Dirección I2C MT9V111 (0x5C)
     );
     port (
-        clk   : in    std_logic;                        --! Oscilador 100 MHz de la Basys 3
-        BTN   : in    std_logic_vector(4 downto 0);     --! BTN(0) = reset del MMCM
-        SW    : in    std_logic_vector(15 downto 0);
-        LED   : out   std_logic_vector(15 downto 0);    --! LED(0) = done
-        CAT   : out   std_logic_vector(7 downto 0);     --! Display de 7 segmentos (no usado)
-        AN    : out   std_logic_vector(3 downto 0);     --! Anodos display (no usado)
-        sclk  : inout std_logic;                        --! I2C SCL (open-drain)
-        sdata : inout std_logic                         --! I2C SDA (open-drain)
+        clk         : in    std_logic;                     --! Oscilador 100 MHz de la Basys 3
+        BTN         : in    std_logic_vector(4 downto 0);  --! BTN(0) = reset del MMCM
+        SW          : in    std_logic_vector(15 downto 0);
+        LED         : out   std_logic_vector(15 downto 0); --! LED(0)=OK  LED(1)=error
+        CAT         : out   std_logic_vector(7 downto 0);  --! Display 7 seg (no usado)
+        AN          : out   std_logic_vector(3 downto 0);  --! Ánodos display (no usado)
+        -- Bus I2C
+        sclk        : inout std_logic;                     --! I2C SCL (open-drain)
+        sdata       : inout std_logic;                     --! I2C SDA (open-drain)
+        -- Cámara MT9V111
+        cam_reset_n : out   std_logic;                     --! RESET_BAR de la cámara (activo bajo)
+        cam_mclk    : out   std_logic                      --! Master clock de la cámara (~25 MHz)
     );
 end entity TOP;
 
 architecture Behavioral of TOP is
 
     ---------------------------------------------------------------------------
+    -- Constantes de temporización de inicialización
+    ---------------------------------------------------------------------------
+    constant RESET_HOLD_CYCLES : integer := CLK_FREQ_HZ / 1000;        --!   1 ms a 100 MHz
+    constant RESET_WAIT_CYCLES : integer := CLK_FREQ_HZ / 1000 * 150;  --! 150 ms a 100 MHz
+    constant MCLK_DIV          : integer := 2;  --! Toggle cada 2 ciclos → 25 MHz
+
+    ---------------------------------------------------------------------------
     -- Reloj y reset
     ---------------------------------------------------------------------------
     signal mclk      : std_logic;
     signal locked    : std_logic;
-    signal rst_final : std_logic;  --! Reset activo alto; '1' hasta que el MMCM esté estable
+    signal rst_final : std_logic;  --! Activo alto; '1' hasta que el MMCM esté estable
 
     ---------------------------------------------------------------------------
-    -- Señales de interfaz con i2c_master — Control
+    -- Generación de MCLK para la cámara (25 MHz = mclk/4)
     ---------------------------------------------------------------------------
-    signal i2c_rw       : std_logic                              := '0';
-    signal i2c_start    : std_logic                              := '0';
-    signal i2c_num_regs : integer range 1 to FIFO_DEPTH         := 1;
-    signal i2c_addr_reg : std_logic_vector(7 downto 0)          := (others => '0');
+    signal mclk_div_cnt : integer range 0 to MCLK_DIV - 1 := 0;
+    signal cam_mclk_r   : std_logic := '0';
 
     ---------------------------------------------------------------------------
-    -- Señales de interfaz con i2c_master — WR FIFO
+    -- Interfaz con i2c_master — Control
     ---------------------------------------------------------------------------
-    signal i2c_wr_push  : std_logic                              := '0';
-    signal i2c_wr_data  : std_logic_vector(15 downto 0)         := (others => '0');
+    signal i2c_rw       : std_logic                      := '0';
+    signal i2c_start    : std_logic                      := '0';
+    signal i2c_num_regs : integer range 1 to FIFO_DEPTH := 1;
+    signal i2c_addr_reg : std_logic_vector(7 downto 0)  := (others => '0');
+
+    ---------------------------------------------------------------------------
+    -- Interfaz con i2c_master — WR FIFO
+    ---------------------------------------------------------------------------
+    signal i2c_wr_push  : std_logic                      := '0';
+    signal i2c_wr_data  : std_logic_vector(15 downto 0) := (others => '0');
     signal i2c_wr_full  : std_logic;
     signal i2c_wr_empty : std_logic;
 
     ---------------------------------------------------------------------------
-    -- Señales de interfaz con i2c_master — RD FIFO
+    -- Interfaz con i2c_master — RD FIFO
     ---------------------------------------------------------------------------
-    signal i2c_rd_pop   : std_logic                              := '0';
+    signal i2c_rd_pop   : std_logic                      := '0';
     signal i2c_rd_data  : std_logic_vector(15 downto 0);
     signal i2c_rd_full  : std_logic;
     signal i2c_rd_empty : std_logic;
 
     ---------------------------------------------------------------------------
-    -- Señales de interfaz con i2c_master — Estado
+    -- Interfaz con i2c_master — Estado
     ---------------------------------------------------------------------------
-    signal i2c_busy     : std_logic;
-    signal i2c_done     : std_logic;
-    signal i2c_error    : std_logic;
+    signal i2c_busy  : std_logic;
+    signal i2c_done  : std_logic;
+    signal i2c_error : std_logic;
 
     ---------------------------------------------------------------------------
-    -- Señales de interfaz con i2c_master — Bus (separadas del inout físico)
-    -- El tristate y open-drain se manejan aquí en el TOP.
+    -- Interfaz con i2c_master — Bus (señales separadas del inout físico)
     ---------------------------------------------------------------------------
-    signal scl_out_i  : std_logic;  --! Valor que el controlador quiere poner en SCL
-    signal sda_out_i  : std_logic;  --! Valor que el controlador quiere poner en SDA
-    signal sda_oe_i   : std_logic;  --! '1'=conducir SDA  '0'=tristate
-    signal sda_in_i   : std_logic;  --! Valor leído del bus SDA
+    signal scl_out_i : std_logic;
+    signal sda_out_i : std_logic;
+    signal sda_oe_i  : std_logic;
+    signal sda_in_i  : std_logic;
 
     ---------------------------------------------------------------------------
     -- FSM del TOP
     ---------------------------------------------------------------------------
     type main_state_t is (
-        ST_IDLE,
-        ST_WR_FILL_FIFO,    --! Cargar datos en WR FIFO
-        ST_WR_START,        --! Lanzar transacción Write
-        ST_WR_WAIT,         --! Esperar done/error del Write
-        ST_RD_START,        --! Lanzar transacción Read
-        ST_RD_WAIT,         --! Esperar done/error del Read
-        ST_RD_DRAIN,        --! Vaciar RD FIFO
-        ST_FINISH,          --! Transacción completada correctamente
-        ST_ERROR            --! Error (NACK u otro)
+        ST_CAM_RESET_ASSERT,    --! RESET_BAR='0' durante RESET_HOLD_CYCLES
+        ST_CAM_RESET_WAIT,      --! Espera 150 ms tras soltar el reset
+        ST_WR_FILL_FIFO,        --! Cargar datos en WR FIFO
+        ST_WR_START,            --! Lanzar transacción Write
+        ST_WR_WAIT,             --! Esperar done/error del Write
+        ST_RD_START,            --! Lanzar transacción Read
+        ST_RD_WAIT,             --! Esperar done/error del Read
+        ST_RD_DRAIN,            --! Vaciar RD FIFO
+        ST_FINISH,
+        ST_ERROR
     );
-    signal state : main_state_t := ST_IDLE;
+    signal state : main_state_t := ST_CAM_RESET_ASSERT;
 
-    signal fill_cnt : integer range 0 to FIFO_DEPTH := 0;  --! Contador de llenado de WR FIFO
-    signal rd_cnt   : integer range 0 to 16          := 0;  --! Contador de vaciado de RD FIFO
+    signal init_cnt    : integer range 0 to RESET_WAIT_CYCLES := 0;
+    signal fill_cnt    : integer range 0 to FIFO_DEPTH        := 0;
+    signal rd_cnt      : integer range 0 to 16               := 0;
+    signal cam_reset_r : std_logic := '0';
 
     ---------------------------------------------------------------------------
     -- Datos de ejemplo
@@ -116,55 +139,85 @@ architecture Behavioral of TOP is
     );
 
     type rd_buf_t is array (0 to NUM_REGS_RD - 1) of std_logic_vector(15 downto 0);
-    signal rd_buf : rd_buf_t := (others => (others => '0'));  --! Buffer de datos leídos
+    signal rd_buf : rd_buf_t := (others => (others => '0'));
 
     ---------------------------------------------------------------------------
     -- ILA / Debug
-    -- debug_sclk y debug_sdata capturan lo que el controlador pone en el bus,
-    -- no el pin físico (que puede estar en 'Z' cuando open-drain).
     ---------------------------------------------------------------------------
     signal debug_sclk  : std_logic;
     signal debug_sdata : std_logic;
+    signal debug_mclk : std_logic;
+
 
     attribute mark_debug : string;
-    attribute mark_debug of i2c_start  : signal is "true";
-    attribute mark_debug of i2c_busy   : signal is "true";
-    attribute mark_debug of i2c_done   : signal is "true";
-    attribute mark_debug of i2c_error  : signal is "true";
-    attribute mark_debug of debug_sclk : signal is "true";
-    attribute mark_debug of debug_sdata: signal is "true";
+    attribute dont_touch : string;
+
+    attribute mark_debug of i2c_start   : signal is "true";
+    attribute mark_debug of i2c_busy    : signal is "true";
+    attribute mark_debug of i2c_done    : signal is "true";
+    attribute mark_debug of i2c_error   : signal is "true";
+    attribute mark_debug of debug_sclk  : signal is "true";
+    attribute mark_debug of debug_sdata : signal is "true";
+    attribute mark_debug of state       : signal is "true";
+    attribute mark_debug of cam_reset_r : signal is "true";
+    attribute mark_debug of cam_mclk_r : signal is "true";
+    attribute dont_touch of cam_mclk_r : signal is "true";
+
+
 
 begin
 
     ---------------------------------------------------------------------------
     -- Bus I2C — open-drain
-    -- SCL: la FPGA solo fuerza '0'; el pull-up externo da el '1'.
-    -- SDA: igual, controlado por sda_oe_i.
     ---------------------------------------------------------------------------
     sclk     <= '0' when scl_out_i = '0' else 'Z';
     sdata    <= sda_out_i when sda_oe_i = '1' else 'Z';
     sda_in_i <= sdata;
 
     ---------------------------------------------------------------------------
-    -- Debug: captura registrada de lo que el controlador pone en el bus
+    -- Señales de cámara
     ---------------------------------------------------------------------------
-    p_debug : process(mclk)
-    begin
-        if rising_edge(mclk) then
-            debug_sclk  <= scl_out_i;  --! Lo que el controlador intenta poner en SCL
-            debug_sdata <= sda_in_i;   --! Lo que hay en el bus SDA (incluye lo que pone el esclavo)
-        end if;
-    end process p_debug;
+    cam_reset_n <= cam_reset_r;
+    cam_mclk    <= cam_mclk_r;
 
     ---------------------------------------------------------------------------
     -- Salidas no usadas
     ---------------------------------------------------------------------------
     CAT <= (others => '0');
-    AN  <= (others => '1');  -- Anodos activos bajos: '1' = display apagado
+    AN  <= (others => '1');  --! Ánodos activos bajos: '1' = display apagado
+
+    ---------------------------------------------------------------------------
+    -- Debug
+    ---------------------------------------------------------------------------
+    p_debug : process(mclk)
+    begin
+        if rising_edge(mclk) then
+            debug_sclk  <= scl_out_i;
+            debug_sdata <= sda_in_i;
+        end if;
+    end process p_debug;
+
+    ---------------------------------------------------------------------------
+    -- Generación de MCLK para la cámara
+    -- Toggle cada MCLK_DIV ciclos → 100 MHz / 4 = 25 MHz
+    ---------------------------------------------------------------------------
+    p_cam_mclk : process(mclk)
+    begin
+        if rising_edge(mclk) then
+            if rst_final = '1' then
+                mclk_div_cnt <= 0;
+                cam_mclk_r   <= '0';
+            elsif mclk_div_cnt = MCLK_DIV - 1 then
+                mclk_div_cnt <= 0;
+                cam_mclk_r   <= not cam_mclk_r;
+            else
+                mclk_div_cnt <= mclk_div_cnt + 1;
+            end if;
+        end if;
+    end process p_cam_mclk;
 
     ---------------------------------------------------------------------------
     -- MMCM
-    -- BTN(0) resetea el MMCM. El sistema sale de reset cuando locked='1'.
     ---------------------------------------------------------------------------
     mi_MMCM : entity work.clk_wiz_0
         port map (
@@ -188,27 +241,22 @@ begin
         port map (
             clk           => mclk,
             reset         => rst_final,
-            -- Control
             rw            => i2c_rw,
             start_i2c     => i2c_start,
             num_regs      => i2c_num_regs,
             addr_dev      => SENSOR_ADDR,
             addr_reg      => i2c_addr_reg,
-            -- WR FIFO
             wr_fifo_push  => i2c_wr_push,
             wr_fifo_data  => i2c_wr_data,
             wr_fifo_full  => i2c_wr_full,
             wr_fifo_empty => i2c_wr_empty,
-            -- RD FIFO
             rd_fifo_pop   => i2c_rd_pop,
             rd_fifo_data  => i2c_rd_data,
             rd_fifo_full  => i2c_rd_full,
             rd_fifo_empty => i2c_rd_empty,
-            -- Estado
             busy          => i2c_busy,
             done          => i2c_done,
             error         => i2c_error,
-            -- Bus
             scl_out       => scl_out_i,
             sda_out       => sda_out_i,
             sda_oe_o      => sda_oe_i,
@@ -222,7 +270,9 @@ begin
     begin
         if rising_edge(mclk) then
             if rst_final = '1' then
-                state        <= ST_IDLE;
+                state        <= ST_CAM_RESET_ASSERT;
+                cam_reset_r  <= '0';        --! Mantener cámara en reset
+                init_cnt     <= 0;
                 i2c_rw       <= '0';
                 i2c_start    <= '0';
                 i2c_wr_push  <= '0';
@@ -232,23 +282,43 @@ begin
                 i2c_wr_data  <= (others => '0');
                 fill_cnt     <= 0;
                 rd_cnt       <= 0;
-                LED(0)       <= '0';
+                LED(0) <= '0';
+                LED(1) <= '0';
             else
-                -- Pulsos de un ciclo por defecto
                 i2c_start   <= '0';
                 i2c_wr_push <= '0';
                 i2c_rd_pop  <= '0';
 
                 case state is
 
-                    when ST_IDLE =>
-                        LED(0)   <= '0';
-                        fill_cnt <= 0;
-                        rd_cnt   <= 0;
-                        state    <= ST_WR_FILL_FIFO;
+                    -----------------------------------------------------------
+                    -- Mantener RESET_BAR='0' durante 1 ms
+                    -----------------------------------------------------------
+                    when ST_CAM_RESET_ASSERT =>
+                        cam_reset_r <= '0';
+                        if init_cnt = RESET_HOLD_CYCLES - 1 then
+                            init_cnt <= 0;
+                            state    <= ST_CAM_RESET_WAIT;
+                        else
+                            init_cnt <= init_cnt + 1;
+                        end if;
 
                     -----------------------------------------------------------
-                    -- Cargar WR FIFO antes de lanzar la escritura
+                    -- Soltar reset y esperar 150 ms
+                    -----------------------------------------------------------
+                    when ST_CAM_RESET_WAIT =>
+                        cam_reset_r <= '1';
+                        if init_cnt = RESET_WAIT_CYCLES - 1 then
+                            init_cnt <= 0;
+                            fill_cnt <= 0;
+                            rd_cnt   <= 0;
+                            state    <= ST_WR_FILL_FIFO;
+                        else
+                            init_cnt <= init_cnt + 1;
+                        end if;
+
+                    -----------------------------------------------------------
+                    -- Cargar WR FIFO
                     -----------------------------------------------------------
                     when ST_WR_FILL_FIFO =>
                         if fill_cnt = NUM_REGS_WR then
@@ -300,7 +370,7 @@ begin
                         end if;
 
                     -----------------------------------------------------------
-                    -- Vaciar RD FIFO y guardar en buffer interno
+                    -- Vaciar RD FIFO
                     -----------------------------------------------------------
                     when ST_RD_DRAIN =>
                         if i2c_rd_empty = '0' and rd_cnt < NUM_REGS_RD then
@@ -311,25 +381,25 @@ begin
                             state <= ST_FINISH;
                         end if;
 
+                    -----------------------------------------------------------
                     when ST_FINISH =>
-                        LED(0) <= '1';          --! Indica éxito
-                        state  <= ST_FINISH;    --! rd_buf(0) y rd_buf(1) contienen los datos leídos
+                        LED(0) <= '1';       --! Éxito: rd_buf contiene los datos leídos
+                        LED(1) <= '0';
+                        state  <= ST_FINISH;
 
                     when ST_ERROR =>
                         LED(0) <= '0';
+                        LED(1) <= '1';       --! Error visible en LED(1)
                         state  <= ST_ERROR;
 
                     when others =>
-                        state <= ST_IDLE;
+                        state <= ST_CAM_RESET_ASSERT;
 
                 end case;
             end if;
         end if;
     end process p_fsm;
 
-    ---------------------------------------------------------------------------
-    -- LEDs auxiliares
-    ---------------------------------------------------------------------------
-    LED(15 downto 1) <= SW(15 downto 1);
+    LED(15 downto 2) <= SW(15 downto 2);
 
 end architecture Behavioral;
