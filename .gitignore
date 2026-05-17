@@ -125,3 +125,6 @@ desktop.ini
 # --- Archivos temporales de LaTeX ---
 **/report/build/*
 *.drawio.bkp
+
+
+06-Project/*/

@@ -1,0 +1,19 @@
+/*!
+\page page_git GIT REPOSITORY
+
+El repositorio de git almacena los archivos en los que se tiene control de versiones, se puede acceder a través del icono situado en la esquina superior derecha de esta página. 
+
+\section sec_gitflow GIT FLOW
+
+A la hora de trabajar con control de versiones y más en concreto con GIT, hay que seguir ciertas reglas:
+
+- Los cambios se realizan en ramas feature/<branch_name>
+- Las ramas feature/ siempre nacen de la rama develop y no desde otra feature/
+- Para hacer un merge a develop se debe traer antes develop y probar para confirmar el funcionamiento con los cambios
+- El merge a develop se hace a través de una pull request (PR) 
+
+\image html GitFlow.png
+
+\todo ¿Queremos incluir un git-graph o algo aquí? Puede que sea necesario solamente con en enlace al repo. 
+
+*/

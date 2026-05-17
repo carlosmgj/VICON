@@ -1,0 +1,45 @@
+# ============================================================
+# doc_config.yaml  —  Configuración del documento Word VHDL
+# ============================================================
+
+document:
+  title:           "FPGA Design Documentation"
+  project:         "MyProject"
+  author:          "Engineering Team"
+  version:         "1.0"
+  date:            ""                # vacío = fecha de generación automática
+  confidentiality: "CONFIDENTIAL"
+
+entity_diagram:
+  width_percent: 50    # porcentaje del ancho de contenido (50-100)
+  
+page:
+  size: A4                           # A4 | US_LETTER
+
+header:
+  logo:       null                   # ruta a PNG del logo, o null
+  right_text: "{project}  |  v{version}"
+
+footer:
+  left_text: "{confidentiality}"     # texto izquierda
+  page_format: "Page {page} of {total}"   # {page} y {total} se sustituyen por campos Word
+
+# ─── Secciones del documento (en orden) ───────────────────
+sections:
+
+  - type: cover                      # Portada (sin header/footer)
+
+  - type: toc
+    title: "Table of Contents"
+
+  - type: modules
+    top_module: auto                 # "auto" detecta el top, o pon el nombre explícito
+    max_depth:  3                    # niveles máximos de jerarquía (H1 → H3)
+    show:
+      entity_diagram:  true          # diagrama PlantUML de E/S
+      ports_table:     true          # tabla de puertos
+      generics_table:  true          # tabla de genéricos (si los hay)
+      signals_table:   true          # señales internas
+      constants_table: true          # constantes (si las hay)
+      submodules_list: true          # lista de módulos instanciados
+      fsm_diagram:     true          # diagrama FSM (si existe)
