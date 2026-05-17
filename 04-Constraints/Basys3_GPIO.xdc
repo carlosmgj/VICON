@@ -179,7 +179,57 @@ set_property PACKAGE_PIN L2 [get_ports cam_mclk]
 set_property IOSTANDARD LVCMOS33 [get_ports cam_mclk]
 
 
+#UM232H-B
 
+#Bus 1 - BROWN   - D0 - PINPMOD: 1
+set_property PACKAGE_PIN A14 [get_ports {ADBUS[0]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {ADBUS[0]}]
+#Bus 1 - RED     - D1 - PINPMOD: 7
+set_property PACKAGE_PIN A15 [get_ports {ADBUS[1]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {ADBUS[1]}]
+#Bus 1 - ORANGE  - D2 - PINPMOD: 2
+set_property PACKAGE_PIN A16 [get_ports {ADBUS[2]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {ADBUS[2]}]
+#Bus 1 - YELLOW  - D3 - PINPMOD: 8
+set_property PACKAGE_PIN A17 [get_ports {ADBUS[3]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {ADBUS[3]}]
+#Bus 1 - GREEN   - D4 - PINPMOD: 3
+set_property PACKAGE_PIN B15 [get_ports {ADBUS[4]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {ADBUS[4]}]
+#Bus 1 - BLUE    - D5 - PINPMOD: 9
+set_property PACKAGE_PIN C15 [get_ports {ADBUS[5]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {ADBUS[5]}]
+#Bus 1 - PURPLE  - D6 - PINPMOD: 4
+set_property PACKAGE_PIN B16 [get_ports {ADBUS[6]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {ADBUS[6]}]
+#Bus 1 - GREY    - D7 - PINPMOD: 10
+set_property PACKAGE_PIN C16 [get_ports {ADBUS[7]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {ADBUS[7]}]
+
+#Bus 2 - RED     - C0 - PINPMOD: 1
+set_property PACKAGE_PIN K17 [get_ports {ACBUS[0]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {ACBUS[0]}]
+#Bus 2 - ORANGE  - C1 - PINPMOD: 7
+set_property PACKAGE_PIN L17 [get_ports {ACBUS[1]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {ACBUS[1]}]
+#Bus 2 - YELLOW  - C2 - PINPMOD: 2
+set_property PACKAGE_PIN M18 [get_ports {ACBUS[2]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {ACBUS[2]}]
+#Bus 2 - GREEN   - C3 - PINPMOD: 8
+set_property PACKAGE_PIN M19 [get_ports {ACBUS[3]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {ACBUS[3]}]
+#Bus 2 - BLUE    - C4 - PINPMOD: 3
+set_property PACKAGE_PIN N17 [get_ports {ACBUS[4]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {ACBUS[4]}]
+#Bus 2 - PURPLE  - C5 - PINPMOD: 9
+set_property PACKAGE_PIN P17 [get_ports {ACBUS[5]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {ACBUS[5]}]
+#Bus 2 - GREY    - C6 - PINPMOD: 4
+set_property PACKAGE_PIN P18 [get_ports {ACBUS[6]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {ACBUS[6]}]
+#Bus 2 - WHITE   - C7 - PINPMOD: 10
+set_property PACKAGE_PIN R18 [get_ports {ACBUS[7]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {ACBUS[7]}]
 
 
 
