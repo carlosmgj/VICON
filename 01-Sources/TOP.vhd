@@ -28,17 +28,23 @@ entity TOP is
         SENSOR_ADDR  : std_logic_vector(6 downto 0) := "1011100"       --! Dirección I2C MT9V111 (0x5C)
     );
     port (
+        -- System CLK 
         clk         : in    std_logic;                     --! Oscilador 100 MHz de la Basys 3
-        BTN         : in    std_logic_vector(4 downto 0);  --! BTN(0) = reset del MMCM
+        -- Dev Board interface 
         SW          : in    std_logic_vector(15 downto 0);
         LED         : out   std_logic_vector(15 downto 0); --! LED(0)=OK  LED(1)=error
-        CAT         : out   std_logic_vector(7 downto 0);  --! Display 7 seg (no usado)
-        AN          : out   std_logic_vector(3 downto 0);  --! Ánodos display (no usado)
-        -- Bus I2C
+        CAT         : out   std_logic_vector(6 downto 0);
+        DP          : out   std_logic;
+        AN          : out   std_logic_vector(3 downto 0);
+        BTN         : in    std_logic_vector(4 downto 0);  --! BTN(0) = reset del MMCM
+        -- MT9V111 - JA & JXADC
+        dout        : in    std_logic_vector(7 downto 0);
+        line_valid  : in    std_logic;
+        pixclk      : in    std_logic;
+        cam_reset_n : out   std_logic;                     --! RESET_BAR de la cámara (activo bajo)
         sclk        : inout std_logic;                     --! I2C SCL (open-drain)
         sdata       : inout std_logic;                     --! I2C SDA (open-drain)
-        -- Cámara MT9V111
-        cam_reset_n : out   std_logic;                     --! RESET_BAR de la cámara (activo bajo)
+        frame_valid : in    std_logic;
         cam_mclk    : out   std_logic                      --! Master clock de la cámara (~25 MHz)
     );
 end entity TOP;
@@ -147,22 +153,28 @@ architecture Behavioral of TOP is
     signal debug_sclk  : std_logic;
     signal debug_sdata : std_logic;
     signal debug_mclk : std_logic;
-
-
+    signal debug_dout       : std_logic_vector(7 downto 0);
+    signal debug_pixclk     : std_logic;
+    signal debug_fval       : std_logic;
+    signal debug_lval       : std_logic;
+    
     attribute mark_debug : string;
     attribute dont_touch : string;
 
-    attribute mark_debug of i2c_start   : signal is "true";
-    attribute mark_debug of i2c_busy    : signal is "true";
-    attribute mark_debug of i2c_done    : signal is "true";
-    attribute mark_debug of i2c_error   : signal is "true";
-    attribute mark_debug of debug_sclk  : signal is "true";
-    attribute mark_debug of debug_sdata : signal is "true";
-    attribute mark_debug of state       : signal is "true";
-    attribute mark_debug of cam_reset_r : signal is "true";
-    attribute mark_debug of cam_mclk_r : signal is "true";
-    attribute dont_touch of cam_mclk_r : signal is "true";
-
+    attribute mark_debug of i2c_start    : signal is "true";
+    attribute mark_debug of i2c_busy     : signal is "true";
+    attribute mark_debug of i2c_done     : signal is "true";
+    attribute mark_debug of i2c_error    : signal is "true";
+    attribute mark_debug of debug_sclk   : signal is "true";
+    attribute mark_debug of debug_sdata  : signal is "true";
+    attribute mark_debug of state        : signal is "true";
+    attribute mark_debug of cam_reset_r  : signal is "true";
+    attribute mark_debug of cam_mclk_r   : signal is "true";
+    attribute dont_touch of cam_mclk_r   : signal is "true";
+    attribute mark_debug of debug_dout   : signal is "true";
+    attribute mark_debug of debug_pixclk : signal is "true";
+    attribute mark_debug of debug_fval   : signal is "true";
+    attribute mark_debug of debug_lval   : signal is "true";
 
 
 begin
@@ -184,16 +196,18 @@ begin
     -- Salidas no usadas
     ---------------------------------------------------------------------------
     CAT <= (others => '0');
+    DP  <= '0';
     AN  <= (others => '1');  --! Ánodos activos bajos: '1' = display apagado
 
-    ---------------------------------------------------------------------------
-    -- Debug
-    ---------------------------------------------------------------------------
     p_debug : process(mclk)
     begin
         if rising_edge(mclk) then
             debug_sclk  <= scl_out_i;
             debug_sdata <= sda_in_i;
+            debug_dout       <= dout;
+            debug_pixclk     <= pixclk;
+            debug_fval       <= frame_valid;
+            debug_lval       <= line_valid;
         end if;
     end process p_debug;
 
