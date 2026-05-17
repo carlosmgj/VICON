@@ -1,26 +1,18 @@
-# VICON
+# PROYECTO
 
-## Trabajo Fin de Master en Sistemas Electrónicos para Entornos Inteligentes
+Estructura de carpetas del proyecto FPGA/VHDL.
 
-Documentación disponible <a href="https://carlosmgj.github.io/VICON/" target="_blank"> aquí</a>
+## Estructura
 
-
-## Configuración de Editor Visual Studio Code
-
-El desarrollo del proyecto se ha realizado utilizando principalmente este editor, que tiene soport (por medio de extensiones) para:
-
-- GIT: Push/pull/Resolver Merge Conflicts/Ver gráfica de ramas, etc
-- LaTex: Compilar (Automaticamente al guardar o con la receta), ver PDF (Ctrl + Alt + V), ayuda a sintaxis
-- MarkDown: previsualización (Ctrl + Shift + V)
-
-
-Si se abre la carpeta del repositorio con VSCode, los settings se cargarán desde .vscode/settings.json > globales
-
-Para cargar el perfil, habrá que importar el archivo localizado en: vscode_profiles/FPGA.code-profile. Aquí se incluyen:
-- Settings (settings.json) globales
-- Extensiones instaladas
-- Keybindings (atajos de teclado)
-- Snippets
-- Tasks y launch configs
-
-La idea es tener por ejemplo un perfil para Python, otro para VHDL/LaTeX, otro para web, cada uno con sus propias extensiones y configuración sin que se mezclen ni se ralenticen entre sí.
+| Carpeta | Contenido |
+|---------|-----------|
+| `0-Documents/` | Documentación del proyecto |
+| `01-Sources/` | Código fuente VHDL del diseño RTL |
+| `02-IPs/` | IPs de Vivado (.xci) |
+| `03-BD/` | Block Designs de Vivado |
+| `04-Constraints/` | Ficheros de constraints (.xdc) |
+| `05-TestBench/` | Testbenches, vectores y resultados de simulación |
+| `06-Project/` | Scripts TCL de generación del proyecto Vivado |
+| `07-Versions/` | Control de versiones y releases |
+| `08-Repositories/` | IPs y librerías propias |
+| `09-Doxygen/` | Herramientas y scripts de documentación automática |
