@@ -1,5 +1,5 @@
 --! \file TOP.vhd
---! \brief Top-level del sistema de comunicación con la cámara MT9V111.
+--! \brief Top-level del sistema de visión con la cámara MT9V111 y FTDI FT232H.
 --!
 --! Secuencia de inicialización al arrancar:
 --!   1. ST_CAM_RESET_ASSERT  : RESET_BAR='0' durante 1 ms
@@ -9,17 +9,31 @@
 --!   5. ST_PAGE_SEL_WAIT     : Esperar done/error
 --!   6. ST_CHIPID_RD_START   : Lanzar lectura del registro 0xFF (Chip ID)
 --!   7. ST_CHIPID_RD_WAIT    : Esperar done/error
---!   8. ST_CHIPID_RD_DRAIN   : Vaciar RD FIFO
---!   9. ST_FINISH            : LED(0)='1' si chip ID = 0x823A, LED(1)='1' si error
+--!   8. ST_CHIPID_RD_DRAIN   : Vaciar RD FIFO y verificar Chip ID
+--!   9. ST_FINISH            : LED(0)='1' — captura activa y streaming al PC
 --!
---! El registro 0xFF del Sensor Core contiene el Chip ID = 0x823A.
---! Leer este valor confirma que la comunicación I2C funciona de extremo a extremo.
+--! Flujo de datos de imagen:
+--!   MT9V111 (pixclk ~25 MHz)
+--!     └─ u_frame_capture  → solo canal Y (luminancia, escala de grises 640x480)
+--!          └─ u_async_fifo (FIFO asíncrona pixclk → ftdi_clk)
+--!               └─ u_ftdi_ctrl → FT232H → PC via USB
+--!
+--! Interfaz FTDI FT232H — Modo Synchronous FIFO:
+--!   ADBUS[7:0] : datos bidireccionales (píxeles Y hacia el PC)
+--!   ACBUS[0]   : RXF# — '0' = FTDI listo para recibir (input FPGA)
+--!   ACBUS[1]   : TXE# — '0' = FTDI tiene datos (input FPGA, no usado aún)
+--!   ACBUS[2]   : RD#  — '0' = pulso de lectura (output FPGA, no usado aún)
+--!   ACBUS[3]   : WR#  — '0' = pulso de escritura (output FPGA)
+--!   ACBUS[4]   : CLKOUT — reloj 60 MHz del FTDI (input FPGA)
+--!   ACBUS[5]   : OE#  — '0' = FPGA conduce ADBUS (output FPGA)
+--!   ACBUS[6:7] : sin usar
 --!
 --! Notas de hardware (Basys 3):
 --!   - sclk y sdata son open-drain. Pull-ups internos activos (1.5 kΩ externos recomendados).
 --!   - cam_mclk se genera dividiendo mclk por 4 → 25 MHz (rango válido: 13-27 MHz).
 --!   - cam_reset_n es activo bajo. La FSM lo controla con un contador de tiempo.
 --!   - BTN(0) resetea el MMCM y reinicia toda la secuencia.
+--!   - pixclk debe ir a un pin MRCC/SRCC de la Basys 3 para evitar warnings de routing.
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -29,41 +43,53 @@ entity TOP is
     generic (
         CLK_FREQ_HZ  : integer                       := 100_000_000;  --! Frecuencia de mclk (Hz)
         I2C_FREQ_HZ  : integer                       := 400_000;       --! Frecuencia I2C (Hz)
-        FIFO_DEPTH   : integer                       := 16;            --! Profundidad de las FIFOs
+        FIFO_DEPTH   : integer                       := 16;            --! Profundidad de las FIFOs I2C
         SENSOR_ADDR  : std_logic_vector(6 downto 0) := "1011100"       --! Dirección I2C MT9V111 (0x5C)
     );
     port (
-        -- System CLK
+        ---------------------------------------------------------------------------
+        -- Sistema
+        ---------------------------------------------------------------------------
         clk         : in    std_logic;                     --! Oscilador 100 MHz de la Basys 3
-        -- Dev Board interface
+
+        ---------------------------------------------------------------------------
+        -- Dev Board
+        ---------------------------------------------------------------------------
         SW          : in    std_logic_vector(15 downto 0);
         LED         : out   std_logic_vector(15 downto 0); --! LED(0)=OK  LED(1)=error
         CAT         : out   std_logic_vector(6 downto 0);
         DP          : out   std_logic;
         AN          : out   std_logic_vector(3 downto 0);
         BTN         : in    std_logic_vector(4 downto 0);  --! BTN(0) = reset del MMCM
-        -- MT9V111 - JA & JXADC
-        dout        : in    std_logic_vector(7 downto 0);
-        line_valid  : in    std_logic;
-        pixclk      : in    std_logic;
-        cam_reset_n : out   std_logic;                     --! RESET_BAR de la cámara (activo bajo)
+
+        ---------------------------------------------------------------------------
+        -- MT9V111 — JA & JXADC
+        ---------------------------------------------------------------------------
+        dout        : in    std_logic_vector(7 downto 0);  --! Datos YCbCr (8 bits)
+        line_valid  : in    std_logic;                     --! LINE_VALID
+        pixclk      : in    std_logic;                     --! PIXCLK (~25 MHz)
+        frame_valid : in    std_logic;                     --! FRAME_VALID
+        cam_reset_n : out   std_logic;                     --! RESET_BAR activo bajo
         sclk        : inout std_logic;                     --! I2C SCL (open-drain)
         sdata       : inout std_logic;                     --! I2C SDA (open-drain)
-        frame_valid : in    std_logic;
-        cam_mclk    : out   std_logic                      --! Master clock de la cámara (~25 MHz)
+        cam_mclk    : out   std_logic;                     --! Master clock (~25 MHz)
+
+        ---------------------------------------------------------------------------
+        -- FTDI FT232H — Modo Synchronous FIFO
+        ---------------------------------------------------------------------------
+        ADBUS       : inout std_logic_vector(7 downto 0);  --! Bus de datos bidireccional
+        ACBUS       : inout std_logic_vector(7 downto 0)   --! Bus de control
     );
 end entity TOP;
 
 architecture Behavioral of TOP is
 
     ---------------------------------------------------------------------------
-    -- Constantes de temporización de inicialización
+    -- Constantes de temporización
     ---------------------------------------------------------------------------
-    constant RESET_HOLD_CYCLES : integer := CLK_FREQ_HZ / 1000;        --!   1 ms a 100 MHz
-    constant RESET_WAIT_CYCLES : integer := CLK_FREQ_HZ / 1000 * 150;  --! 150 ms a 100 MHz
-    constant MCLK_DIV          : integer := 2;  --! Toggle cada 2 ciclos → 25 MHz
-
-    --! Chip ID esperado del MT9V111 (registro 0xFF del Sensor Core)
+    constant RESET_HOLD_CYCLES : integer := CLK_FREQ_HZ / 1000;        --!   1 ms
+    constant RESET_WAIT_CYCLES : integer := CLK_FREQ_HZ / 1000 * 150;  --! 150 ms
+    constant MCLK_DIV          : integer := 2;                          --! 100 MHz / 4 = 25 MHz
     constant CHIP_ID_EXPECTED  : std_logic_vector(15 downto 0) := x"823A";
 
     ---------------------------------------------------------------------------
@@ -71,10 +97,10 @@ architecture Behavioral of TOP is
     ---------------------------------------------------------------------------
     signal mclk      : std_logic;
     signal locked    : std_logic;
-    signal rst_final : std_logic;  --! Activo alto; '1' hasta que el MMCM esté estable
+    signal rst_final : std_logic;
 
     ---------------------------------------------------------------------------
-    -- Generación de MCLK para la cámara (25 MHz = mclk/4)
+    -- Generación de MCLK para la cámara
     ---------------------------------------------------------------------------
     signal mclk_div_cnt : integer range 0 to MCLK_DIV - 1 := 0;
     signal cam_mclk_r   : std_logic := '0';
@@ -111,7 +137,7 @@ architecture Behavioral of TOP is
     signal i2c_error : std_logic;
 
     ---------------------------------------------------------------------------
-    -- Interfaz con i2c_master — Bus (señales separadas del inout físico)
+    -- Interfaz con i2c_master — Bus físico
     ---------------------------------------------------------------------------
     signal scl_out_i : std_logic;
     signal sda_out_i : std_logic;
@@ -119,57 +145,92 @@ architecture Behavioral of TOP is
     signal sda_in_i  : std_logic;
 
     ---------------------------------------------------------------------------
+    -- Señales FTDI
+    ---------------------------------------------------------------------------
+    signal ftdi_clk   : std_logic;  --! CLKOUT 60 MHz — ACBUS[4]
+    signal ftdi_rxf_n : std_logic;  --! RXF# — ACBUS[0]
+    signal ftdi_txe_n : std_logic;  --! TXE# — ACBUS[1]
+    signal ftdi_rd_n  : std_logic;  --! RD#  — ACBUS[2]
+    signal ftdi_wr_n  : std_logic;  --! WR#  — ACBUS[3]
+    signal ftdi_oe_n  : std_logic;  --! OE#  — ACBUS[5]
+
+    --! Señales internas del controlador FTDI hacia ADBUS
+    signal ftdi_adbus_out : std_logic_vector(7 downto 0);
+    signal ftdi_adbus_oe  : std_logic;
+    signal ftdi_tx_active : std_logic;
+
+    ---------------------------------------------------------------------------
+    -- Interfaz entre frame_capture y fifo_generator_0
+    ---------------------------------------------------------------------------
+    signal cap_fifo_data  : std_logic_vector(7 downto 0);
+    signal cap_fifo_wr    : std_logic;
+    signal cap_fifo_full  : std_logic;
+    signal cap_fifo_empty : std_logic;
+    signal cap_fifo_dout  : std_logic_vector(7 downto 0);
+    signal cap_fifo_rd_en : std_logic;
+    signal cap_frame_done : std_logic;
+    signal cap_overflow   : std_logic;
+    signal cap_en         : std_logic;
+
+    ---------------------------------------------------------------------------
     -- FSM del TOP
     ---------------------------------------------------------------------------
     type main_state_t is (
-        ST_CAM_RESET_ASSERT,    --! RESET_BAR='0' durante RESET_HOLD_CYCLES
-        ST_CAM_RESET_WAIT,      --! Espera 150 ms tras soltar el reset
-        ST_PAGE_SEL_FILL,       --! Cargar WR FIFO con page register (R1 = 4 → Sensor Core)
-        ST_PAGE_SEL_START,      --! Lanzar escritura del page register
-        ST_PAGE_SEL_WAIT,       --! Esperar done/error de la escritura del page register
-        ST_CHIPID_RD_START,     --! Lanzar lectura del registro 0xFF (Chip ID)
-        ST_CHIPID_RD_WAIT,      --! Esperar done/error de la lectura
-        ST_CHIPID_RD_DRAIN,     --! Vaciar RD FIFO y verificar Chip ID
-        ST_FINISH,              --! LED(0)='1' si Chip ID correcto
-        ST_ERROR                --! LED(1)='1' si error I2C o Chip ID incorrecto
+        ST_CAM_RESET_ASSERT,
+        ST_CAM_RESET_WAIT,
+        ST_PAGE_SEL_FILL,
+        ST_PAGE_SEL_START,
+        ST_PAGE_SEL_WAIT,
+        ST_CHIPID_RD_START,
+        ST_CHIPID_RD_WAIT,
+        ST_CHIPID_RD_DRAIN,
+        ST_FINISH,
+        ST_ERROR
     );
     signal state : main_state_t := ST_CAM_RESET_ASSERT;
 
     signal init_cnt    : integer range 0 to RESET_WAIT_CYCLES := 0;
     signal fill_cnt    : integer range 0 to FIFO_DEPTH        := 0;
     signal cam_reset_r : std_logic := '0';
-
-    --! Resultado de la lectura del Chip ID
-    signal chip_id : std_logic_vector(15 downto 0) := (others => '0');
+    signal chip_id     : std_logic_vector(15 downto 0) := (others => '0');
 
     ---------------------------------------------------------------------------
     -- ILA / Debug
     ---------------------------------------------------------------------------
-    signal debug_sclk    : std_logic;
-    signal debug_sdata   : std_logic;
-    signal debug_dout    : std_logic_vector(7 downto 0);
-    signal debug_pixclk  : std_logic;
-    signal debug_fval    : std_logic;
-    signal debug_lval    : std_logic;
+    signal debug_sclk   : std_logic;
+    signal debug_sdata  : std_logic;
+    signal debug_dout   : std_logic_vector(7 downto 0);
+    signal debug_pixclk : std_logic;
+    signal debug_fval   : std_logic;
+    signal debug_lval   : std_logic;
+    signal debug_rxf_n  : std_logic;
+    signal debug_wr_n   : std_logic;
 
     attribute mark_debug : string;
     attribute dont_touch : string;
 
-    attribute mark_debug of i2c_start    : signal is "true";
-    attribute mark_debug of i2c_busy     : signal is "true";
-    attribute mark_debug of i2c_done     : signal is "true";
-    attribute mark_debug of i2c_error    : signal is "true";
-    attribute mark_debug of debug_sclk   : signal is "true";
-    attribute mark_debug of debug_sdata  : signal is "true";
-    attribute mark_debug of state        : signal is "true";
-    attribute mark_debug of cam_reset_r  : signal is "true";
-    attribute mark_debug of cam_mclk_r   : signal is "true";
-    attribute dont_touch of cam_mclk_r   : signal is "true";
-    attribute mark_debug of debug_dout   : signal is "true";
-    attribute mark_debug of debug_pixclk : signal is "true";
-    attribute mark_debug of debug_fval   : signal is "true";
-    attribute mark_debug of debug_lval   : signal is "true";
-    attribute mark_debug of chip_id      : signal is "true";
+    attribute mark_debug of i2c_start     : signal is "true";
+    attribute mark_debug of i2c_busy      : signal is "true";
+    attribute mark_debug of i2c_done      : signal is "true";
+    attribute mark_debug of i2c_error     : signal is "true";
+    attribute mark_debug of debug_sclk    : signal is "true";
+    attribute mark_debug of debug_sdata   : signal is "true";
+    attribute mark_debug of state         : signal is "true";
+    attribute mark_debug of cam_reset_r   : signal is "true";
+    attribute mark_debug of cam_mclk_r    : signal is "true";
+    attribute dont_touch of cam_mclk_r    : signal is "true";
+    attribute mark_debug of debug_dout    : signal is "true";
+    attribute mark_debug of debug_pixclk  : signal is "true";
+    attribute mark_debug of debug_fval    : signal is "true";
+    attribute mark_debug of debug_lval    : signal is "true";
+    attribute mark_debug of chip_id       : signal is "true";
+    attribute mark_debug of debug_rxf_n   : signal is "true";
+    attribute mark_debug of debug_wr_n    : signal is "true";
+    attribute mark_debug of cap_fifo_wr   : signal is "true";
+    attribute mark_debug of cap_fifo_full : signal is "true";
+    attribute mark_debug of cap_overflow  : signal is "true";
+    attribute mark_debug of cap_frame_done: signal is "true";
+    attribute mark_debug of ftdi_tx_active: signal is "true";
 
 begin
 
@@ -187,6 +248,29 @@ begin
     cam_mclk    <= cam_mclk_r;
 
     ---------------------------------------------------------------------------
+    -- Captura habilitada cuando el Chip ID es correcto
+    ---------------------------------------------------------------------------
+    cap_en <= '1' when state = ST_FINISH else '0';
+
+    ---------------------------------------------------------------------------
+    -- FTDI — mapeo ACBUS ↔ señales internas
+    ---------------------------------------------------------------------------
+    ftdi_rxf_n <= ACBUS(0);
+    ftdi_txe_n <= ACBUS(1);
+    ACBUS(2)   <= ftdi_rd_n;
+    ACBUS(3)   <= ftdi_wr_n;
+    ftdi_clk   <= ACBUS(4);
+    ACBUS(5)   <= ftdi_oe_n;
+    ACBUS(6)   <= 'Z';
+    ACBUS(7)   <= 'Z';
+
+    --! RD# inactivo — no leemos del FTDI todavía
+    ftdi_rd_n <= '1';
+
+    --! ADBUS — tristate controlado por el controlador FTDI
+    ADBUS <= ftdi_adbus_out when ftdi_adbus_oe = '1' else (others => 'Z');
+
+    ---------------------------------------------------------------------------
     -- Salidas no usadas
     ---------------------------------------------------------------------------
     CAT <= (others => '0');
@@ -194,7 +278,7 @@ begin
     AN  <= (others => '1');
 
     ---------------------------------------------------------------------------
-    -- Debug
+    -- Debug — señales registradas en dominio mclk
     ---------------------------------------------------------------------------
     p_debug : process(mclk)
     begin
@@ -205,12 +289,13 @@ begin
             debug_pixclk <= pixclk;
             debug_fval   <= frame_valid;
             debug_lval   <= line_valid;
+            debug_rxf_n  <= ftdi_rxf_n;
+            debug_wr_n   <= ftdi_wr_n;
         end if;
     end process p_debug;
 
     ---------------------------------------------------------------------------
-    -- Generación de MCLK para la cámara
-    -- Toggle cada MCLK_DIV ciclos → 100 MHz / 4 = 25 MHz
+    -- Generación de MCLK para la cámara (100 MHz / 4 = 25 MHz)
     ---------------------------------------------------------------------------
     p_cam_mclk : process(mclk)
     begin
@@ -241,7 +326,68 @@ begin
     rst_final <= not locked;
 
     ---------------------------------------------------------------------------
-    -- Instancia del controlador I2C
+    -- Capturador de frames
+    -- Dominio pixclk — extrae solo canal Y (luminancia)
+    ---------------------------------------------------------------------------
+    u_frame_capture : entity work.frame_capture
+        generic map (
+            H_RES      => 640,
+            V_RES      => 480,
+            FIFO_DEPTH => 4096
+        )
+        port map (
+            pixclk      => pixclk,
+            reset       => rst_final,
+            frame_valid => frame_valid,
+            line_valid  => line_valid,
+            dout        => dout,
+            capture_en  => cap_en,
+            fifo_data   => cap_fifo_data,
+            fifo_wr     => cap_fifo_wr,
+            fifo_full   => cap_fifo_full,
+            frame_done  => cap_frame_done,
+            overflow    => cap_overflow
+        );
+
+    ---------------------------------------------------------------------------
+    -- FIFO asíncrona — cruce de dominio pixclk → ftdi_clk
+    -- Escritura: frame_capture en dominio pixclk (~25 MHz)
+    -- Lectura:   ftdi_controller en dominio ftdi_clk (60 MHz)
+    ---------------------------------------------------------------------------
+    u_async_fifo : entity work.fifo_generator_0
+        port map (
+            wr_clk => pixclk,
+            din    => cap_fifo_data,
+            wr_en  => cap_fifo_wr,
+            full   => cap_fifo_full,
+            rd_clk => ftdi_clk,
+            dout   => cap_fifo_dout,
+            rd_en  => cap_fifo_rd_en,
+            empty  => cap_fifo_empty,
+            rst    => rst_final
+        );
+
+    ---------------------------------------------------------------------------
+    -- Controlador FTDI FT232H — Modo Synchronous FIFO
+    -- Dominio ftdi_clk (60 MHz) — lee FIFO y envía al PC
+    ---------------------------------------------------------------------------
+    u_ftdi_ctrl : entity work.ftdi_controller
+        port map (
+            ftdi_clk   => ftdi_clk,
+            reset      => rst_final,
+            fifo_dout  => cap_fifo_dout,
+            fifo_empty => cap_fifo_empty,
+            fifo_rd_en => cap_fifo_rd_en,
+            ftdi_rxf_n => ftdi_rxf_n,
+            ftdi_wr_n  => ftdi_wr_n,
+            ftdi_oe_n  => ftdi_oe_n,
+            adbus_out  => ftdi_adbus_out,
+            adbus_oe   => ftdi_adbus_oe,
+            tx_active  => ftdi_tx_active
+        );
+
+    ---------------------------------------------------------------------------
+    -- Controlador I2C
     ---------------------------------------------------------------------------
     u_i2c : entity work.i2c_master
         generic map (
@@ -302,9 +448,6 @@ begin
 
                 case state is
 
-                    -----------------------------------------------------------
-                    -- Mantener RESET_BAR='0' durante 1 ms
-                    -----------------------------------------------------------
                     when ST_CAM_RESET_ASSERT =>
                         cam_reset_r <= '0';
                         if init_cnt = RESET_HOLD_CYCLES - 1 then
@@ -314,9 +457,6 @@ begin
                             init_cnt <= init_cnt + 1;
                         end if;
 
-                    -----------------------------------------------------------
-                    -- Soltar reset y esperar 150 ms
-                    -----------------------------------------------------------
                     when ST_CAM_RESET_WAIT =>
                         cam_reset_r <= '1';
                         if init_cnt = RESET_WAIT_CYCLES - 1 then
@@ -327,24 +467,17 @@ begin
                             init_cnt <= init_cnt + 1;
                         end if;
 
-                    -----------------------------------------------------------
-                    -- Cargar WR FIFO con page register
-                    -- R1 = 0x0004 → selecciona Sensor Core
-                    -----------------------------------------------------------
                     when ST_PAGE_SEL_FILL =>
                         if i2c_wr_full = '0' then
-                            i2c_wr_data <= x"0004";  --! R1 = 4 → Sensor Core
+                            i2c_wr_data <= x"0004";
                             i2c_wr_push <= '1';
                             state       <= ST_PAGE_SEL_START;
                         end if;
 
-                    -----------------------------------------------------------
-                    -- Lanzar escritura del page register (R1 = 0x01)
-                    -----------------------------------------------------------
                     when ST_PAGE_SEL_START =>
                         if i2c_busy = '0' then
-                            i2c_rw       <= '0';        --! Write
-                            i2c_addr_reg <= x"01";      --! Registro R1 = page select
+                            i2c_rw       <= '0';
+                            i2c_addr_reg <= x"01";
                             i2c_num_regs <= 1;
                             i2c_start    <= '1';
                             state        <= ST_PAGE_SEL_WAIT;
@@ -357,13 +490,10 @@ begin
                             state <= ST_CHIPID_RD_START;
                         end if;
 
-                    -----------------------------------------------------------
-                    -- Lanzar lectura del Chip ID (registro 0xFF, Sensor Core)
-                    -----------------------------------------------------------
                     when ST_CHIPID_RD_START =>
                         if i2c_busy = '0' and i2c_rd_empty = '1' then
-                            i2c_rw       <= '1';        --! Read
-                            i2c_addr_reg <= x"FF";      --! Chip ID register
+                            i2c_rw       <= '1';
+                            i2c_addr_reg <= x"FF";
                             i2c_num_regs <= 1;
                             i2c_start    <= '1';
                             state        <= ST_CHIPID_RD_WAIT;
@@ -376,29 +506,25 @@ begin
                             state <= ST_CHIPID_RD_DRAIN;
                         end if;
 
-                    -----------------------------------------------------------
-                    -- Vaciar RD FIFO y verificar Chip ID
-                    -----------------------------------------------------------
                     when ST_CHIPID_RD_DRAIN =>
                         if i2c_rd_empty = '0' then
                             i2c_rd_pop <= '1';
                             chip_id    <= i2c_rd_data;
                             if i2c_rd_data = CHIP_ID_EXPECTED then
-                                state <= ST_FINISH;   --! 0x823A ✓
+                                state <= ST_FINISH;
                             else
-                                state <= ST_ERROR;    --! Chip ID incorrecto
+                                state <= ST_ERROR;
                             end if;
                         end if;
 
-                    -----------------------------------------------------------
                     when ST_FINISH =>
-                        LED(0) <= '1';       --! Chip ID correcto: 0x823A ✓
+                        LED(0) <= '1';       --! Chip ID OK — streaming activo
                         LED(1) <= '0';
                         state  <= ST_FINISH;
 
                     when ST_ERROR =>
                         LED(0) <= '0';
-                        LED(1) <= '1';       --! Error: NACK o Chip ID incorrecto
+                        LED(1) <= '1';
                         state  <= ST_ERROR;
 
                     when others =>
