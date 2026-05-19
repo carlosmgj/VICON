@@ -27,19 +27,19 @@ REM FLAGS DE CONFIGURACIÓN
 REM ============================================================
 
 REM VSG
-set VSG_ENABLED=1
-set VSG_FAIL_ON_ERROR=0
-set VSG_DETAIL=1
-set VSG_CONFIG=1
+set VSG_ENABLED       = 1
+set VSG_FAIL_ON_ERROR = 0
+set VSG_DETAIL        = 1
+set VSG_CONFIG        = 1
 
 REM GHDL
-set GHDL_ENABLED=1
-set GHDL_FAIL_ON_ERROR=0
-set GHDL_DETAIL=1
+set GHDL_ENABLED       = 1
+set GHDL_FAIL_ON_ERROR = 0
+set GHDL_DETAIL        = 1
 
 REM Word
-set WORD_ENABLED=1
-set WORD_FAIL_ON_ERROR=0
+set WORD_ENABLED       = 1
+set WORD_FAIL_ON_ERROR = 0
 
 REM ============================================================
 
@@ -93,19 +93,22 @@ if "%VSG_ENABLED%"=="1" (
 
     if exist "%REPORTS_DIR%\vsg_report.txt" del "%REPORTS_DIR%\vsg_report.txt"
 
-    REM Recoger todos los .vhd recursivamente en carpetas *Sources*
+    REM Recoger todos los .vhd recursivamente en carpetas *Sources* (excluir 06-Project)
     set VHD_LIST=
     for /r "%PROJECT_DIR%" %%f in (*.vhd *.vhdl) do (
         echo %%~pf | findstr /i "Sources" >nul 2>&1
-        if not errorlevel 1 set VHD_LIST=!VHD_LIST! "%%f"
+        if not errorlevel 1 (
+            echo %%~pf | findstr /i "06-Project" >nul 2>&1
+            if errorlevel 1 set VHD_LIST=!VHD_LIST! "%%f"
+        )
     )
 
     if defined VHD_LIST (
         if "%VSG_CONFIG%"=="1" (
             if "%VSG_DETAIL%"=="1" (
-                vsg -f !VHD_LIST! --output_format syntastic -c "%DOXYGEN_DIR%scripts\vsg_config.yaml" > "%REPORTS_DIR%\vsg_report.txt" 2>&1
+                vsg -f !VHD_LIST! --output_format syntastic -c "%DOXYGEN_DIR%scripts\vsg_config.json" > "%REPORTS_DIR%\vsg_report.txt" 2>&1
             ) else (
-                vsg -f !VHD_LIST! --output_format summary -c "%DOXYGEN_DIR%scripts\vsg_config.yaml" > "%REPORTS_DIR%\vsg_report.txt" 2>&1
+                vsg -f !VHD_LIST! --output_format summary -c "%DOXYGEN_DIR%scripts\vsg_config.json" > "%REPORTS_DIR%\vsg_report.txt" 2>&1
             )
         ) else (
             if "%VSG_DETAIL%"=="1" (

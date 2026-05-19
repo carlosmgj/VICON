@@ -1128,7 +1128,7 @@ EXCLUDE_SYMBOLS        =
 # that contain example code fragments that are included (see the \include
 # command).
 
-EXAMPLE_PATH           = 
+EXAMPLE_PATH           = ./../00-Documents/01-Doxygen/00-ExtraContent
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp and
@@ -1148,7 +1148,7 @@ EXAMPLE_RECURSIVE      = NO
 # that contain images that are to be included in the documentation (see the
 # \image command).
 
-IMAGE_PATH             = ./../00-Documents/01-Doxygen/00-ExtraContent \
+IMAGE_PATH             = ./../00-Documents/01-Doxygen/00-ExtraContent ./../00-Documents/01-Doxygen/00-ExtraContent/diagrams
 
 # The INPUT_FILTER tag can be used to specify a program that Doxygen should
 # invoke to filter for each input file. Doxygen will invoke the filter program
@@ -1484,6 +1484,8 @@ HTML_EXTRA_FILES       = style/doxygen-awesome-darkmode-toggle.js \
                          style/extra_js/default.js \
                          style/extra_js/ldark.js \
                          style/extra_js/narrow.js \
+                         ./../00-Documents/01-Doxygen/00-ExtraContent/vicon_system.html \
+
                          
 
 # The HTML_COLORSTYLE tag can be used to specify if the generated HTML output

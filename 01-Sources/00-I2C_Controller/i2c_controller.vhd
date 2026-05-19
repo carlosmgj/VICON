@@ -1,12 +1,5 @@
 --! \file i2c_controller.vhd
 --! \brief Controlador I2C maestro con FIFOs de escritura y lectura.
---!
---! Protocolo soportado:
---!   WRITE : S + ADDR_W + ACK + REG_ADDR + ACK + [DATA_H + ACK + DATA_L + ACK] x N + P
---!   READ  : S + ADDR_W + ACK + REG_ADDR + ACK + Sr + ADDR_R + ACK + [DATA_H + ACK + DATA_L + ACK/NACK] x N + P
---!
---! Los puertos del bus (scl_out, sda_out, sda_oe_o, sda_in) son señales lógicas
---! separadas. El tristate e open-drain se manejan en el TOP level.
 
 library ieee;
 use ieee.std_logic_1164.all;

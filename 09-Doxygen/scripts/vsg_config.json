@@ -1,0 +1,19 @@
+{
+  "rule": {
+    "architecture_004": { "case": "upper" },
+    "architecture_019": { "case": "upper" },
+    "architecture_020": { "case": "upper" },
+    "entity_004": { "case": "upper" },
+    "entity_006": { "case": "upper" },
+    "case_014": { "case": "upper" },
+    "case_015": { "case": "upper" },
+    "signal_002": { "case": "upper" },
+    "signal_007": { "disable": true },
+    "instantiation_034": { "disable": true },
+    "instantiation_036": { "disable": true },
+    "length_001": { "length": 120 },
+    "if_002": { "disable": true },
+    "process_012": { "disable": true },
+    "conditional_waveforms_001": { "disable": true }
+  }
+}

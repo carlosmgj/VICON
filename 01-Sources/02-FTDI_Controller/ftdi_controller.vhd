@@ -1,21 +1,5 @@
 --! \file ftdi_controller.vhd
 --! \brief Controlador para el FT232H en modo Synchronous FIFO.
---!
---! Envía datos continuamente desde la FIFO asíncrona hacia el PC via FTDI
---! mientras haya datos disponibles y el FTDI esté listo para recibirlos.
---!
---! Protocolo de escritura (Synchronous FIFO mode, datasheet FT232H):
---!   1. Esperar RXF# = '0'  → FTDI listo para recibir
---!   2. OE# = '0'           → FPGA toma control de ADBUS
---!   3. Poner dato en ADBUS
---!   4. WR# = '0'           → dato capturado por FTDI en flanco de subida de CLKOUT
---!   5. WR# = '1'           → fin del pulso de escritura
---!   6. Volver a 1
---!
---! Todo opera en el dominio ftdi_clk (60 MHz generado por el FT232H).
---!
---! \note Solo escritura hacia el PC implementada. Lectura desde el PC (RD#/TXE#)
---!       se añadirá cuando se implemente el canal de comandos.
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -76,10 +60,10 @@ architecture rtl of ftdi_controller is
     ---------------------------------------------------------------------------
     -- ILA / Debug
     ---------------------------------------------------------------------------
-    attribute mark_debug : string;
-    attribute mark_debug of state      : signal is "true";
-    attribute mark_debug of fifo_rd_r  : signal is "true";
-    attribute mark_debug of data_r     : signal is "true";
+    -- attribute mark_debug : string;
+    -- attribute mark_debug of state      : signal is "true";
+    -- attribute mark_debug of fifo_rd_r  : signal is "true";
+    -- attribute mark_debug of data_r     : signal is "true";
 
 begin
 

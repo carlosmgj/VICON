@@ -1,8 +1,13 @@
 --! Controlador I2C para comunicación con el sensor MT9V111.
 --! 
 --! \section sec_mt9v111_protocol Protocolo MT9V111:
---! - WRITE: S + ADDR_WR + ACK + REG_ADDR + ACK + DATA_H + ACK + DATA_L + ACK + [repetir DATA_H/DATA_L para más registros, auto-increment] + P
---! - READ:  S + ADDR_WR + ACK + REG_ADDR + ACK + Sr + ADDR_RD + ACK + DATA_H + ACK + ... + DATA_L + NACK + P
+--! 
+--! Protocolo soportado:
+--!   WRITE : S + ADDR_W + ACK + REG_ADDR + ACK + [DATA_H + ACK + DATA_L + ACK] x N + P
+--!   READ  : S + ADDR_W + ACK + REG_ADDR + ACK + Sr + ADDR_R + ACK + [DATA_H + ACK + DATA_L + ACK/NACK] x N + P
+--! 
+--! Los puertos del bus (scl_out, sda_out, sda_oe_o, sda_in) son señales lógicas
+--! separadas. El tristate e open-drain se manejan en el TOP level.
 --! 
 --! Timing SCL – 4 fases de CLKS_PER_PHASE ciclos de sistema cada una:
 --! - _0  SCL=0  →  cambiar / preparar SDA
@@ -37,7 +42,7 @@
 --! </div>
 --! </div>
 --! \endhtmlonly
---!
+--! 
 --! ADDR
 --! 
 --! \htmlonly
@@ -115,7 +120,7 @@
 --! </div>
 --! </div>
 --! \endhtmlonly
---!
+--! 
 --! MT9V111 16 bits Writing
 --! \htmlonly
 --! <div style="zoom: 1; text-align:center; overflow-x: auto; max-width: 100%;">
@@ -142,7 +147,7 @@
 --! </div>
 --! </div>
 --! \endhtmlonly
---!
+--! 
 --! 
 --! Bloques reutilizables en la FSM:
 --!  - TX (ST_TX_*)   envía 'tx_byte' MSB-first. Al completar el bit 0 pasa a ST_RACK_* para recibir el ACK del esclavo.
