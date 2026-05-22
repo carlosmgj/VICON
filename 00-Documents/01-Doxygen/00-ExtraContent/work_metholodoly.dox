@@ -66,7 +66,15 @@ Para poder hacer diagramas dinámicos de señal pondremos en la <b> descripción
 
 Para incluir diagramas interactivos de Draw IO, está la metodología manual o automática, en la que el script debería añadirlo a raíz de cierto comando predefinido con la ruta o el nombre del archivo. 
 
-Por ahora pongo aquí la manera de embeberlo de forma manual. Los pasos son:
+Hay dos maneras de embeberlo manualmente:
+
+1. Fácil: con el html generado desde draw io directamente.
+
+2. Más compleja (No usar): 
+
+
+
+Los pasos son:
 
 - Crear un archivo \b html llamado <nombre_html_waveform>.html
    \warning En el código html mostrado más abajo, hay que copiar el interior del svg \b exportado a mano desde DRAW IO <\b>

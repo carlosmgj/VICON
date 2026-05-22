@@ -6,15 +6,15 @@
 --! Modo para enviar datos continuamente con una alta tasa de transferencia de datos.
 --! 
 --! ### Señales de Control
---! | Señal         | Dirección    | Nombre                | Descripción   |
---! | :---          | ---:         | :---                  | :---          |
---! | **CLKOUT**    | out    (]→)  | Clock Output          | Generado por el chip FTDI de forma continua, las señales se capturan en **flanco de subida**. |
---! | **RXF#**      | out    (]→)  | Receive Buffer Full   | Indica si tiene datos guardados (0) o no hay datos (1) recibidos desde el PC. |
---! | **TXE#**      | out    (]→)  | Transmit Buffer Empty | Indica si el buffer de transmisión tiene espacio (0) o no (1) para recibir datos desde la FPGA. |
---! | **OE#**       | in     (→[)  | Output Enable         | Dueño del bus es el FTDI (0) para leer o es la FPGA (1) para escribir. |
---! | **RD#**       | in     (→[)  | Read Enable           | Sincroniza la descarga de datos de FTDI a FPGA durante una lectura. |
---! | **WR#**       | in     (→[)  | Write Enable          | Sincroniza la carga de datos desde la FPGA hacia el FTDI durante una escritura. |
---! | **ADBUS**     | inout  (↔[)  | Data Bus              | Bus bidireccional de 8 bits. |
+--! | Señal         | Dirección  FTDI  | Dirección  FPGA  | Nombre                | Descripción   |
+--! | :---          | ---:             | ---:             | :---                  | :---          |
+--! | **CLKOUT**    | out    (]→)      | in     (→[)      | Clock Output          | Generado por el chip FTDI de forma continua, las señales se capturan en **flanco de subida**. |
+--! | **RXF#**      | out    (]→)      | in     (→[)      | Receive Buffer Full   | Indica si tiene datos guardados (0) o no hay datos (1) recibidos desde el PC. |
+--! | **TXE#**      | out    (]→)      | in     (→[)      | Transmit Buffer Empty | Indica si el buffer de transmisión tiene espacio (0) o no (1) para recibir datos desde la FPGA. |
+--! | **OE#**       | in     (→[)      | out    (]→)      | Output Enable         | Dueño del bus es el FTDI (0) para leer o es la FPGA (1) para escribir. |
+--! | **RD#**       | in     (→[)      | out    (]→)      | Read Enable           | Sincroniza la descarga de datos de FTDI a FPGA durante una lectura. |
+--! | **WR#**       | in     (→[)      | out    (]→)      | Write Enable          | Sincroniza la carga de datos desde la FPGA hacia el FTDI durante una escritura. |
+--! | **ADBUS**     | inout  (↔[)      | inout  (↔[)      | Data Bus              | Bus bidireccional de 8 bits. |
 --! 
 --! \warning <b> Note that Asynchronous FIFO mode must be selected in the EEPROM before selecting the Synchronous FIFO mode in software. </b> 
 --! Go to section \ref subsec_td232hmode
