@@ -243,7 +243,7 @@ begin
         generic map (
             H_RES      => 640,
             V_RES      => 480,
-            FIFO_DEPTH => 4096
+            FIFO_DEPTH => 16384
         )
         port map (
             pixclk      => pixclk,

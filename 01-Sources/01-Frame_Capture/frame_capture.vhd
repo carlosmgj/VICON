@@ -6,6 +6,12 @@
 --!
 --! Los píxeles con valor 0xFF se sustituyen por 0xFE y los 0x00 por 0x01
 --! para garantizar que el marcador no aparece en los datos de imagen.
+--!
+--! Extracción del canal Y:
+--!   En lugar de usar byte_sel, se usa el bit 0 de byte_cnt para determinar
+--!   si el byte actual es Y (par) o croma (impar). Así aunque haya un byte
+--!   extra o de menos en alguna línea, el error no se acumula entre líneas
+--!   porque byte_cnt se resetea al inicio de cada línea.
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -15,7 +21,7 @@ entity frame_capture is
     generic (
         H_RES      : integer := 640;
         V_RES      : integer := 480;
-        FIFO_DEPTH : integer := 2048
+        FIFO_DEPTH : integer := 16384
     );
     port (
         pixclk      : in  std_logic;
@@ -37,29 +43,36 @@ architecture rtl of frame_capture is
     type cap_state_t is (
         ST_IDLE,
         ST_WAIT_FRAME_START,
-        ST_MARKER_0,   --! 0xFF
-        ST_MARKER_1,   --! 0x00
-        ST_MARKER_2,   --! 0xAA
-        ST_MARKER_3,   --! 0x55
+        ST_MARKER_0,
+        ST_MARKER_1,
+        ST_MARKER_2,
+        ST_MARKER_3,
         ST_WAIT_LINE,
         ST_CAPTURE,
+        ST_LINE_END,
         ST_FRAME_END
     );
     signal state : cap_state_t := ST_IDLE;
 
-    signal byte_sel     : std_logic := '0';
-    signal col_cnt      : integer range 0 to H_RES - 1 := 0;
-    signal row_cnt      : integer range 0 to V_RES - 1 := 0;
-    signal overflow_r   : std_logic := '0';
-    signal frame_done_r : std_logic := '0';
+    ---------------------------------------------------------------------------
+    -- byte_cnt — cuenta todos los bytes de la línea (Y y croma)
+    -- byte_cnt(0)='0' → byte Y    (capturar)
+    -- byte_cnt(0)='1' → byte croma (descartar)
+    -- Se resetea al inicio de cada línea
+    ---------------------------------------------------------------------------
+    signal byte_cnt    : unsigned(10 downto 0) := (others => '0');
+    signal col_cnt     : integer range 0 to H_RES - 1 := 0;
+    signal row_cnt     : integer range 0 to V_RES - 1 := 0;
+    signal overflow_r  : std_logic := '0';
+    signal frame_done_r: std_logic := '0';
 
     attribute mark_debug : string;
-    attribute mark_debug of state       : signal is "true";
-    attribute mark_debug of byte_sel    : signal is "true";
-    attribute mark_debug of col_cnt     : signal is "true";
-    attribute mark_debug of row_cnt     : signal is "true";
-    attribute mark_debug of fifo_wr     : signal is "true";
-    attribute mark_debug of overflow_r  : signal is "true";
+    attribute mark_debug of state      : signal is "true";
+    attribute mark_debug of byte_cnt   : signal is "true";
+    attribute mark_debug of col_cnt    : signal is "true";
+    attribute mark_debug of row_cnt    : signal is "true";
+    attribute mark_debug of fifo_wr    : signal is "true";
+    attribute mark_debug of overflow_r : signal is "true";
 
 begin
 
@@ -71,7 +84,7 @@ begin
         if rising_edge(pixclk) then
             if reset = '1' then
                 state        <= ST_IDLE;
-                byte_sel     <= '0';
+                byte_cnt     <= (others => '0');
                 col_cnt      <= 0;
                 row_cnt      <= 0;
                 fifo_data    <= (others => '0');
@@ -85,7 +98,7 @@ begin
                 case state is
 
                     when ST_IDLE =>
-                        byte_sel   <= '0';
+                        byte_cnt   <= (others => '0');
                         col_cnt    <= 0;
                         row_cnt    <= 0;
                         overflow_r <= '0';
@@ -130,8 +143,11 @@ begin
                             state     <= ST_WAIT_LINE;
                         end if;
 
+                    -----------------------------------------------------------
+                    -- Esperar inicio de línea — resetear byte_cnt
+                    -----------------------------------------------------------
                     when ST_WAIT_LINE =>
-                        byte_sel <= '0';
+                        byte_cnt <= (others => '0');
                         col_cnt  <= 0;
                         if frame_valid = '0' then
                             state <= ST_FRAME_END;
@@ -139,38 +155,55 @@ begin
                             state <= ST_CAPTURE;
                         end if;
 
+                    -----------------------------------------------------------
+                    -- Captura de bytes
+                    -- byte_cnt(0)='0' → byte Y    → capturar
+                    -- byte_cnt(0)='1' → byte croma → descartar
+                    -----------------------------------------------------------
                     when ST_CAPTURE =>
-                        byte_sel <= not byte_sel;
+                        if line_valid = '0' then
+                            state <= ST_LINE_END;
+                        else
+                            byte_cnt <= byte_cnt + 1;
 
-                        if byte_sel = '0' then
-                            if fifo_full = '0' then
-                                if dout = x"FF" then
-                                    fifo_data <= x"FE";
-                                elsif dout = x"00" then
-                                    fifo_data <= x"01";
+                            if byte_cnt(0) = '0' then
+                                -- Byte Y — capturar
+                                if fifo_full = '0' then
+                                    if dout = x"FF" then
+                                        fifo_data <= x"FE";
+                                    elsif dout = x"00" then
+                                        fifo_data <= x"01";
+                                    else
+                                        fifo_data <= dout;
+                                    end if;
+                                    fifo_wr <= '1';
                                 else
-                                    fifo_data <= dout;
+                                    overflow_r <= '1';
                                 end if;
-                                fifo_wr <= '1';
-                            else
-                                overflow_r <= '1';
-                            end if;
 
-                            if col_cnt = H_RES - 1 then
-                                col_cnt <= 0;
-                            else
-                                col_cnt <= col_cnt + 1;
+                                if col_cnt = H_RES - 1 then
+                                    col_cnt <= 0;
+                                else
+                                    col_cnt <= col_cnt + 1;
+                                end if;
                             end if;
+                            -- byte_cnt(0)='1' → croma → no hacer nada
                         end if;
 
-                        if line_valid = '0' then
-                            byte_sel <= '0';
-                            col_cnt  <= 0;
-                            if row_cnt = V_RES - 1 then
-                                row_cnt <= 0;
-                            else
-                                row_cnt <= row_cnt + 1;
-                            end if;
+                    -----------------------------------------------------------
+                    -- Fin de línea
+                    -----------------------------------------------------------
+                    when ST_LINE_END =>
+                        byte_cnt <= (others => '0');
+                        col_cnt  <= 0;
+                        if row_cnt = V_RES - 1 then
+                            row_cnt <= 0;
+                        else
+                            row_cnt <= row_cnt + 1;
+                        end if;
+                        if frame_valid = '0' then
+                            state <= ST_FRAME_END;
+                        else
                             state <= ST_WAIT_LINE;
                         end if;
 
