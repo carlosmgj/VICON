@@ -1,1 +1,0 @@
-Archivo de texto utilizado para que GIT reconozca el directorio

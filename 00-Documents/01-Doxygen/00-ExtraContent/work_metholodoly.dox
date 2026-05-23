@@ -1,0 +1,203 @@
+/*!
+\page page_workmethodology WORK METHODOLOGY
+
+\section sec_comments AUTODOCUMENTATION  
+
+La documentación se puede realizar o bien dentro de los mismos .vhd o con archivos independientes con contenido plano, preferiblemente .dox o .md
+
+Mi recomendación: Si es simple ponerlo dentro del propio .vhd y si no, ponerlo en un archivo aparte.
+<b> Para hacerlo con un archivo aparte es necesario crear un .dox con el mismo nombre que el .vhd y en su misma carpeta </b>
+
+\subsection subsec_comments_wavedrom WAVEFORMS
+
+Para poder hacer diagramas dinámicos de señal pondremos en la <b> descripción del file </b> o en la <b> declaración de la entidad </b> los siguientes wrapper para el json con estilo de wavedrom:
+
+- Simple: Si es largo desborda sin scroll
+
+   @verbatim
+   --! \htmlonly
+   --! <div style="text-align:center;">
+   --! <script type="WaveDrom">
+   --! AQUI VA EL JSON DE WAVEDROM COMENTADO CON IDENTIFICADORES DOXYGEN (--!)
+   --! </script>
+   --! </div>
+   --! \endhtmlonly
+   @endverbatim
+
+- Sin desbordamiento: con scroll
+
+   @verbatim
+   --! \brief Mi controlador I2C
+   --! \fsm_show_actions
+   --! \htmlonly
+   --! <div style="text-align:center; overflow-x: auto; max-width: 100%;">
+   --! <style>
+   --! #mi_i2c svg { width: 1000% !important; height: auto !important; }
+   --! </style>
+   --! <div id="mi_i2c">
+   --! <script type="WaveDrom">
+   --! AQUI VA EL JSON DE WAVEDROM COMENTADO CON IDENTIFICADORES DOXYGEN (--!)
+   --! </script>
+   --! </div>
+   --! </div>
+   --! \endhtmlonly
+   @endverbatim
+
+- Desbordamiento controlado
+
+   @verbatim
+   --! \brief Mi controlador I2C
+   --! \fsm_show_actions
+   --! \htmlonly
+   --! <div style="text-align:center; max-width: 100%;">
+   --! <style>
+   --! #mi_i2c svg { width: 1000% !important; height: auto !important; }
+   --! </style>
+   --! <div id="mi_i2c">
+   --! <script type="WaveDrom">
+   --! AQUI VA EL JSON DE WAVEDROM COMENTADO CON IDENTIFICADORES DOXYGEN (--!)
+   --! </script>
+   --! </div>
+   --! </div>
+   --! \endhtmlonly
+   @endverbatim
+
+\subsection subsec_drawio DRAW IO
+
+Para incluir diagramas interactivos de Draw IO, está la metodología manual o automática, en la que el script debería añadirlo a raíz de cierto comando predefinido con la ruta o el nombre del archivo. 
+
+Hay dos maneras de embeberlo manualmente:
+
+1. Fácil: con el html generado desde draw io directamente.
+
+2. Más compleja (No usar): 
+
+
+
+Los pasos son:
+
+- Crear un archivo \b html llamado <nombre_html_waveform>.html
+   \warning En el código html mostrado más abajo, hay que copiar el interior del svg \b exportado a mano desde DRAW IO <\b>
+
+   @code{.html}
+   <!DOCTYPE html>
+   <html>
+   <head>
+   <style>
+   body { margin: 0; background: #fff; font-family: sans-serif; }
+   #toolbar {
+      padding: 8px;
+      background: #f4f4f4;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+   }
+   #toolbar button {
+      padding: 4px 12px;
+      cursor: pointer;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: white;
+   }
+   #toolbar button:hover { background: #e0e0e0; }
+   #container {
+      width: 100%;
+      height: calc(100vh - 50px);
+      overflow-x: scroll;
+      overflow-y: auto;
+   }
+   #svg-wrapper {
+      height: 100%;
+      display: inline-block;
+      white-space: nowrap;
+   }
+   </style>
+   </head>
+   <body>
+   <div id="toolbar">
+   <button onclick="zoom(1.2)">＋</button>
+   <button onclick="zoom(0.8)">－</button>
+   <button onclick="resetView()">⟳ Reset</button>
+   <span id="zoom-label" style="color:#666; font-size:13px;">100%</span>
+   </div>
+   <div id="container">
+   <div id="svg-wrapper">
+      CONTENIDO DEL SVG AQUI, HAY QUE ABRIRLO Y COPIAR EL INTERIOR DESDE <svg> a </svg>
+   </div>
+   </div>
+   <script>
+   let scale = 1;
+   const wrapper = document.getElementById('svg-wrapper');
+   const label   = document.getElementById('zoom-label');
+   function applyScale() {
+      const svg = wrapper.querySelector('svg');
+      if (!svg) return;
+      const baseWidth = parseInt(svg.getAttribute('width')) || 800;
+      svg.style.width  = (baseWidth * scale) + 'px';
+      svg.style.height = 'auto';
+      label.textContent = Math.round(scale * 100) + '%';
+   }
+   function zoom(factor) {
+      scale = Math.min(Math.max(scale * factor, 0.2), 5);
+      applyScale();
+   }
+   function resetView() {
+      scale = 1;
+      applyScale();
+      document.getElementById('container').scrollLeft = 0;
+   }
+   applyScale();
+   </script>
+   </body>
+   </html>
+   @endcode
+   
+- Dependiendo del lenguaje del archivo donde se quiera incluir el archivo se comentará de una manera o de otra.
+   - VHDL:   
+      @verbatim
+      \htmlinclude <nombre_html_waveform>.html
+      @endverbatim
+      
+      @verbatim
+      --! @htmlonly
+      --! <iframe src="<nombre_html_waveform>.html"
+      --!         width="100%"
+      --!         height="200px"
+      --!         style="border:none;">
+      --! </iframe>
+      --! @endhtmlonly
+      @endverbatim
+   
+   - .dox:
+      \note Si no se quiere tener la limitación de tamaño se pueden quitar el width y el height
+      @verbatim
+      \htmlonly
+      <iframe src="<nombre_html_waveform>.html"
+              width="100%"
+              height="200px"
+              style="border:none;">
+      </iframe>
+      \endhtmlonly
+      @endverbatim
+
+- Referenciar html en el Doxyfile dentro de HTML_EXTRA_FILES. Otra opción es incluir una carpeta en concreto entero en los extra files.
+
+
+\section sec_work_tools Tools
+
+\subsection subsec_ide IDE
+
+\subsubsection subsec_vscode VSCODE
+
+Lorem Ipsum
+
+@htmlonly
+<!-- -->
+<a href="https://google.com" target="_blank">
+   <button class="dl-button">⬇ Descargar perfil para FW</button>
+</a>
+@endhtmlonly
+
+*/

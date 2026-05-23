@@ -1,26 +1,130 @@
-# No subir los proyectos Vivado generados
-projects/*/project/
-projects/*/*.runs/
-projects/*/*.cache/
-projects/*/*.sim/
-projects/*/*.hw/
-projects/*/*.ip_user_files/
+# ============================================================
+# ============================================================
+#                      FIRMWARE
+# ============================================================
+# ============================================================
 
-# Logs y temporales
+# ============================================================
+#                       VHDL / FPGA
+# ============================================================
+
+# Vivado project files (regenerar con TCL)
+*.xpr
+*.xsa
+*.bit
+*.bin
+*.mcs
+
+# Vivado generated folders
+.Xil/
+*/runs/
+*/cache/
+*/ip/
+*/bd/
 *.jou
 *.log
 *.str
-*.wdb
+*.dcp
 
-# Proyectos Vivado
-*.xpr
+# IP generated files (keep .xci, exclude generated sources)
+*/ip/*/hdl/
+*/ip/*/doc/
+*/ip/*/simulation/
+*/ip/*/synth/
 
-# Archivos de documentación generados
-docs/
+# Simulation
+work/
+*.vcd
+*.ghw
+*.wlf
+modelsim.ini
+transcript
+
+# GHDL work library
+e~*.o
+*.cf
+
+# ============================================================
+# PYTHON
+# ============================================================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+
+# ============================================================
+# DOXYGEN - Output generado automáticamente
+# ============================================================
+**/00-Documents/01-Doxygen/html/
+**/00-Documents/01-Doxygen/latex/
+**/00-Documents/01-Doxygen/xml/
+**/00-Documents/01-Doxygen/rtf/
+
+# Ficheros auto-generados por scripts
+**/09-Doxygen/scripts/__pycache__/
+**/00-Documents/01-Doxygen/00-ExtraContent/hierarchy.dox
+**/00-Documents/01-Doxygen/00-ExtraContent/reports.dox
+**/00-Documents/01-Doxygen/00-ExtraContent/builddate.dox
+
+# Reportes de análisis (auto-generados)
+**/00-Reports/ghdl_report.txt
+**/00-Reports/vsg_report.txt
+**/00-Reports/ghdl_summary.txt
+**/00-Reports/vsg_summary.txt
+
+# VSG rules dump
+**/09-Doxygen/scripts/vsg_all_rules.json
+
+# Word generado
+**/09-Doxygen/docs/design_document.docx
+
+# ============================================================
+# NODE
+# ============================================================
+node_modules/
+npm-debug.log*
+package-lock.json
+
+# ============================================================
+# VSCODE
+# ============================================================
+.vscode/
+!.vscode/extensions.json
+
+# ============================================================
+# SISTEMA
+# ============================================================
+.DS_Store
+Thumbs.db
+desktop.ini
+*.tmp
+*.bak
+*.swp
+*~
+
+# ============================================================
+# VERSIONES Y RELEASES
+# ============================================================
+07-Versions/*.zip 
+
+
+# Word generado
+**/01-Doxygen/design_document.docx
+**/01-Doxygen/diagrams/
+
 
 # --- Archivos temporales de LaTeX ---
-report/build/*
-!report/build/main.pdf
-LATEX/
+**/report/build/*
 *.drawio.bkp
-definition/memoria_tfm_antigua/
+
+
+06-Project/*/

@@ -1,0 +1,42 @@
+/*!
+\htmlonly
+<p style="color:gray;font-size:0.9em;">Documentation generated: <span id="bdate"></span></p>
+<script>
+document.getElementById('bdate').innerText = document.lastModified;
+</script>
+\endhtmlonly
+
+\tableofcontents
+
+\mainpage MAIN PAGE
+ 
+
+\section sec_desc DESCRIPTION
+
+Proyecto encargado de ...
+
+\ref page_navigablediagram
+
+\ref page_reports
+
+\section sec_source_code SOURCE CODE
+
+\ref page_hierarchy "DESIGN UNITS"
+\todo Podría ser interesante incluir en la tabla de \ref page_hierarchy alguna columna adicional
+
+
+
+[FILE LIST](files.html)
+ 
+
+\section sec_source_autodoc AUTODOC
+
+\ref page_workmethodology
+
+\ref page_setup
+
+\ref page_team
+
+
+
+*/
