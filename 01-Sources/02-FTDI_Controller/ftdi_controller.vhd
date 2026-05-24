@@ -1,26 +1,6 @@
 --! \file ftdi_controller.vhd
 --! \brief Controlador para el FT232H en modo Synchronous FIFO.
---!
---! Envía datos continuamente desde la FIFO asíncrona hacia el PC via FTDI
---! mientras haya datos disponibles y el FTDI esté listo para recibirlos.
---!
---! Lecciones aprendidas del proyecto de test TOP_FTDI_TEST:
---!   - La FSM debe operar en **falling_edge(ftdi_clk)** para garantizar
---!     que WR# y ADBUS están estables cuando el FTDI los muestrea en el
---!     flanco de subida de CLKOUT (medio ciclo de margen = 8.3 ns).
---!   - OE# debe estar siempre a '1' para escritura FPGA→FTDI.
---!     OE# solo se usa para lectura FTDI→FPGA.
---!   - ADBUS debe ser conducido siempre por la FPGA (sin tristate).
---!   - Burst mode: no volver a ST_IDLE entre bytes si TXE#='0'.
---!
---! Protocolo de escritura (Synchronous FIFO mode, datasheet FT232H):
---!   1. Esperar TXE#='0'  → FTDI listo para recibir
---!   2. Dato estable en ADBUS (ST_SETUP)
---!   3. WR#='0'           → dato capturado por FTDI en flanco de subida de CLKOUT
---!   4. WR#='1'           → fin del pulso de escritura
---!   5. Burst: si TXE#='0' → cargar siguiente dato y volver a 2
---!
---! Todo opera en falling_edge(ftdi_clk) (60 MHz generado por el FT232H).
+
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -29,33 +9,29 @@ use IEEE.NUMERIC_STD.ALL;
 entity ftdi_controller is
     port (
         ---------------------------------------------------------------------------
-        -- Dominio ftdi_clk (60 MHz — generado por el FT232H)
+        -- Dominio clk_i (60 MHz — generado por el FT232H vía BUFG)
         ---------------------------------------------------------------------------
-        ftdi_clk    : in  std_logic;   --! Reloj 60 MHz del FTDI (ACBUS[5])
-        reset       : in  std_logic;   --! Reset síncrono activo alto
+        clk_i   : in std_logic;  --! Reloj 60 MHz del FT232H (ACBUS[5] vía BUFG)
+        reset_i : in std_logic;  --! Reset síncrono activo alto
 
         ---------------------------------------------------------------------------
-        -- Interfaz con FIFO asíncrona (lado de lectura)
+        -- Interfaz con FIFO asíncrona (lado de lectura — dominio clk_i)
         ---------------------------------------------------------------------------
-        fifo_dout   : in  std_logic_vector(7 downto 0);  --! Dato en cabeza de FIFO
-        fifo_empty  : in  std_logic;                     --! FIFO vacía
-        fifo_rd_en  : out std_logic;                     --! Pulso de lectura de FIFO
+        fifo_data_i  : in  std_logic_vector(7 downto 0);  --! Dato en cabeza de la FIFO de captura
+        fifo_empty_i : in  std_logic;                     --! FIFO vacía; no hay datos disponibles para enviar
+        fifo_rd_en_o : out std_logic;                     --! Pulso de lectura de FIFO (1 ciclo, activo alto)
 
         ---------------------------------------------------------------------------
-        -- Interfaz física FTDI — señales de control
+        -- Interfaz física FT232H
         ---------------------------------------------------------------------------
-        ftdi_txe_n  : in  std_logic;   --! TXE# — '0' = FTDI listo para recibir
-        ftdi_wr_n   : out std_logic;   --! WR#  — '0' = pulso de escritura
-
-        ---------------------------------------------------------------------------
-        -- Interfaz física FTDI — datos
-        ---------------------------------------------------------------------------
-        adbus_out   : out std_logic_vector(7 downto 0);  --! Dato hacia FTDI
+        txe_n_i  : in  std_logic;                      --! TXE# (activo bajo): '0'=FT232H listo para recibir
+        wr_n_o   : out std_logic;                      --! WR#  (activo bajo): '0'=pulso de escritura al FTDI
+        adbus_o  : out std_logic_vector(7 downto 0);   --! Byte de datos hacia el FT232H por ADBUS
 
         ---------------------------------------------------------------------------
         -- Estado
         ---------------------------------------------------------------------------
-        tx_active   : out std_logic    --! '1' durante transmisión activa
+        tx_active_o : out std_logic  --! '1' durante transmisión activa (burst en curso)
     );
 end entity ftdi_controller;
 
@@ -64,89 +40,89 @@ architecture rtl of ftdi_controller is
     ---------------------------------------------------------------------------
     -- FSM
     ---------------------------------------------------------------------------
-    type state_t is (
-        ST_IDLE,    --! Esperar datos en FIFO y TXE#='0'
-        ST_SETUP,   --! Dato estable en ADBUS, WR# todavía alto
-        ST_WRITE,   --! WR#='0' — FTDI captura dato
-        ST_HOLD     --! WR#='1' — avanzar FIFO, decidir burst o IDLE
+    type t_state is (
+        ST_IDLE,   --! Esperar datos en FIFO y TXE#='0'
+        ST_SETUP,  --! Dato estable en ADBUS; WR# todavía alto (setup time)
+        ST_WRITE,  --! WR#='0' — FT232H captura dato en flanco de subida de CLKOUT
+        ST_HOLD    --! WR#='1' — avanzar FIFO; decidir burst o volver a ST_IDLE
     );
-    signal state : state_t := ST_IDLE;
 
-    signal data_r    : std_logic_vector(7 downto 0) := (others => '0');
-    signal fifo_rd_r : std_logic := '0';
+    signal s_state : t_state := ST_IDLE;  --! Estado actual de la FSM
+
+    signal data_r    : std_logic_vector(7 downto 0) := (others => '0');  --! Registro del dato a enviar por ADBUS
+    signal fifo_rd_r : std_logic                    := '0';              --! Registro de habilitación de lectura de FIFO
 
     ---------------------------------------------------------------------------
     -- ILA / Debug
     ---------------------------------------------------------------------------
     attribute mark_debug : string;
-    attribute mark_debug of state      : signal is "true";
+    attribute mark_debug of s_state    : signal is "true";
     attribute mark_debug of fifo_rd_r  : signal is "true";
     attribute mark_debug of data_r     : signal is "true";
 
 begin
 
-    fifo_rd_en <= fifo_rd_r;
-    adbus_out  <= data_r;
+    fifo_rd_en_o <= fifo_rd_r;
+    adbus_o      <= data_r;
 
     ---------------------------------------------------------------------------
-    -- FSM — falling_edge para garantizar setup/hold time con CLKOUT
+    -- FSM — falling_edge para garantizar setup/hold time respecto a CLKOUT
     ---------------------------------------------------------------------------
-    p_fsm : process(ftdi_clk)
+    p_fsm : process(clk_i)
     begin
-        if falling_edge(ftdi_clk) then
-            if reset = '1' then
-                state      <= ST_IDLE;
-                ftdi_wr_n  <= '1';
-                fifo_rd_r  <= '0';
-                tx_active  <= '0';
-                data_r     <= (others => '0');
+        if falling_edge(clk_i) then
+            if reset_i = '1' then
+                s_state     <= ST_IDLE;
+                wr_n_o      <= '1';
+                fifo_rd_r   <= '0';
+                tx_active_o <= '0';
+                data_r      <= (others => '0');
             else
                 fifo_rd_r <= '0';
 
-                case state is
+                case s_state is
 
                     -----------------------------------------------------------
                     -- Esperar FIFO con datos y FTDI listo
                     -----------------------------------------------------------
                     when ST_IDLE =>
-                        ftdi_wr_n <= '1';
-                        tx_active <= '0';
-
-                        if fifo_empty = '0' and ftdi_txe_n = '0' then
+                        wr_n_o      <= '1';
+                        tx_active_o <= '0';
+                        if fifo_empty_i = '0' and txe_n_i = '0' then
                             fifo_rd_r <= '1';
-                            data_r    <= fifo_dout;
-                            state     <= ST_SETUP;
+                            data_r    <= fifo_data_i;
+                            s_state   <= ST_SETUP;
                         end if;
 
                     -----------------------------------------------------------
-                    -- Dato estable en ADBUS, WR# todavía alto
+                    -- Dato estable en ADBUS; WR# todavía alto
                     -----------------------------------------------------------
                     when ST_SETUP =>
-                        tx_active <= '1';
-                        state     <= ST_WRITE;
+                        tx_active_o <= '1';
+                        s_state     <= ST_WRITE;
 
                     -----------------------------------------------------------
-                    -- WR#='0' — FTDI captura dato en flanco de subida de CLKOUT
+                    -- WR#='0' — FT232H captura dato en flanco de subida de CLKOUT
                     -----------------------------------------------------------
                     when ST_WRITE =>
-                        ftdi_wr_n <= '0';
-                        state     <= ST_HOLD;
+                        wr_n_o  <= '0';
+                        s_state <= ST_HOLD;
 
                     -----------------------------------------------------------
-                    -- WR#='1' — decidir si continuar burst o volver a IDLE
+                    -- WR#='1' — decidir si continuar burst o volver a ST_IDLE
                     -----------------------------------------------------------
                     when ST_HOLD =>
-                        ftdi_wr_n <= '1';
-                        if fifo_empty = '0' and ftdi_txe_n = '0' then
+                        wr_n_o <= '1';
+                        if fifo_empty_i = '0' and txe_n_i = '0' then
                             fifo_rd_r <= '1';
-                            data_r    <= fifo_dout;
-                            state     <= ST_SETUP;
+                            data_r    <= fifo_data_i;
+                            s_state   <= ST_SETUP;
                         else
-                            state <= ST_IDLE;
+                            s_state <= ST_IDLE;
                         end if;
 
                     when others =>
-                        state <= ST_IDLE;
+                        s_state <= ST_IDLE;
 
                 end case;
             end if;
