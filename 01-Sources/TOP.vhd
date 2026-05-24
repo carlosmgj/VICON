@@ -63,7 +63,7 @@ architecture Behavioral of TOP is
     signal s_locked       : std_logic;                                            --! Activada (LL) cuando el MMCM genera un reloj estable (Async?) 
     signal s_rst_final    : std_logic;                                            --! Reset vinculado a la correcta generación de s_mclk. (Async?) Añadir 2FF Sync
     signal s_mclk_div_cnt : integer range 0 to g_MT9V111_MCLK_DIV - 1 := 0;       --! Ciclos de reloj de s_mclk que hay en flanco activo de s_cam_mclk_o
-    signal s_cam_mclk_r   : std_logic                                 := '0';     --! Registro del divisor de reloj que genera mt_clk_o
+    signal cam_mclk_r     : std_logic                                 := '0';     --! Registro del divisor de reloj que genera mt_clk_o
 
     ---------------------------------------------------------------------------
     -- Señales MT9V111 — Interfaz FSM <-> Controlador I2C
@@ -127,7 +127,7 @@ architecture Behavioral of TOP is
     signal s_state       : main_state_t                                   := ST_CAM_RESET_ASSERT;     --! Estado actual de la FSM de inicialización del sensor
     signal s_init_cnt    : integer range 0 to c_MT9V111_RESET_WAIT_CYCLES := 0;                       --! Contador de ciclos para temporización de reset e inicialización
     signal s_fill_cnt    : integer range 0 to g_MT9V111_I2C_FIFO_DEPTH    := 0;                       --! Contador de registros encolados en la FIFO de escritura I2C
-    signal s_cam_reset_r : std_logic                                      := '0';                     --! Registro de control del pin RESET# del MT9V111 (activo bajo)
+    signal cam_reset_r   : std_logic                                      := '0';                     --! Registro de control del pin RESET# del MT9V111 (activo bajo)
     signal s_chip_id     : std_logic_vector(15 downto 0)                  := (others => '0');         --! Chip ID leído del MT9V111 (esperado: CHIP_ID_EXPECTED)
 
     ---------------------------------------------------------------------------
@@ -156,10 +156,10 @@ begin
 
     i2c_sclk_io   <= '0' when s_scl_out        = '0' else 'Z';
     i2c_sdata_io  <= s_sda_out when s_sda_oe = '1' else 'Z';
-    s_sda_in   <= i2c_sdata_io;
+    s_sda_in      <= i2c_sdata_io;
 
-    mt_reset_n_o <= s_cam_reset_r;
-    mt_clk_o     <= s_cam_mclk_r;
+    mt_reset_n_o <= cam_reset_r;
+    mt_clk_o     <= cam_mclk_r;
     s_cap_en     <= '1' when s_state = ST_FINISH else '0';
 
     ---------------------------------------------------------------------------
@@ -208,10 +208,10 @@ begin
         if rising_edge(s_mclk) then
             if s_rst_final = '1' then
                 s_mclk_div_cnt <= 0;
-                s_cam_mclk_r   <= '0';
+                cam_mclk_r   <= '0';
             elsif s_mclk_div_cnt = g_MT9V111_MCLK_DIV - 1 then
                 s_mclk_div_cnt <= 0;
-                s_cam_mclk_r   <= not s_cam_mclk_r;
+                cam_mclk_r     <= not cam_mclk_r;
             else
                 s_mclk_div_cnt <= s_mclk_div_cnt + 1;
             end if;
@@ -224,7 +224,7 @@ begin
         if rising_edge(s_mclk) then
             if s_rst_final = '1' then
                 s_state          <= ST_CAM_RESET_ASSERT;
-                s_cam_reset_r    <= '0';
+                cam_reset_r      <= '0';
                 s_init_cnt       <= 0;
                 s_i2c_rw         <= '0';
                 s_i2c_start      <= '0';
@@ -245,7 +245,7 @@ begin
                 case s_state is
 
                     when ST_CAM_RESET_ASSERT =>
-                        s_cam_reset_r <= '0';
+                        cam_reset_r <= '0';
                         if s_init_cnt = c_MT9V111_RESET_HOLD_CYCLES - 1 then
                             s_init_cnt <= 0;
                             s_state    <= ST_CAM_RESET_WAIT;
@@ -254,7 +254,7 @@ begin
                         end if;
 
                     when ST_CAM_RESET_WAIT =>
-                        s_cam_reset_r <= '1';
+                        cam_reset_r <= '1';
                         if s_init_cnt = c_MT9V111_RESET_WAIT_CYCLES - 1 then
                             s_init_cnt <= 0;
                             s_fill_cnt <= 0;
@@ -418,9 +418,9 @@ begin
     --! \brief Controlador I2C (Maestro)
     u_i2c : entity work.i2c_master
         generic map (
-            CLK_FREQ_HZ => g_SYSTEM_CLK_FREQ_HZ,
-            I2C_FREQ_HZ => g_MT9V111_I2C_FREQ_HZ,
-            FIFO_DEPTH  => g_MT9V111_I2C_FIFO_DEPTH
+            g_CLK_FREQ_HZ => g_SYSTEM_CLK_FREQ_HZ,
+            g_I2C_FREQ_HZ => g_MT9V111_I2C_FREQ_HZ,
+            g_FIFO_DEPTH  => g_MT9V111_I2C_FIFO_DEPTH
         )
         port map (
             clk_i           => s_mclk,

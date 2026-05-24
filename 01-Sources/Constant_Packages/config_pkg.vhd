@@ -1,45 +1,60 @@
 --! \file config_pkg.vhd
---! \brief Paquete de constantes del proyecto
+--! \brief Paquete de configuración global de VICON.
+--!        Contiene todas las constantes de diseño: placa, sensor, FTDI.
 
-library ieee;
-use ieee.std_logic_1164.all;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
 
 package config_pkg is
 
-    constant c_SYSTEM_CLK_FREQ_HZ        : integer := 100_000_000;
-    constant c_BASYS3_SW_QTY             : integer := 16;
-    constant c_BASYS3_BTN_QTY            : integer := 4;
-    constant c_BASYS3_BTN_CENTER         : integer := 0;
-    constant c_BASYS3_BTN_RIGHT          : integer := 1;
-    constant c_BASYS3_BTN_TOP            : integer := 2;
-    constant c_BASYS3_BTN_LEFT           : integer := 3;
-    constant c_BASYS3_BTN_DOWN           : integer := 4; 
-    constant c_BASYS3_LED_QTY            : integer := 16;
-    constant c_BASYS3_7SEG_BAR_QTY       : integer := 7;
-    constant c_BASYS3_7SEG_DIGIT_QTY     : integer := 4;
- 
-     
-    constant c_MT9V111_I2C_FREQ_HZ       : integer                       := 400_000;
-    constant c_MT9V111_I2C_FIFO_DEPTH    : integer                       := 16;
-    constant c_MT9V111_I2C_SENSOR_ADDR   : std_logic_vector(6 downto 0)  := "1011100";
-    constant c_MT9V111_DATA_BITS         : integer                       := 8;
-    constant c_MT9V111_RESET_HOLD_US     : integer                       := 1;         -- tiempo mínimo según datasheet
-    constant c_MT9V111_RESET_WAIT_US     : integer                       := 150000;    -- tiempo de estabilización PLL
-    constant c_MT9V111_MCLK_DIV          : integer                       := 2;
-    constant c_MT9V111_CHIP_ID_EXPECTED  : std_logic_vector(15 downto 0) := x"823A";
-    constant c_MT9V111_H_RES             : integer                       := 640;
-    constant c_MT9V111_V_RES             : integer                       := 640;
+    ---------------------------------------------------------------------------
+    -- Sistema
+    ---------------------------------------------------------------------------
+    constant c_SYSTEM_CLK_FREQ_HZ    : integer := 100_000_000;  --! Frecuencia del reloj de sistema generado por el MMCM (Hz)
 
-    constant c_FTDI_DATABUS_W            : integer := 8;
-    constant c_FTDI_CONTROLBUS_W         : integer := 8;
-    -- FT232H ACBUS pin mapping 
-    constant c_FTDI_ACBUS_RXF_N          : integer := 0;  
-    constant c_FTDI_ACBUS_TXE_N          : integer := 1;  
-    constant c_FTDI_ACBUS_RD_N           : integer := 2;  
-    constant c_FTDI_ACBUS_WR_N           : integer := 3;     
-    constant c_FTDI_ACBUS_SIWU_N         : integer := 4;  
-    constant c_FTDI_ACBUS_CLKOUT         : integer := 5;  
-    constant c_FTDI_ACBUS_OE_N           : integer := 6;  
-    constant c_FTDI_ACBUS_PWRSAV         : integer := 7;  
- 
-end package config_pkg; 
+    ---------------------------------------------------------------------------
+    -- Basys 3 — Recursos de la placa de evaluación
+    ---------------------------------------------------------------------------
+    constant c_BASYS3_SW_QTY         : integer := 16;  --! Número de interruptores deslizantes
+    constant c_BASYS3_LED_QTY        : integer := 16;  --! Número de LEDs
+    constant c_BASYS3_7SEG_BAR_QTY   : integer := 7;   --! Segmentos por dígito del display 7 segmentos
+    constant c_BASYS3_7SEG_DIGIT_QTY : integer := 4;   --! Número de dígitos del display 7 segmentos
+    constant c_BASYS3_BTN_QTY        : integer := 5;   --! Número de pulsadores \warning original era 4, pero hay 5 definidos (0..4)
+    -- Índices de los pulsadores en basys3_btn_i
+    constant c_BASYS3_BTN_CENTER     : integer := 0;   --! Índice del pulsador central
+    constant c_BASYS3_BTN_RIGHT      : integer := 1;   --! Índice del pulsador derecho
+    constant c_BASYS3_BTN_TOP        : integer := 2;   --! Índice del pulsador superior
+    constant c_BASYS3_BTN_LEFT       : integer := 3;   --! Índice del pulsador izquierdo
+    constant c_BASYS3_BTN_DOWN       : integer := 4;   --! Índice del pulsador inferior
+
+    ---------------------------------------------------------------------------
+    -- MT9V111 — Sensor óptico
+    ---------------------------------------------------------------------------
+    constant c_MT9V111_I2C_FREQ_HZ      : integer                       := 400_000;    --! Frecuencia del bus I2C (Hz); MT9V111 soporta hasta 400 kHz
+    constant c_MT9V111_I2C_FIFO_DEPTH   : integer                       := 16;         --! Profundidad de las FIFOs de escritura y lectura I2C
+    constant c_MT9V111_I2C_SENSOR_ADDR  : std_logic_vector(6 downto 0)  := "1011100";  --! Dirección I2C de 7 bits del MT9V111 (0x5C)
+    constant c_MT9V111_DATA_BITS        : integer                       := 8;          --! Anchura del bus de datos de imagen del sensor
+    constant c_MT9V111_MCLK_DIV        : integer                       := 2;          --! Divisor de c_SYSTEM_CLK_FREQ_HZ para generar mt_clk_o
+    constant c_MT9V111_CHIP_ID_EXPECTED : std_logic_vector(15 downto 0) := x"823A";   --! Chip ID fijo del MT9V111 (registro 0xFF, page 0)
+    constant c_MT9V111_H_RES            : integer                       := 640;        --! Resolución horizontal del sensor en píxeles
+    constant c_MT9V111_V_RES            : integer                       := 480;        --! Resolución vertical del sensor en píxeles \warning original era 640
+    -- Temporización de reset (valores del datasheet; los ciclos se calculan en TOP)
+    constant c_MT9V111_RESET_HOLD_US    : integer                       := 1;          --! Tiempo mínimo de RESET# a nivel bajo (µs)
+    constant c_MT9V111_RESET_WAIT_US    : integer                       := 150_000;    --! Tiempo de espera tras liberar RESET# para estabilización del PLL (µs)
+
+    ---------------------------------------------------------------------------
+    -- FT232H — Chip FTDI en modo Synchronous FIFO
+    ---------------------------------------------------------------------------
+    constant c_FTDI_DATABUS_W    : integer := 8;  --! Anchura del bus de datos ADBUS (bits)
+    constant c_FTDI_CONTROLBUS_W : integer := 8;  --! Anchura del bus de control ACBUS (bits)
+    -- Mapeo de pines ACBUS según esquemático
+    constant c_FTDI_ACBUS_RXF_N  : integer := 0;  --! RXF#   — RX empty flag  (entrada): '0'=dato disponible para leer
+    constant c_FTDI_ACBUS_TXE_N  : integer := 1;  --! TXE#   — TX full flag   (entrada): '0'=FT232H listo para recibir
+    constant c_FTDI_ACBUS_RD_N   : integer := 2;  --! RD#    — read strobe    (salida):  '0'=leer byte de ADBUS
+    constant c_FTDI_ACBUS_WR_N   : integer := 3;  --! WR#    — write strobe   (salida):  '0'=escribir byte en ADBUS
+    constant c_FTDI_ACBUS_SIWU_N : integer := 4;  --! SIWU#  — send immediate (salida):  mantenido a '1' (inactivo)
+    constant c_FTDI_ACBUS_CLKOUT : integer := 5;  --! CLKOUT — reloj 60 MHz   (entrada): entra vía BUFG como s_ftdi_clk
+    constant c_FTDI_ACBUS_OE_N   : integer := 6;  --! OE#    — output enable  (salida):  mantenido a '1' (solo escritura)
+    constant c_FTDI_ACBUS_PWRSAV : integer := 7;  --! PWRSAV — power save     (salida):  mantenido a '1' (activo)
+
+end package config_pkg;
