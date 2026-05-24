@@ -63,18 +63,6 @@ architecture rtl of frame_capture is
     signal overflow_r   : std_logic := '0';  --! Registro de overflow; se mantiene hasta el siguiente ST_IDLE
     signal frame_done_r : std_logic := '0';  --! Registro de frame_done; pulso de 1 ciclo
 
-    ---------------------------------------------------------------------------
-    -- ILA / Debug
-    ---------------------------------------------------------------------------
-    attribute mark_debug : string;
-    attribute mark_debug of s_state     : signal is "true";
-    attribute mark_debug of s_byte_cnt  : signal is "true";
-    attribute mark_debug of s_col_cnt   : signal is "true";
-    attribute mark_debug of s_row_cnt   : signal is "true";
-    attribute mark_debug of fifo_wr_o   : signal is "true";
-    attribute mark_debug of fifo_data_o : signal is "true";
-    attribute mark_debug of overflow_r  : signal is "true";
-
 begin
 
     frame_done_o <= frame_done_r;

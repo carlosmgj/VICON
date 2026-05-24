@@ -52,13 +52,6 @@ architecture rtl of ftdi_controller is
     signal data_r    : std_logic_vector(7 downto 0) := (others => '0');  --! Registro del dato a enviar por ADBUS
     signal fifo_rd_r : std_logic                    := '0';              --! Registro de habilitación de lectura de FIFO
 
-    ---------------------------------------------------------------------------
-    -- ILA / Debug
-    ---------------------------------------------------------------------------
-    attribute mark_debug : string;
-    attribute mark_debug of s_state    : signal is "true";
-    attribute mark_debug of fifo_rd_r  : signal is "true";
-    attribute mark_debug of data_r     : signal is "true";
 
 begin
 

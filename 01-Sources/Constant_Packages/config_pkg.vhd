@@ -1,6 +1,5 @@
 --! \file config_pkg.vhd
 --! \brief Paquete de configuración global de VICON.
---!        Contiene todas las constantes de diseño: placa, sensor, FTDI.
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -34,7 +33,7 @@ package config_pkg is
     constant c_MT9V111_I2C_FIFO_DEPTH   : integer                       := 16;        --! Profundidad de las FIFOs de escritura y lectura I2C
     constant c_MT9V111_I2C_SENSOR_ADDR  : std_logic_vector(6 downto 0)  := "1011100"; --! Dirección I2C de 7 bits del MT9V111 (0x5C)
     constant c_MT9V111_DATA_BITS        : integer                       := 8;         --! Anchura del bus de datos de imagen del sensor
-    constant c_MT9V111_MCLK_DIV        : integer                       := 2;          --! Divisor de c_SYSTEM_CLK_FREQ_HZ para generar mt_clk_o
+    constant c_MT9V111_MCLK_DIV         : integer                       := 2;          --! Divisor de c_SYSTEM_CLK_FREQ_HZ para generar mt_clk_o
     constant c_MT9V111_CHIP_ID_EXPECTED : std_logic_vector(15 downto 0) := x"823A";   --! Chip ID fijo del MT9V111 (registro 0xFF, page 0)
     constant c_MT9V111_H_RES            : integer                       := 640;       --! Resolución horizontal del sensor en píxeles
     constant c_MT9V111_V_RES            : integer                       := 480;       --! Resolución vertical del sensor en píxeles \warning original era 640
@@ -68,5 +67,10 @@ package config_pkg is
     constant c_PROTO_RESERVED_00 : std_logic_vector(7 downto 0) := x"00"; --! Sustituido por 0x01
     constant c_PROTO_RESERVED_AA : std_logic_vector(7 downto 0) := x"AA"; --! Sustituido por 0xAB
     constant c_PROTO_RESERVED_55 : std_logic_vector(7 downto 0) := x"55"; --! Sustituido por 0x56
+
+    constant c_PROTO_REPLACE_FF : std_logic_vector(7 downto 0) := x"FE"; --! Sustituto de 0xFF en datos de imagen
+    constant c_PROTO_REPLACE_00 : std_logic_vector(7 downto 0) := x"01"; --! Sustituto de 0x00 en datos de imagen
+    constant c_PROTO_REPLACE_AA : std_logic_vector(7 downto 0) := x"AB"; --! Sustituto de 0xAA en datos de imagen
+    constant c_PROTO_REPLACE_55 : std_logic_vector(7 downto 0) := x"56"; --! Sustituto de 0x55 en datos de imagen
 
 end package config_pkg;

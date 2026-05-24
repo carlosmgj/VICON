@@ -7,15 +7,11 @@ ftdi.set_bitmode(0xFF, Ftdi.BitMode.SYNCFF)
 ftdi.purge_buffers()
 time.sleep(0.1)
 
-print("CLKOUT activo — abre la ILA ahora")
-input("Presiona Enter para leer datos...")
+print("CLKOUT activo — configura trigger en ILA ahora")
+input("Presiona Enter cuando hayas configurado el trigger...")
 
-data = ftdi.read_data(1024)
-errors = 0
-for i in range(1, len(data)):
-    if data[i] != (data[i-1] + 1) % 256:
-        errors += 1
-        print(f"Error en posición {i}: esperado {(data[i-1]+1)%256}, recibido {data[i]}")
-print(f"Total errores: {errors}/{len(data)} bytes")
-
-ftdi.close()
+print("Leyendo — dale a Run Trigger en la ILA ahora")
+# Leer continuamente para mantener el FTDI activo
+while True:
+    data = ftdi.read_data(4096)
+    # No cerrar el FTDI

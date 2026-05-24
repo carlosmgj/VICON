@@ -172,17 +172,6 @@ architecture rtl of i2c_master is
     signal s_done  : std_logic := '0';  --! Registro interno de done_o
     signal s_error : std_logic := '0';  --! Registro interno de error_o
 
-    ---------------------------------------------------------------------------
-    -- ILA / Debug — señales marcadas para captura en ILA de Vivado
-    ---------------------------------------------------------------------------
-    attribute mark_debug : string;
-    attribute mark_debug of s_state      : signal is "true";
-    attribute mark_debug of s_seq_next   : signal is "true";
-    attribute mark_debug of s_phase_cnt  : signal is "true";
-    attribute mark_debug of s_phase_tick : signal is "true";
-    attribute mark_debug of scl_r        : signal is "true";
-    attribute mark_debug of sda_out_r    : signal is "true";
-    attribute mark_debug of s_sda_oe     : signal is "true";
 
     attribute fsm_encoding : string;
     attribute fsm_encoding of s_state : signal is "auto";

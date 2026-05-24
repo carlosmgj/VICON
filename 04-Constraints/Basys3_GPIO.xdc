@@ -235,7 +235,3 @@ set_property IOSTANDARD LVCMOS33 [get_ports {ACBUS[7]}]
 
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {ACBUS_IBUF[5]}]
 create_clock -period 16.667 -name ftdi_clk [get_ports {ACBUS[5]}]
-
-connect_debug_port u_ila_1/probe3 [get_nets [list u_frame_capture/byte_sel]]
-connect_debug_port dbg_hub/clk [get_nets clk_IBUF_BUFG]
-

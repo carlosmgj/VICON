@@ -368,22 +368,12 @@ begin
     -- INSTANCIAS DIRECTAS DE MÓDULOS
     ---------------------------------------------------------------------------
     ---------------------------------------------------------------------------
-    
-    --! \brief  Agente del MT9V111
-    u_cam_sim : entity work.cam_sim
-        port map (
-            pixclk_i => mt_pixclk_i,
-            reset_i  => s_rst_final,
-            fvalid_i => s_sim_fval,
-            lvalid_i => s_sim_lval,
-            data_i   => s_sim_dout
-        );
 
     --! \brief  Capturador de imágenes
     u_frame_capture : entity work.frame_capture
         generic map (
-            H_RES => g_MT9V111_H_RES,
-            V_RES => g_MT9V111_V_RES
+            g_H_RES => g_MT9V111_H_RES,
+            g_V_RES => g_MT9V111_V_RES
         )
         port map (
             pixclk_i     => mt_pixclk_i,
