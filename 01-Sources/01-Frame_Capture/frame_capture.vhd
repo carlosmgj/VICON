@@ -63,16 +63,32 @@ architecture rtl of frame_capture is
     signal overflow_r   : std_logic := '0';  --! Registro de overflow; se mantiene hasta el siguiente ST_IDLE
     signal frame_done_r : std_logic := '0';  --! Registro de frame_done; pulso de 1 ciclo
 
+    signal rst_pixclk_2ff: std_logic_vector(1 downto 0) :=(others => '1');
+    signal rst_pixclk : std_logic;
+
 begin
 
     frame_done_o <= frame_done_r;
     overflow_o   <= overflow_r;
 
+    p_reset_sync: process(pixclk_i, reset_i)
+    begin
+        if reset_i = '1' then
+            rst_pixclk_2ff <= (others => '1');
+        elsif rising_edge(pixclk_i) then
+            rst_pixclk_2ff(0) <= '0';
+            rst_pixclk_2ff(1) <= rst_pixclk_2ff(0);
+        end if;
+    end process p_reset_sync;
+    rst_pixclk <= rst_pixclk_2ff(1);
+
+
     --! \brief FSM de captura de frame — dominio pixclk_i
     p_capture : process(pixclk_i)
     begin
+        -- /todo Reset aquí no se cumple porque pixclk_i es una señal post-reset 
         if rising_edge(pixclk_i) then
-            if reset_i = '1' then
+            if rst_pixclk = '1' then
                 s_state      <= ST_IDLE;
                 s_byte_cnt   <= (others => '0');
                 s_col_cnt    <= 0;
@@ -147,8 +163,8 @@ begin
 
                     -----------------------------------------------------------
                     -- Captura con sustituciones para evitar falsos positivos
-                    -- s_byte_cnt(0)='0' → byte Y (capturar)
-                    -- s_byte_cnt(0)='1' → byte croma (descartar)
+                    -- s_byte_cnt(0)='1' → byte Y (capturar)
+                    -- s_byte_cnt(0)='0' → byte croma (descartar)
                     -----------------------------------------------------------
                     when ST_CAPTURE =>
                         if lvalid_i = '0' then
@@ -159,7 +175,6 @@ begin
                             if s_byte_cnt(0) = '0' then
                                 if fifo_full_i = '0' then
                                     if    data_i = c_PROTO_RESERVED_FF then fifo_data_o <= c_PROTO_REPLACE_FF;
-                                    elsif data_i = c_PROTO_RESERVED_00 then fifo_data_o <= c_PROTO_REPLACE_00;
                                     elsif data_i = c_PROTO_RESERVED_AA then fifo_data_o <= c_PROTO_REPLACE_AA;
                                     elsif data_i = c_PROTO_RESERVED_55 then fifo_data_o <= c_PROTO_REPLACE_55;
                                     else                                     fifo_data_o <= data_i;

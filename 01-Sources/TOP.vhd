@@ -24,7 +24,12 @@ entity TOP is
         g_MT9V111_H_RES             : integer                      := c_MT9V111_H_RES;             --! Resolución horizontal del sensor en píxeles
         g_MT9V111_V_RES             : integer                      := c_MT9V111_V_RES;             --! Resolución vertical del sensor en píxeles
         g_MT9V111_RESET_HOLD_US     : integer                      := c_MT9V111_RESET_HOLD_US;     --! Tiempo mínimo de RESET# a nivel bajo según datasheet (µs)
-        g_MT9V111_RESET_WAIT_US     : integer                      := c_MT9V111_RESET_WAIT_US      --! Tiempo de espera tras liberar RESET# para estabilización del PLL (µs)
+        g_MT9V111_RESET_WAIT_US     : integer                      := c_MT9V111_RESET_WAIT_US;     --! Tiempo de espera tras liberar RESET# para estabilización del PLL (µs)
+        g_USE_CAM_SIM               : boolean                      := false;                        --! true → imagen interna (cam_sim); false → imagen del sensor real
+        g_CAM_SIM_HBLANK            : integer                      := 300;                        --! Blanking horizontal del cam_sim (ciclos pixclk): similar a P1 real
+        g_CAM_SIM_VBLANK            : integer                      := 13;                          --! Blanking vertical del cam_sim (filas): similar a Reg0x06+9 real
+        g_CAM_SIM_H_RES             : integer                      := c_CAM_SIM_H_RES;
+        g_CAM_SIM_V_RES             : integer                      := c_CAM_SIM_V_RES
         );
     port (
         -- Basys 3 Ports: Propios de la placa de evaluación
@@ -51,7 +56,7 @@ entity TOP is
     );
 end entity TOP;
 
-architecture Behavioral of TOP is
+architecture rtl of TOP is
 
     constant c_MT9V111_RESET_HOLD_CYCLES : integer := (g_SYSTEM_CLK_FREQ_HZ / 1_000_000) * g_MT9V111_RESET_HOLD_US;
     constant c_MT9V111_RESET_WAIT_CYCLES : integer := (g_SYSTEM_CLK_FREQ_HZ / 1_000_000) * g_MT9V111_RESET_WAIT_US;
@@ -131,11 +136,12 @@ architecture Behavioral of TOP is
     signal s_chip_id     : std_logic_vector(15 downto 0)                  := (others => '0');         --! Chip ID leído del MT9V111 (esperado: CHIP_ID_EXPECTED)
 
     ---------------------------------------------------------------------------
-    -- Señales de Simulación — sustituyen entradas del sensor en testbench
+    -- Señales de imagen — multiplexadas entre sensor real y cam_sim interno
     ---------------------------------------------------------------------------
-    signal s_sim_fval : std_logic;                                              --! FVALID simulado generado por cam_sim
-    signal s_sim_lval : std_logic;                                              --! LVALID simulado generado por cam_sim
-    signal s_sim_dout : std_logic_vector(7 downto 0);                           --! Datos de píxel simulados generados por cam_sim
+    signal s_mt_fvalid_int : std_logic;                                            --! Frame valid: sensor real o cam_sim según g_USE_CAM_SIM
+    signal s_mt_lvalid_int : std_logic;                                            --! Line valid:  sensor real o cam_sim según g_USE_CAM_SIM
+    signal s_mt_data_int   : std_logic_vector(c_MT9V111_DATA_BITS-1 downto 0);  --! Datos:       sensor real o cam_sim según g_USE_CAM_SIM
+    signal s_mt_pixclk_int : std_logic;                                            --! Pixclk:      mt_pixclk_i o cam_mclk_r según g_USE_CAM_SIM
 
     ---------------------------------------------------------------------------
     -- Señales de Debug — capturadas en s_mclk para el ILA
@@ -193,10 +199,10 @@ begin
         if rising_edge(s_mclk) then
             debug_sclk   <= s_scl_out;
             debug_sdata  <= s_sda_in;
-            debug_dout   <= mt_data_i;
-            debug_pixclk <= mt_pixclk_i;
-            debug_fval   <= mt_fvalid_i;
-            debug_lval   <= mt_lvalid_i;
+            debug_dout   <= s_mt_data_int;
+            debug_pixclk <= s_mt_pixclk_int;
+            debug_fval   <= s_mt_fvalid_int;
+            debug_lval   <= s_mt_lvalid_int;
             debug_txe_n  <= s_ftdi_txe_n;
             debug_wr_n   <= s_ftdi_wr_n;
         end if;
@@ -352,7 +358,7 @@ begin
     --! \brief  FIFO Asíncrona de Xilinx: relojes independientes
     u_async_fifo : entity work.fifo_generator_0
         port map (
-            wr_clk    => mt_pixclk_i,
+            wr_clk    => s_mt_pixclk_int,
             din       => s_cap_fifo_data,
             wr_en     => s_cap_fifo_wr,
             full      => s_cap_fifo_full,
@@ -376,11 +382,11 @@ begin
             g_V_RES => g_MT9V111_V_RES
         )
         port map (
-            pixclk_i     => mt_pixclk_i,
+            pixclk_i     => s_mt_pixclk_int,
             reset_i      => s_rst_final,
-            fvalid_i     => s_sim_fval,
-            lvalid_i     => s_sim_lval,
-            data_i       => s_sim_dout,
+            fvalid_i     => s_mt_fvalid_int,
+            lvalid_i     => s_mt_lvalid_int,
+            data_i       => s_mt_data_int,
             capture_en_i => s_cap_en,
             fifo_data_o  => s_cap_fifo_data,
             fifo_wr_o    => s_cap_fifo_wr,
@@ -439,4 +445,34 @@ begin
 
     
 
-end architecture Behavioral;
+    ---------------------------------------------------------------------------
+    -- Selección de fuente de imagen: sensor real o cam_sim interno
+    ---------------------------------------------------------------------------
+    g_real_image : if not g_USE_CAM_SIM generate
+        s_mt_fvalid_int <= mt_fvalid_i;
+        s_mt_lvalid_int <= mt_lvalid_i;
+        s_mt_data_int   <= mt_data_i;
+        s_mt_pixclk_int <= mt_pixclk_i;
+    end generate;
+
+    --! \brief Generador de imagen sintética interno — activo solo con g_USE_CAM_SIM=true
+    --! Resolución y timing configurables via genéricos del TOP.
+    g_cam_sim_on : if g_USE_CAM_SIM generate
+        u_cam_sim : entity work.mt9v111_image
+            generic map (
+                g_H_RES  => g_CAM_SIM_H_RES,  --! Resolución horizontal del cam_sim
+                g_V_RES  => g_CAM_SIM_V_RES,  --! Resolución vertical del cam_sim
+                g_HBLANK => g_CAM_SIM_HBLANK,  --! Blanking horizontal
+                g_VBLANK => g_CAM_SIM_VBLANK   --! Blanking vertical
+            )
+            port map (
+                clkin_i  => cam_mclk_r,
+                pixclk_o => s_mt_pixclk_int,
+                reset_i  => s_rst_final,
+                fvalid_o => s_mt_fvalid_int,
+                lvalid_o => s_mt_lvalid_int,
+                data_o   => s_mt_data_int
+            );
+    end generate;
+
+end architecture rtl;

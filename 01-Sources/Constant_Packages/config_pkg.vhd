@@ -33,14 +33,20 @@ package config_pkg is
     constant c_MT9V111_I2C_FIFO_DEPTH   : integer                       := 16;        --! Profundidad de las FIFOs de escritura y lectura I2C
     constant c_MT9V111_I2C_SENSOR_ADDR  : std_logic_vector(6 downto 0)  := "1011100"; --! Dirección I2C de 7 bits del MT9V111 (0x5C)
     constant c_MT9V111_DATA_BITS        : integer                       := 8;         --! Anchura del bus de datos de imagen del sensor
-    constant c_MT9V111_MCLK_DIV         : integer                       := 2;          --! Divisor de c_SYSTEM_CLK_FREQ_HZ para generar mt_clk_o
+    constant c_MT9V111_MCLK_DIV         : integer                       := 4;         --! Divisor de c_SYSTEM_CLK_FREQ_HZ para generar mt_clk_o
     constant c_MT9V111_CHIP_ID_EXPECTED : std_logic_vector(15 downto 0) := x"823A";   --! Chip ID fijo del MT9V111 (registro 0xFF, page 0)
     constant c_MT9V111_H_RES            : integer                       := 640;       --! Resolución horizontal del sensor en píxeles
     constant c_MT9V111_V_RES            : integer                       := 480;       --! Resolución vertical del sensor en píxeles \warning original era 640
     -- Temporización de reset (valores del datasheet; los ciclos se calculan en TOP)   
     constant c_MT9V111_RESET_HOLD_US    : integer                       := 1;         --! Tiempo mínimo de RESET# a nivel bajo (µs)
     constant c_MT9V111_RESET_WAIT_US    : integer                       := 150_000;   --! Tiempo de espera tras liberar RESET# para estabilización del PLL (µs)
-
+    ---------------------------------------------------------------------------
+    -- cam_sim — Resolución del generador de imagen sintética en hardware
+    -- Default de g_CAM_SIM_H_RES y g_CAM_SIM_V_RES en TOP con g_USE_CAM_SIM=true
+    ---------------------------------------------------------------------------
+    constant c_CAM_SIM_H_RES : integer := 8;    --! Resolución horizontal del cam_sim en hardware (píxeles)
+    constant c_CAM_SIM_V_RES : integer := 4;    --! Resolución vertical del cam_sim en hardware (líneas)
+    
     ---------------------------------------------------------------------------
     -- FT232H — Chip FTDI en modo Synchronous FIFO
     ---------------------------------------------------------------------------

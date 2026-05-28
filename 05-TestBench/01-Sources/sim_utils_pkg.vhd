@@ -24,13 +24,13 @@ package sim_utils_pkg is
     -- Constantes reducidas para acelerar la simulación
     -- Sustituyen a las de config_pkg en el generic map del testbench.
     ---------------------------------------------------------------------------
-    constant c_SIM_RESET_HOLD_US : integer := 1;          --! Tiempo de RESET# bajo (µs) — igual al real, ya es mínimo
-    constant c_SIM_RESET_WAIT_US : integer := 10;         --! Tiempo de espera post-reset (µs) — 150_000 → 10
-    constant c_SIM_H_RES         : integer := 8;          --! Resolución horizontal (píxeles) — 640 → 8
-    constant c_SIM_V_RES         : integer := 4;          --! Resolución vertical (líneas)    — 480 → 4
-    constant c_SIM_I2C_FREQ_HZ   : integer := 4_000_000;  --! Frecuencia I2C (Hz) — 400k → 4M para reducir ciclos de simulación
-    constant c_SIM_HBLANK        : integer := 4;          --! Ciclos de blanking horizontal    — 100 → 4
-    constant c_SIM_VBLANK        : integer := 8;          --! Ciclos de blanking vertical      — 1000 → 8
+    constant c_SIM_RESET_HOLD_US : integer := 1;           --! Tiempo de RESET# bajo (µs) — igual al real, ya es mínimo
+    constant c_SIM_RESET_WAIT_US : integer := 2;           --! Tiempo de espera post-reset (µs) — 150_000 → 10
+    constant c_SIM_H_RES         : integer := 8;           --! Resolución horizontal (píxeles) — 640 → 8
+    constant c_SIM_V_RES         : integer := 4;           --! Resolución vertical (líneas)    — 480 → 4
+    constant c_SIM_I2C_FREQ_HZ   : integer := 4_000_000;   --! Frecuencia I2C (Hz) — 400k → 4M para reducir ciclos de simulación
+    constant c_SIM_HBLANK               : integer                       := 10;        --! Tiempo usado en simulación para espaciado hotizontal en lugar de 300
+    constant c_SIM_VBLANK               : integer                       := 8;         --! Tiempo usado en simulación para espaciado vertical en lugar de 13
 
     ---------------------------------------------------------------------------
     -- Funciones de conversión para logging

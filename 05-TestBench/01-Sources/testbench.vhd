@@ -5,7 +5,7 @@
 --!   - u_clk_rst    : clk_reset_gen  — reloj 100 MHz y reset inicial
 --!   - u_dut        : TOP            — DUT completo
 --!   - u_i2c_agent  : mt9v111_agent  — esclavo I2C del sensor MT9V111
---!   - u_cam        : cam_sim        — generador de imagen sintética
+--!   - (cam_sim     : mt9v111_image  — instanciado internamente en TOP con g_USE_CAM_SIM=true)
 --!   - u_ftdi_agent : ftdi_agent     — agente FTDI: CLKOUT, TXE#, log de bytes
 --!
 --! Los genéricos del DUT se sobreescriben con valores reducidos de sim_utils_pkg
@@ -45,13 +45,9 @@ architecture sim of testbench is
     signal s_sda_bus : std_logic := 'H';  --! SDA compartido entre TOP y u_i2c_agent
 
     ---------------------------------------------------------------------------
-    -- Señales del sensor MT9V111 — dominio pixclk
+    -- Señales del sensor MT9V111
     ---------------------------------------------------------------------------
-    signal s_mt_pixclk  : std_logic;                                         --! mt_clk_o del TOP → pixclk_i de u_cam
-    signal s_mt_fvalid  : std_logic;                                         --! Frame valid: u_cam → TOP
-    signal s_mt_lvalid  : std_logic;                                         --! Line valid:  u_cam → TOP
-    signal s_mt_data    : std_logic_vector(c_MT9V111_DATA_BITS-1 downto 0);  --! Datos:       u_cam → TOP
-    signal s_mt_reset_n : std_logic;                                         --! RESET# del sensor (monitorizar)
+    signal s_mt_reset_n : std_logic;  --! RESET# del sensor (monitorizar)
 
     ---------------------------------------------------------------------------
     -- Bus FTDI
@@ -73,6 +69,9 @@ architecture sim of testbench is
 
 begin
 
+    s_scl_bus <= 'H';
+    s_sda_bus <= 'H';
+    
     ---------------------------------------------------------------------------
     -- Generador de reloj y reset
     ---------------------------------------------------------------------------
@@ -93,7 +92,12 @@ begin
             g_MT9V111_RESET_WAIT_US => c_SIM_RESET_WAIT_US,
             g_MT9V111_H_RES         => c_SIM_H_RES,
             g_MT9V111_V_RES         => c_SIM_V_RES,
-            g_MT9V111_I2C_FREQ_HZ   => c_SIM_I2C_FREQ_HZ
+            g_MT9V111_I2C_FREQ_HZ   => c_SIM_I2C_FREQ_HZ,
+            g_USE_CAM_SIM           => true,                 --! Imagen generada internamente en TOP
+            g_CAM_SIM_HBLANK        => c_SIM_HBLANK,  --! Blanking horizontal reducido para simulación
+            g_CAM_SIM_VBLANK        => c_SIM_VBLANK,  --! Blanking vertical reducido para simulación
+            g_CAM_SIM_H_RES         => c_SIM_H_RES,   --! Resolución horizontal del cam_sim en simulación
+            g_CAM_SIM_V_RES         => c_SIM_V_RES    --! Resolución vertical del cam_sim en simulación
         )
         port map (
             basys3_clk_i  => s_clk_base,
@@ -103,12 +107,13 @@ begin
             basys3_dp_o   => s_basys3_dp,
             basys3_an_o   => s_basys3_an,
             basys3_btn_i  => s_basys3_btn,
-            mt_data_i     => s_mt_data,
-            mt_lvalid_i   => s_mt_lvalid,
-            mt_pixclk_i   => s_mt_pixclk,
-            mt_fvalid_i   => s_mt_fvalid,
+            -- Puertos de imagen no usados con g_USE_CAM_SIM=true
+            mt_data_i     => (others => '0'),
+            mt_lvalid_i   => '0',
+            mt_pixclk_i   => '0',
+            mt_fvalid_i   => '0',
             mt_reset_n_o  => s_mt_reset_n,
-            mt_clk_o      => s_mt_pixclk,   --! TOP genera MCLK → u_cam lo usa como pixclk
+            mt_clk_o      => open,
             i2c_sclk_io   => s_scl_bus,
             i2c_sdata_io  => s_sda_bus,
             ftdi_adbus_o  => s_ftdi_adbus,
@@ -117,7 +122,7 @@ begin
 
     ---------------------------------------------------------------------------
     -- Agente I2C: esclavo MT9V111
-    -- Los puertos de imagen van a open: u_cam es quien genera pixclk/fval/lval/data
+    -- La imagen es generada internamente por el TOP (g_USE_CAM_SIM=true)
     ---------------------------------------------------------------------------
     u_i2c_agent : entity work.mt9v111_i2c
         generic map (
@@ -125,30 +130,7 @@ begin
         )
         port map (
             scl_i    => s_scl_bus,
-            sda_io   => s_sda_bus,
-            pixclk_o => open,
-            fvalid_o => open,
-            lvalid_o => open,
-            data_o   => open
-        );
-
-    ---------------------------------------------------------------------------
-    -- Generador de imagen sintética
-    -- pixclk viene del TOP (mt_clk_o); resolución reducida para simulación.
-    ---------------------------------------------------------------------------
-    u_cam : entity work.mt9v111_image
-        generic map (
-            g_H_RES  => c_SIM_H_RES,
-            g_V_RES  => c_SIM_V_RES,
-            g_HBLANK => c_SIM_HBLANK,
-            g_VBLANK => c_SIM_VBLANK
-        )
-        port map (
-            pixclk_i => s_mt_pixclk,
-            reset_i  => s_rst_raw,
-            fvalid_o => s_mt_fvalid,
-            lvalid_o => s_mt_lvalid,
-            data_o   => s_mt_data
+            sda_io   => s_sda_bus
         );
 
     ---------------------------------------------------------------------------

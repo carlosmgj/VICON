@@ -1,5 +1,16 @@
---! \file mt9v111.vhd
+--! \file mt9v111_i2c.vhd
 --! \brief Agente de simulación I2C esclavo del MT9V111.
+--!
+--! Implementa el comportamiento del bus I2C del sensor MT9V111.
+--! Soporta escritura y lectura de registros de 16 bits con auto-incremento.
+--!
+--! \note Las líneas I2C son open-drain. El TOP conduce '0' o 'Z' (nunca '1').
+--!       Con el pull-up del testbench (s_scl_bus='H', s_sda_bus='H'), los
+--!       niveles altos llegan como 'H', no como '1'. Por eso todas las
+--!       comparaciones y detecciones de flanco usan To_X01() para normalizar
+--!       'H'→'1' y 'L'→'0' antes de evaluar.
+--!
+--! \note Solo válido en simulación — usa wait. No sintetizable.
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -7,27 +18,15 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity mt9v111_i2c is
     generic (
-        g_I2C_ADDR  : std_logic_vector(6 downto 0) := "1011100";  --! Dirección I2C de 7 bits del MT9V111 (0x5C)
-        g_IMG_WIDTH : integer                       := 640;        --! Ancho de imagen (no usado aquí; ver cam_sim)
-        g_IMG_HEIGHT: integer                       := 480         --! Alto de imagen  (no usado aquí; ver cam_sim)
+        g_I2C_ADDR : std_logic_vector(6 downto 0) := "1011100"  --! Dirección I2C de 7 bits del MT9V111 (0x5C)
     );
     port (
-        pixclk_o : out std_logic;                     --! Reloj de píxel generado internamente (\todo conectar a cam_sim)
-        fvalid_o : out std_logic;                     --! Frame valid (\todo conectar a cam_sim)
-        lvalid_o : out std_logic;                     --! Line valid  (\todo conectar a cam_sim)
-        data_o   : out std_logic_vector(7 downto 0); --! Datos de imagen (\todo conectar a cam_sim)
-        scl_i    : in    std_logic;                   --! Reloj I2C (entrada)
-        sda_io   : inout std_logic                    --! Datos I2C (open-drain bidireccional)
+        scl_i  : in    std_logic;  --! Reloj I2C (entrada, open-drain: '0' o 'H')
+        sda_io : inout std_logic   --! Datos I2C (open-drain bidireccional)
     );
 end entity mt9v111_i2c;
 
 architecture sim of mt9v111_i2c is
-
-    ---------------------------------------------------------------------------
-    -- Constantes de simulación
-    ---------------------------------------------------------------------------
-    constant c_PIX_PERIOD     : time := 37 ns;      --! Periodo del reloj de píxel (~27 MHz)
-    constant c_ACK_SETUP_TIME : time := 400 ns;     --! Tiempo de setup antes de conducir ACK tras Repeated START
 
     ---------------------------------------------------------------------------
     -- Tipos
@@ -35,155 +34,153 @@ architecture sim of mt9v111_i2c is
     type t_reg_map is array (0 to 255) of std_logic_vector(15 downto 0);
 
     ---------------------------------------------------------------------------
-    -- Reloj de píxel interno
-    ---------------------------------------------------------------------------
-    signal s_clk_int : std_logic := '0';
-
-    ---------------------------------------------------------------------------
     -- Bancos de registros del MT9V111
-    -- \note Page select no implementado; regs_ifp declarado pero no accedido por I2C
+    -- \note Page select no implementado; s_regs_ifp declarado pero no accedido
     ---------------------------------------------------------------------------
     signal s_regs_core : t_reg_map := (
-        16#00# => x"823A",   --! Chip ID (0xFF en la numeración del datasheet)
-        16#0D# => x"0008",   --! Reset register
-        others => x"CACA"    --! Valor por defecto para detectar accesos no inicializados
+        16#FF# => x"823A",  --! Chip ID (registro 0xFF, page 0)
+        16#0D# => x"0008",  --! Reset register
+        others => x"CACA"   --! Valor centinela para detectar accesos no inicializados
     );
 
     signal s_regs_ifp : t_reg_map := (
-        16#01# => x"0001",   --! IFP: registro 1
-        others => x"0FE0"    --! Valor por defecto IFP
+        16#01# => x"0001",  --! IFP: registro 1
+        others => x"0FE0"   --! Valor por defecto IFP
     );
 
     ---------------------------------------------------------------------------
-    -- Señales de debug — visibles en simulador para seguimiento del estado I2C
+    -- Señales de debug
     ---------------------------------------------------------------------------
-    signal s_reg_addr   : integer range 0 to 255 := 0;  --! Dirección del registro en curso (debug)
-    signal s_debug_state : string(1 to 24) := (others => ' ');  --! Estado textual del proceso I2C (debug)
+    signal s_reg_addr    : integer range 0 to 255 := 0;             --! Dirección del registro en curso
+    signal s_debug_state : string(1 to 24)        := (others => ' '); --! Estado textual del proceso I2C
 
 begin
 
     ---------------------------------------------------------------------------
-    -- Generador de reloj de píxel
-    -- \todo Eliminar cuando se use cam_sim como fuente de pixclk/fval/lval/data
-    ---------------------------------------------------------------------------
-    s_clk_int <= not s_clk_int after c_PIX_PERIOD / 2;
-    pixclk_o  <= s_clk_int;
-    fvalid_o  <= '0';
-    lvalid_o  <= '0';
-    data_o    <= (others => '0');
-
-    ---------------------------------------------------------------------------
     --! \brief Proceso I2C esclavo — solo simulación
     --!
-    --! Detecta START, lee dirección + R/W, y gestiona transacciones de
-    --! escritura y lectura con auto-incremento de dirección de registro.
+    --! Todas las comparaciones de nivel usan To_X01() para normalizar
+    --! 'H'→'1' y 'L'→'0', ya que el bus open-drain presenta 'H'/'L'
+    --! en lugar de '1'/'0' cuando está en reposo con pull-up.
     ---------------------------------------------------------------------------
     p_i2c_slave : process
         variable v_addr_byte  : std_logic_vector(7 downto 0);
-        variable v_rw         : std_logic := '0';               --! '0'=write, '1'=read
-        variable v_reg_addr   : integer range 0 to 255;         --! Dirección base de la transacción
-        variable v_reg_inc    : integer range 0 to 255;         --! Dirección con auto-incremento
-        variable v_data_h     : std_logic_vector(7 downto 0);   --! Byte alto del registro
-        variable v_data_l     : std_logic_vector(7 downto 0);   --! Byte bajo del registro
-        variable v_data_16    : std_logic_vector(15 downto 0);  --! Dato completo de 16 bits
+        variable v_rw         : std_logic := '0';
+        variable v_reg_addr   : integer range 0 to 255;
+        variable v_reg_inc    : integer range 0 to 255;
+        variable v_data_h     : std_logic_vector(7 downto 0);
+        variable v_data_l     : std_logic_vector(7 downto 0);
+        variable v_data_16    : std_logic_vector(15 downto 0);
         variable v_stop_seen  : boolean;
         variable v_start_seen : boolean;
-        variable v_mack       : std_logic;                      --! MACK leído del master ('0'=ACK, '1'=NACK)
+        variable v_mack       : std_logic;
+        variable v_bit        : std_logic;
     begin
         sda_io <= 'Z';
 
-        loop  -- bucle exterior: esperar START y procesar transacción indefinidamente
+        loop  -- bucle exterior: esperar START y procesar transacción
 
             -----------------------------------------------------------------------
             -- Esperar condición START: SDA baja mientras SCL está alto
+            -- Usando eventos en SDA + comprobación de SCL con To_X01
             -----------------------------------------------------------------------
             s_debug_state <= "WAIT_START              ";
-            wait until falling_edge(sda_io) and scl_i = '1';
+            loop
+                wait on sda_io, scl_i;
+                exit when To_X01(sda_io) = '0' and To_X01(scl_i) = '1';
+            end loop;
             s_debug_state <= "START_DETECTED          ";
 
             -----------------------------------------------------------------------
             -- Leer byte de dirección + R/W (8 bits, MSB primero)
+            -- wait on scl_i + To_X01: normaliza 'H'→'1' para detectar flancos en bus open-drain
             -----------------------------------------------------------------------
             for i in 7 downto 0 loop
-                wait until rising_edge(scl_i);
-                v_addr_byte(i) := sda_io;
+                wait on scl_i; while To_X01(scl_i) /= '1' loop wait on scl_i; end loop;
+                v_bit := To_X01(sda_io);
+                if v_bit = 'X' then v_bit := '0'; end if;
+                v_addr_byte(i) := v_bit;
             end loop;
 
             -----------------------------------------------------------------------
-            -- Comprobar si la dirección coincide con la nuestra
+            -- Comprobar si la dirección coincide
             -----------------------------------------------------------------------
             if v_addr_byte(7 downto 1) = g_I2C_ADDR then
 
                 s_debug_state <= "ADDR_MATCH              ";
 
                 -- ACK de dirección
-                wait until falling_edge(scl_i);
+                wait on scl_i; while To_X01(scl_i) /= '0' loop wait on scl_i; end loop;
                 sda_io <= '0';
-                wait until rising_edge(scl_i);
+                wait on scl_i; while To_X01(scl_i) /= '1' loop wait on scl_i; end loop;
                 sda_io <= 'Z';
-                wait until falling_edge(scl_i);
+                wait on scl_i; while To_X01(scl_i) /= '0' loop wait on scl_i; end loop;
 
                 -----------------------------------------------------------------------
                 -- Leer dirección de registro (8 bits)
                 -----------------------------------------------------------------------
                 s_debug_state <= "RX_REG_ADDR             ";
                 for i in 7 downto 0 loop
-                    wait until rising_edge(scl_i);
-                    v_addr_byte(i) := sda_io;
+                    wait on scl_i; while To_X01(scl_i) /= '1' loop wait on scl_i; end loop;
+                    v_bit := To_X01(sda_io);
+                    if v_bit = 'X' then v_bit := '0'; end if;
+                    v_addr_byte(i) := v_bit;
                 end loop;
 
-                v_reg_addr  := to_integer(unsigned(v_addr_byte));
-                v_reg_inc   := v_reg_addr;
-                s_reg_addr  <= v_reg_addr;
+                v_reg_addr := to_integer(unsigned(v_addr_byte));
+                v_reg_inc  := v_reg_addr;
+                s_reg_addr <= v_reg_addr;
 
                 -- ACK de dirección de registro
-                wait until falling_edge(scl_i);
+                wait on scl_i; while To_X01(scl_i) /= '0' loop wait on scl_i; end loop;
                 sda_io <= '0';
-                wait until rising_edge(scl_i);
+                wait on scl_i; while To_X01(scl_i) /= '1' loop wait on scl_i; end loop;
                 sda_io <= 'Z';
-                wait until falling_edge(scl_i);
+                wait on scl_i; while To_X01(scl_i) /= '0' loop wait on scl_i; end loop;
 
                 v_stop_seen  := false;
                 v_start_seen := false;
                 v_rw         := '0';
 
                 -------------------------------------------------------------------
-                -- Bucle de datos: procesa pares DATA_H + DATA_L hasta STOP o NACK
+                -- Bucle de datos
                 -------------------------------------------------------------------
                 while not v_stop_seen loop
 
                     -------------------------------------------------------------------
-                    -- DATA_H: escribir (recibir del master) o leer (enviar al master)
+                    -- DATA_H
                     -------------------------------------------------------------------
                     s_debug_state <= "DATA_H                  ";
                     for i in 7 downto 0 loop
 
                         if v_rw = '0' then
-                            -- WRITE: recibir bit del master
-                            wait until rising_edge(scl_i);
-                            v_data_h(i) := sda_io;
-                            -- Detectar STOP o Repeated START mientras SCL está alto
-                            wait until rising_edge(sda_io) or falling_edge(sda_io) or falling_edge(scl_i);
-                            if scl_i = '1' then
-                                if sda_io = '1' then
+                            -- WRITE: recibir bit
+                            wait on scl_i; while To_X01(scl_i) /= '1' loop wait on scl_i; end loop;
+                            v_bit := To_X01(sda_io);
+                            if v_bit = 'X' then v_bit := '0'; end if;
+                            v_data_h(i) := v_bit;
+                            -- Detectar STOP o Repeated START con SCL alto
+                            wait on sda_io, scl_i;
+                            if To_X01(scl_i) = '1' then
+                                if To_X01(sda_io) = '1' then
                                     v_stop_seen  := true;
                                     s_debug_state <= "STOP_IN_DATA_H          ";
                                     exit;
-                                elsif sda_io = '0' then
+                                elsif To_X01(sda_io) = '0' then
                                     v_start_seen := true;
                                     s_debug_state <= "RSTART_IN_DATA_H        ";
                                     exit;
                                 end if;
                             end if;
                         else
-                            -- READ: enviar bit al master (byte alto del registro)
+                            -- READ: enviar bit al master
                             if i /= 7 then
-                                wait until falling_edge(scl_i);
+                                wait on scl_i; while To_X01(scl_i) /= '0' loop wait on scl_i; end loop;
                             end if;
                             s_reg_addr <= v_reg_inc;
                             sda_io <= s_regs_core(v_reg_inc)(8 + i);
                             if i = 0 then
-                                wait until falling_edge(scl_i);
+                                wait on scl_i; while To_X01(scl_i) /= '0' loop wait on scl_i; end loop;
                             end if;
                         end if;
 
@@ -192,22 +189,24 @@ begin
                     if v_stop_seen then exit; end if;
 
                     -------------------------------------------------------------------
-                    -- Repeated START detectado: leer nueva dirección + R/W
+                    -- Repeated START: leer nueva dirección + R/W
                     -------------------------------------------------------------------
                     if v_start_seen then
                         v_start_seen := false;
                         s_debug_state <= "RX_RSTART_ADDR          ";
 
                         for i in 7 downto 0 loop
-                            wait until rising_edge(scl_i);
-                            v_addr_byte(i) := sda_io;
-                            wait until rising_edge(sda_io) or falling_edge(sda_io) or falling_edge(scl_i);
-                            if scl_i = '1' then
-                                if sda_io = '1' then
+                            wait on scl_i; while To_X01(scl_i) /= '1' loop wait on scl_i; end loop;
+                            v_bit := To_X01(sda_io);
+                            if v_bit = 'X' then v_bit := '0'; end if;
+                            v_addr_byte(i) := v_bit;
+                            wait on sda_io, scl_i;
+                            if To_X01(scl_i) = '1' then
+                                if To_X01(sda_io) = '1' then
                                     v_stop_seen  := true;
                                     s_debug_state <= "STOP_IN_RSTART_ADDR     ";
                                     exit;
-                                elsif sda_io = '0' then
+                                elsif To_X01(sda_io) = '0' then
                                     v_start_seen := true;
                                     s_debug_state <= "RSTART_IN_RSTART_ADDR   ";
                                     exit;
@@ -215,110 +214,102 @@ begin
                             end if;
                         end loop;
 
-                        -- R/W del Repeated START (bit 0 del byte de dirección)
                         if v_addr_byte(0) = '1' then
-                            v_rw := '1';   -- modo lectura
+                            v_rw := '1';
                         else
-                            v_rw := '0';   -- Repeated START en modo write (inusual)
+                            v_rw := '0';
                         end if;
 
-                        -- ACK de la dirección del Repeated START
-                        wait for c_ACK_SETUP_TIME;
+                        -- ACK del Repeated START — SCL ya está bajo
                         sda_io <= '0';
-                        wait until rising_edge(scl_i);
+                        wait on scl_i; while To_X01(scl_i) /= '1' loop wait on scl_i; end loop;
                         sda_io <= 'Z';
-                        wait until falling_edge(scl_i);
+                        wait on scl_i; while To_X01(scl_i) /= '0' loop wait on scl_i; end loop;
 
-                        next;   -- reiniciar bucle con v_rw actualizado
+                        next;
                     end if;
 
                     -------------------------------------------------------------------
-                    -- ACK / envío de DATA_H
+                    -- ACK/MACK tras DATA_H
                     -------------------------------------------------------------------
                     if v_rw = '0' then
-                        -- WRITE: ACK del agente
                         s_debug_state <= "SACK_DATA_H             ";
                         sda_io <= '0';
-                        wait until rising_edge(scl_i);
+                        wait on scl_i; while To_X01(scl_i) /= '1' loop wait on scl_i; end loop;
                         sda_io <= 'Z';
                     else
-                        -- READ: leer MACK del master
                         sda_io <= 'Z';
-                        wait until rising_edge(scl_i);
-                        v_mack := sda_io;
-                        if v_mack = '1' then
+                        wait on scl_i; while To_X01(scl_i) /= '1' loop wait on scl_i; end loop;
+                        v_mack := To_X01(sda_io);
+                        if v_mack /= '0' then
                             s_debug_state <= "NACK_AFTER_DATA_H       ";
-                            exit;   -- master envió NACK → fin de lectura
+                            exit;
                         end if;
                         s_debug_state <= "MACK_DATA_H             ";
                     end if;
 
-                    wait until falling_edge(scl_i);
+                    wait on scl_i; while To_X01(scl_i) /= '0' loop wait on scl_i; end loop;
 
                     -------------------------------------------------------------------
-                    -- DATA_L: escribir (recibir del master) o leer (enviar al master)
+                    -- DATA_L
                     -------------------------------------------------------------------
                     s_debug_state <= "DATA_L                  ";
                     for i in 7 downto 0 loop
 
                         if v_rw = '0' then
-                            -- WRITE: recibir bit
-                            wait until rising_edge(scl_i);
-                            v_data_l(i) := sda_io;
-                            wait until rising_edge(sda_io) or falling_edge(sda_io) or falling_edge(scl_i);
-                            if scl_i = '1' then
-                                if sda_io = '1' then
+                            wait on scl_i; while To_X01(scl_i) /= '1' loop wait on scl_i; end loop;
+                            v_bit := To_X01(sda_io);
+                            if v_bit = 'X' then v_bit := '0'; end if;
+                            v_data_l(i) := v_bit;
+                            wait on sda_io, scl_i;
+                            if To_X01(scl_i) = '1' then
+                                if To_X01(sda_io) = '1' then
                                     v_stop_seen  := true;
                                     s_debug_state <= "STOP_IN_DATA_L          ";
                                     exit;
-                                elsif sda_io = '0' then
+                                elsif To_X01(sda_io) = '0' then
                                     v_start_seen := true;
                                     s_debug_state <= "RSTART_IN_DATA_L        ";
                                     exit;
                                 end if;
                             end if;
                         else
-                            -- READ: enviar bit al master (byte bajo del registro)
                             if i /= 7 then
-                                wait until falling_edge(scl_i);
+                                wait on scl_i; while To_X01(scl_i) /= '0' loop wait on scl_i; end loop;
                             end if;
                             sda_io <= s_regs_core(v_reg_inc)(i);
                             if i = 0 then
-                                wait until falling_edge(scl_i);
+                                wait on scl_i; while To_X01(scl_i) /= '0' loop wait on scl_i; end loop;
                             end if;
                         end if;
 
                     end loop;
 
                     -------------------------------------------------------------------
-                    -- ACK / recepción de DATA_L
+                    -- ACK/MACK tras DATA_L
                     -------------------------------------------------------------------
                     if v_rw = '0' then
-                        -- WRITE: ACK del agente + guardar dato en registro
                         s_debug_state <= "SACK_DATA_L             ";
                         sda_io <= '0';
-                        wait until rising_edge(scl_i);
+                        wait on scl_i; while To_X01(scl_i) /= '1' loop wait on scl_i; end loop;
                         sda_io <= 'Z';
-                        wait until falling_edge(scl_i);
+                        wait on scl_i; while To_X01(scl_i) /= '0' loop wait on scl_i; end loop;
 
-                        -- Guardar par DATA_H:DATA_L en el banco de registros
                         v_data_16 := v_data_h & v_data_l;
                         s_regs_core(v_reg_inc) <= v_data_16;
-
                     else
-                        -- READ: leer MACK del master
                         sda_io <= 'Z';
-                        wait until rising_edge(scl_i);
-                        v_mack := sda_io;
-                        wait until falling_edge(scl_i);
-                        if v_mack = '1' then
+                        wait on scl_i; while To_X01(scl_i) /= '1' loop wait on scl_i; end loop;
+                        v_mack := To_X01(sda_io);
+                        wait on scl_i; while To_X01(scl_i) /= '0' loop wait on scl_i; end loop;
+                        if v_mack /= '0' then
                             s_debug_state <= "NACK_AFTER_DATA_L       ";
-                            exit;   -- master envió NACK → fin de lectura
+                            exit;
                         end if;
                         s_debug_state <= "MACK_DATA_L             ";
                     end if;
 
-                    -- Auto-incremento de dirección de registro
+                    -- Auto-incremento
                     if v_reg_inc = 255 then
                         v_reg_inc := 0;
                     else
@@ -326,10 +317,10 @@ begin
                     end if;
                     s_reg_addr <= v_reg_inc;
 
-                end loop;  -- bucle de datos
-            end if;        -- if dirección coincide
+                end loop;
+            end if;
 
-        end loop;  -- bucle exterior
+        end loop;
 
     end process p_i2c_slave;
 
