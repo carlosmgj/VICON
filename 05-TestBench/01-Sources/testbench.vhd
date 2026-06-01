@@ -107,7 +107,7 @@ begin
             g_MT9V111_V_RES         => g_MT9V111_V_RES,
             g_MT9V111_I2C_FREQ_HZ   => g_MT9V111_I2C_FREQ_HZ,
             g_USE_CAM_SIM           => true,                 --! Imagen generada internamente en TOP
-            g_CAM_SIM_HBLANK        => g_CAM_SIM_VBLANK,     --! Blanking horizontal reducido para simulación
+            g_CAM_SIM_HBLANK        => g_CAM_SIM_HBLANK,     --! Blanking horizontal reducido para simulación
             g_CAM_SIM_VBLANK        => g_CAM_SIM_VBLANK,     --! Blanking vertical reducido para simulación
             g_CAM_SIM_H_RES         => g_CAM_SIM_H_RES,      --! Resolución horizontal del cam_sim en simulación
             g_CAM_SIM_V_RES         => g_CAM_SIM_V_RES       --! Resolución vertical del cam_sim en simulación
