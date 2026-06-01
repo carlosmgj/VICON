@@ -13,6 +13,22 @@ set IP_GEN     "${ROOT}06-Project/vicon_cmgj/vicon_cmgj.gen/sources_1/ip"
 set VIVADO     "C:/Xilinx/Vivado/2020.2"
 set SIMLIB     "${ROOT}06-Project/vicon_cmgj/vicon_cmgj.cache/compile_simlib/questa"
 
+# -----------------------------------------------------------------
+# Procedimientos de utilidad 
+# ----------------
+namespace eval :: {
+    proc recompile {} {
+        restart -force
+        uplevel #0 source sim.do
+    }
+
+    proc rerun {} {
+        restart -force
+        run 50 us
+    }
+}
+
+
 # -----------------------------------------------------------------------------
 # Crear y mapear librería de trabajo
 # -----------------------------------------------------------------------------
@@ -45,6 +61,7 @@ vcom -2008 -work work "${SRC}/00-I2C_Controller/i2c_controller.vhd"
 vcom -2008 -work work "${SRC}/01-Frame_Capture/frame_capture.vhd"
 vcom -2008 -work work "${SRC}/02-FTDI_Controller/ftdi_controller.vhd"
 vcom -2008 -work work "${TB_SRC}/00-MT9V111/mt9v111_image.vhd"
+vcom -2008 -work work "${TB_SRC}/stubs/ila_stub.vhd"
 vcom -2008 -work work "${SRC}/TOP.vhd"
 
 # -----------------------------------------------------------------------------
@@ -62,6 +79,13 @@ vcom -2008 -work work "${TB_SRC}/testbench.vhd"
 # -----------------------------------------------------------------------------
 vopt work.testbench -o testbench_opt \
     +acc \
+    -g g_MT9V111_RESET_HOLD_US=1 \
+    -g g_MT9V111_RESET_WAIT_US=2 \
+    -g g_USE_CAM_SIM=true \
+    -g g_CAM_SIM_HBLANK=20 \
+    -g g_CAM_SIM_VBLANK=30 \
+    -g g_CAM_SIM_H_RES=10 \
+    -g g_CAM_SIM_V_RES=5 \
     -L unisim -L unisims_ver -L secureip \
     -L xpm -L xilinx_vip -L fifo_generator_v13_2_5
 
@@ -91,21 +115,6 @@ vsim -t 1ps -fsmdebug \
 #     echo ">>> ERROR: ST_ERROR en $now"
 # }
 
-# -----------------------------------------------------------------------------
-# Procedimientos de utilidad — disponibles en consola tras el do
-# -----------------------------------------------------------------------------
-proc ::recompile {} {
-    quit -sim
-    file delete -force _opt
-    file delete -force testbench_opt
-    do sim.do
-}
-
-proc ::rerun {} {
-    quit -sim
-    file delete -force testbench_opt
-    do sim.do
-}
 
 
 

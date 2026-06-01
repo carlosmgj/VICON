@@ -48,7 +48,7 @@ architecture rtl of mt9v111_image is
     ---------------------------------------------------------------------------
     -- Constantes de timing
     ---------------------------------------------------------------------------
-    constant c_P2           : integer := 14;    --! Frame End Blanking: ciclos entre LVALID↓ y FVALID↓ (datasheet fijo)
+    constant c_P2             : integer := 14;           --! Frame End Blanking: ciclos entre LVALID↓ y FVALID↓ (datasheet fijo)
     constant c_BYTES_PER_LINE : integer := g_H_RES * 2;  --! Bytes activos por línea: 2 bytes/px × g_H_RES px
 
     ---------------------------------------------------------------------------
@@ -72,7 +72,7 @@ architecture rtl of mt9v111_image is
     -- Rango: 0 .. g_H_RES*2-1 (2 bytes/px × g_H_RES px)
     ---------------------------------------------------------------------------
     signal s_col_cnt   : unsigned(11 downto 0)           := (others => '0');  --! Contador de bytes en la línea (4 bytes por par de píxeles)
-    signal s_row_cnt   : integer range 0 to g_V_RES  - 1 := 0;               --! Contador de líneas dentro del frame
+    signal s_row_cnt   : integer range 0 to g_V_RES  - 1 := 0;                --! Contador de líneas dentro del frame
     signal s_blank_cnt : integer := 0;  --! Contador de ciclos de blanking (usado para HBLANK y VBLANK)
 
     signal fvalid_r : std_logic                    := '0';              --! Registro de frame valid

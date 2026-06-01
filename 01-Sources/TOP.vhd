@@ -12,25 +12,36 @@ library work;
 use work.config_pkg.all;
 
 
+
 --! \brief Entidad de Sistema de Visión.
 --! \fsm_show_actions
 entity TOP is
     generic ( 
-        g_SYSTEM_CLK_FREQ_HZ        : integer                      := c_SYSTEM_CLK_FREQ_HZ;        --! Frecuencia del reloj (s_mclk) para cálculos, CUIDADO puede no coincidir
+        -- Debug
+        g_USE_ILA                   : boolean                      := c_USE_ILA;                    --! Sintetizar ILA para debug de datos
+        
+        -- Sistema
+        g_SYSTEM_CLK_FREQ_HZ        : integer                      := c_SYSTEM_CLK_FREQ_HZ;        --! Frecuencia del reloj (s_mclk) para cálculos, COMPROBAR que coincide con la salida del MMCM
+        
+        -- MT9V111 — Sensor óptico
         g_MT9V111_MCLK_DIV          : integer                      := c_MT9V111_MCLK_DIV;          --! Divisor del reloj del sistema para generar mt_clk_o
         g_MT9V111_I2C_FREQ_HZ       : integer                      := c_MT9V111_I2C_FREQ_HZ;       --! Frecuencia del bus I2C usado para comunicación con MT9V111
         g_MT9V111_I2C_FIFO_DEPTH    : integer                      := c_MT9V111_I2C_FIFO_DEPTH;    --! Profundidad de las FIFOs de LECTURA y ESCRITURA de tramas I2C (mclk <-> sclk)     
         g_MT9V111_I2C_SENSOR_ADDR   : std_logic_vector(6 downto 0) := c_MT9V111_I2C_SENSOR_ADDR;   --! Dirección de 7 bits del MT9V111 dentro del bus I2C
-        g_MT9V111_H_RES             : integer                      := c_MT9V111_H_RES;             --! Resolución horizontal del sensor en píxeles
-        g_MT9V111_V_RES             : integer                      := c_MT9V111_V_RES;             --! Resolución vertical del sensor en píxeles
-        g_MT9V111_RESET_HOLD_US     : integer                      := c_MT9V111_RESET_HOLD_US;     --! Tiempo mínimo de RESET# a nivel bajo según datasheet (µs)
-        g_MT9V111_RESET_WAIT_US     : integer                      := c_MT9V111_RESET_WAIT_US;     --! Tiempo de espera tras liberar RESET# para estabilización del PLL (µs)
-        g_USE_CAM_SIM               : boolean                      := false;                        --! true → imagen interna (cam_sim); false → imagen del sensor real
-        g_CAM_SIM_HBLANK            : integer                      := 300;                        --! Blanking horizontal del cam_sim (ciclos pixclk): similar a P1 real
-        g_CAM_SIM_VBLANK            : integer                      := 13;                          --! Blanking vertical del cam_sim (filas): similar a Reg0x06+9 real
-        g_CAM_SIM_H_RES             : integer                      := c_CAM_SIM_H_RES;
-        g_CAM_SIM_V_RES             : integer                      := c_CAM_SIM_V_RES
+        g_MT9V111_H_RES             : integer                      := c_MT9V111_H_RES;             --! Sensor real de imagen: Resolución horizontal en píxeles
+        g_MT9V111_V_RES             : integer                      := c_MT9V111_V_RES;             --! Sensor real de imagen: Resolución vertical en líneas
+        g_MT9V111_RESET_HOLD_US     : integer                      := c_MT9V111_RESET_HOLD_US;     --! Sensor real de imagen: Tiempo mínimo de RESET# a nivel bajo según datasheet (µs)
+        g_MT9V111_RESET_WAIT_US     : integer                      := c_MT9V111_RESET_WAIT_US;     --! Sensor real de imagen: Tiempo de espera tras liberar RESET# para estabilización del PLL (µs)
+        
+        -- Imagen sintética
+        g_USE_CAM_SIM               : boolean                      := c_USE_CAM_SIM;               --! true → imagen interna (cam_sim); false → imagen del sensor real
+        g_CAM_SIM_HBLANK            : integer                      := c_CAM_SIM_HBLANK;            --! Imagen sintética: Blanking horizontal (ciclos pixclk): similar a P1 real
+        g_CAM_SIM_VBLANK            : integer                      := c_CAM_SIM_VBLANK;            --! Imagen sintética: Blanking vertical (filas): similar a Reg0x06+9 real
+        g_CAM_SIM_H_RES             : integer                      := c_CAM_SIM_H_RES;             --! Imagen sintética: Resolución horizontal en píxeles 
+        g_CAM_SIM_V_RES             : integer                      := c_CAM_SIM_V_RES             --! Imagen sintética: Resolución vertical en líneas
+        
         );
+
     port (
         -- Basys 3 Ports: Propios de la placa de evaluación
         basys3_clk_i   : in    std_logic;                                              --! Señal de reloj externa
@@ -40,16 +51,18 @@ entity TOP is
         basys3_dp_o    : out   std_logic;                                              --! Cátodo de punto de dígito
         basys3_an_o    : out   std_logic_vector(c_BASYS3_7SEG_DIGIT_QTY-1  downto 0);  --! Ánodos de cada dígito: 0-Dcha
         basys3_btn_i   : in    std_logic_vector(c_BASYS3_BTN_QTY-1         downto 0);  --! Pulsadores de la Basys3: ¿¿ 0-Centro, 1-Dcha, 2-Arriba, 3-Izda, 4-Abajo ?? 
+        
         -- MT9V111 Ports: Señales del sensor óptico
         mt_data_i      : in    std_logic_vector(c_MT9V111_DATA_BITS-1      downto 0);  --! Datos de imagen que proporciona el sensor MT9V111
-        mt_lvalid_i    : in    std_logic;                                              --! Indica cuando una línea ...
-        mt_pixclk_i    : in    std_logic;                                              --! Indica cuando ...
-        mt_fvalid_i    : in    std_logic;                                              --! Indica cuando ...
+        mt_lvalid_i    : in    std_logic;                                              --! En alto mientras se transmiten los bytes de línea correcta
+        mt_pixclk_i    : in    std_logic;                                              --! Reloj interno generado a partir de XCLK, igual pero con un poco de retardo
+        mt_fvalid_i    : in    std_logic;                                              --! En alto mientras se transmite la imagen activa: blanking horizontal + P1 + P2 ...
         mt_reset_n_o   : out   std_logic;                                              --! Reset a nivel bajo del MT9V111
         mt_clk_o       : out   std_logic;                                              --! Señal de reloj que hay que proporcionar al MT9V111
             -- BUS I2C
         i2c_sclk_io    : inout std_logic;                                              --! Señal de reloj del bus I2C conectado al MT9V111
         i2c_sdata_io   : inout std_logic;                                              --! Señal de datos del bus I2C conectado al MT9V111
+        
         -- FT232H Ports: Señales del chip FTDI
         ftdi_adbus_o   : out   std_logic_vector(c_FTDI_DATABUS_W-1         downto 0);  --! Señales de datos transferidos entre FPGA y chip FTDI
         ftdi_acbus_io  : inout std_logic_vector(c_FTDI_CONTROLBUS_W-1      downto 0)   --! Señales de control transferidos entre FPGA y chip FTDI
@@ -58,8 +71,18 @@ end entity TOP;
 
 architecture rtl of TOP is
 
+    ---------------------------------------------------------------------------
+    -- CONSTANTES
+    ---------------------------------------------------------------------------
+    
+    --! Ciclos de reloj del sistema correspondientes a g_MT9V111_RESET_HOLD_US
     constant c_MT9V111_RESET_HOLD_CYCLES : integer := (g_SYSTEM_CLK_FREQ_HZ / 1_000_000) * g_MT9V111_RESET_HOLD_US;
+    --! Ciclos de reloj del sistema correspondientes a g_MT9V111_RESET_WAIT_US
     constant c_MT9V111_RESET_WAIT_CYCLES : integer := (g_SYSTEM_CLK_FREQ_HZ / 1_000_000) * g_MT9V111_RESET_WAIT_US;
+    --! Resolucion horizontal de la imagen que llega al controlador de imagen. Dependiendo de si usamos la imagen sintética o no usa unos genéricos u otros
+    constant c_CAP_H_RES : integer := g_CAM_SIM_H_RES * boolean'pos(g_USE_CAM_SIM) + g_MT9V111_H_RES * boolean'pos(not g_USE_CAM_SIM);
+    --! Resolucion vertical de la imagen que llega al controlador de imagen. Dependiendo de si usamos la imagen sintética o no usa unos genéricos u otros
+    constant c_CAP_V_RES : integer := g_CAM_SIM_V_RES * boolean'pos(g_USE_CAM_SIM) + g_MT9V111_V_RES * boolean'pos(not g_USE_CAM_SIM);
     
     ---------------------------------------------------------------------------
     -- Señales de RELOJ & RESET
@@ -140,7 +163,7 @@ architecture rtl of TOP is
     ---------------------------------------------------------------------------
     signal s_mt_fvalid_int : std_logic;                                            --! Frame valid: sensor real o cam_sim según g_USE_CAM_SIM
     signal s_mt_lvalid_int : std_logic;                                            --! Line valid:  sensor real o cam_sim según g_USE_CAM_SIM
-    signal s_mt_data_int   : std_logic_vector(c_MT9V111_DATA_BITS-1 downto 0);  --! Datos:       sensor real o cam_sim según g_USE_CAM_SIM
+    signal s_mt_data_int   : std_logic_vector(c_MT9V111_DATA_BITS-1 downto 0);     --! Datos:       sensor real o cam_sim según g_USE_CAM_SIM
     signal s_mt_pixclk_int : std_logic;                                            --! Pixclk:      mt_pixclk_i o cam_mclk_r según g_USE_CAM_SIM
 
     ---------------------------------------------------------------------------
@@ -154,22 +177,28 @@ architecture rtl of TOP is
     signal debug_lval   : std_logic;                     --! ILA: LVALID del sensor registrado en mclk
     signal debug_txe_n  : std_logic;                     --! ILA: TXE# del FT232H registrado en mclk
     signal debug_wr_n   : std_logic;                     --! ILA: WR# enviado al FT232H registrado en mclk
+    signal debug_overflow   : std_logic;                     
+    signal debug_fifo_wr   : std_logic;                     
 
 begin
 
     --! \todo Async? Añadir 2FF Sync?
     s_rst_final <= not s_locked;
 
-    i2c_sclk_io   <= '0' when s_scl_out        = '0' else 'Z';
-    i2c_sdata_io  <= s_sda_out when s_sda_oe = '1' else 'Z';
+    -- Buffer Triestado de I2C
+    i2c_sclk_io   <= '0'       when s_scl_out  = '0' else 'Z';
+    i2c_sdata_io  <= s_sda_out when s_sda_oe   = '1' else 'Z';
     s_sda_in      <= i2c_sdata_io;
+
 
     mt_reset_n_o <= cam_reset_r;
     mt_clk_o     <= cam_mclk_r;
+
+    --! \todo Mover asignación de enable ldentro de la FSM
     s_cap_en     <= '1' when s_state = ST_FINISH else '0';
 
     ---------------------------------------------------------------------------
-    -- FTDI — CLKOUT via BUFG, OE# y PWRSAV# y SIWU# fijos
+    -- FTDI — CLKOUT via BUFG
     ---------------------------------------------------------------------------
     ftdi_clk_buf : BUFG
         port map (
@@ -177,17 +206,24 @@ begin
             O => s_ftdi_clk
         );
 
+    --------------------------------------------------------------------------
+    ------------        ACBUS
+    --------------------------------------------------------------------------
     ftdi_acbus_io(c_FTDI_ACBUS_RXF_N)      <= 'Z';
     ftdi_acbus_io(c_FTDI_ACBUS_TXE_N)      <= 'Z';
     ftdi_acbus_io(c_FTDI_ACBUS_RD_N)       <= '1';
     ftdi_acbus_io(c_FTDI_ACBUS_WR_N)       <= s_ftdi_wr_n;
     ftdi_acbus_io(c_FTDI_ACBUS_SIWU_N)     <= '1';
-    -- FTDI_ACBUS_CLKOUT — entrada via BUFG (ver ftdi_clk_buf)
     ftdi_acbus_io(c_FTDI_ACBUS_OE_N)       <= '1';
     ftdi_acbus_io(c_FTDI_ACBUS_PWRSAV)     <= '1';
 
-    ftdi_adbus_o <= s_ftdi_adbus;
     s_ftdi_txe_n <= ftdi_acbus_io(c_FTDI_ACBUS_TXE_N);
+
+    --------------------------------------------------------------------------
+    ------------        ACBUS
+    --------------------------------------------------------------------------
+    ftdi_adbus_o <= s_ftdi_adbus;
+    
 
     basys3_cat_o <= (others => '0');
     basys3_dp_o  <= '0';
@@ -205,16 +241,18 @@ begin
             debug_lval   <= s_mt_lvalid_int;
             debug_txe_n  <= s_ftdi_txe_n;
             debug_wr_n   <= s_ftdi_wr_n;
+            debug_overflow <= s_cap_overflow;
+            debug_fifo_wr  <= s_cap_fifo_wr;    
         end if;
     end process p_debug;
 
-    --! \brief Clock Divider: generación de s_cam_mclk, freq ~ SYSTEM_CLK_FREQ_HZ/MT9V111_MCLK_DIV
+    --! \brief Clock Divider: generación de s_cam_mclk, freq ~ SYSTEM_CLK_FREQ_HZ/(MT9V111_MCLK_DIV*2)
     p_cam_mclk : process(s_mclk)
     begin
         if rising_edge(s_mclk) then
             if s_rst_final = '1' then
                 s_mclk_div_cnt <= 0;
-                cam_mclk_r   <= '0';
+                cam_mclk_r     <= '0';
             elsif s_mclk_div_cnt = g_MT9V111_MCLK_DIV - 1 then
                 s_mclk_div_cnt <= 0;
                 cam_mclk_r     <= not cam_mclk_r;
@@ -369,6 +407,30 @@ begin
             rst       => s_rst_final
         );
     
+    --! \brief Analizadores de señales lógicas 
+    g_ila_on : if g_USE_ILA generate
+        --! \brief ILA para debug del dominio FTDI. Hay que generar el reloj previamente para poder monitorizar
+        u_ila : entity work.ila_0
+            port map (
+                clk       => s_ftdi_clk,
+                probe0    => s_cap_fifo_dout,
+                probe1(0) => s_cap_fifo_full,
+                probe2(0) => s_cap_fifo_rd_en,
+                probe3(0) => s_ftdi_wr_n,
+                probe4(0) => s_ftdi_txe_n
+            );
+        --! \brief ILA para debug del dominio MCLK.
+        u_ila_1 : entity work.ila_0
+            port map (
+                clk       => s_mclk,
+                probe0    => debug_dout,
+                probe1(0) => debug_overflow,
+                probe2(0) => debug_fval,
+                probe3(0) => debug_lval,
+                probe4(0) => s_cap_fifo_wr      
+            );
+    end generate;
+
     ---------------------------------------------------------------------------
     ---------------------------------------------------------------------------
     -- INSTANCIAS DIRECTAS DE MÓDULOS
@@ -376,10 +438,13 @@ begin
     ---------------------------------------------------------------------------
 
     --! \brief  Capturador de imágenes
+    --! \param g_H_RES Resolución indicada al frame capture, 
     u_frame_capture : entity work.frame_capture
         generic map (
-            g_H_RES => g_MT9V111_H_RES,
-            g_V_RES => g_MT9V111_V_RES
+            g_H_RES      => c_CAP_H_RES,
+            g_V_RES      => c_CAP_V_RES,
+            g_CAM_FPS    => 15,
+            g_TARGET_FPS => 5
         )
         port map (
             pixclk_i     => s_mt_pixclk_int,
@@ -448,6 +513,7 @@ begin
     ---------------------------------------------------------------------------
     -- Selección de fuente de imagen: sensor real o cam_sim interno
     ---------------------------------------------------------------------------
+    --! \brief "MUX" de señales de imagen, seleccción de imagen real 
     g_real_image : if not g_USE_CAM_SIM generate
         s_mt_fvalid_int <= mt_fvalid_i;
         s_mt_lvalid_int <= mt_lvalid_i;
@@ -455,13 +521,13 @@ begin
         s_mt_pixclk_int <= mt_pixclk_i;
     end generate;
 
-    --! \brief Generador de imagen sintética interno — activo solo con g_USE_CAM_SIM=true
+    --! \brief "MUX" de señales de imagen, seleccción de imagen sintética. Default para Testbench
     --! Resolución y timing configurables via genéricos del TOP.
     g_cam_sim_on : if g_USE_CAM_SIM generate
         u_cam_sim : entity work.mt9v111_image
             generic map (
-                g_H_RES  => g_CAM_SIM_H_RES,  --! Resolución horizontal del cam_sim
-                g_V_RES  => g_CAM_SIM_V_RES,  --! Resolución vertical del cam_sim
+                g_H_RES  => g_CAM_SIM_H_RES,   --! Resolución horizontal del cam_sim
+                g_V_RES  => g_CAM_SIM_V_RES,   --! Resolución vertical del cam_sim
                 g_HBLANK => g_CAM_SIM_HBLANK,  --! Blanking horizontal
                 g_VBLANK => g_CAM_SIM_VBLANK   --! Blanking vertical
             )
@@ -474,5 +540,7 @@ begin
                 data_o   => s_mt_data_int
             );
     end generate;
+    
+    
 
 end architecture rtl;

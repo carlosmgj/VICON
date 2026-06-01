@@ -5,12 +5,17 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
 package config_pkg is
-
+    
+    ---------------------------------------------------------------------------
+    -- DEBUG
+    ---------------------------------------------------------------------------
+    constant c_USE_ILA               : boolean := true; --! true → ILA activo (síntesis); false → sin ILA (simulación)
+    
     ---------------------------------------------------------------------------
     -- Sistema
     ---------------------------------------------------------------------------
-    constant c_SYSTEM_CLK_FREQ_HZ    : integer := 100_000_000;  --! Frecuencia del reloj de sistema generado por el MMCM (Hz)
-
+    constant c_SYSTEM_CLK_FREQ_HZ    : integer := 100_000_000; --! Frecuencia del reloj de sistema generado por el MMCM (Hz)
+    
     ---------------------------------------------------------------------------
     -- Basys 3 — Recursos de la placa de evaluación
     ---------------------------------------------------------------------------
@@ -19,7 +24,6 @@ package config_pkg is
     constant c_BASYS3_7SEG_BAR_QTY   : integer := 7;  --! Segmentos por dígito del display 7 segmentos
     constant c_BASYS3_7SEG_DIGIT_QTY : integer := 4;  --! Número de dígitos del display 7 segmentos
     constant c_BASYS3_BTN_QTY        : integer := 5;  --! Número de pulsadores \warning original era 4, pero hay 5 definidos (0..4)
-    -- Índices de los pulsadores en basys3_btn_i       
     constant c_BASYS3_BTN_CENTER     : integer := 0;  --! Índice del pulsador central
     constant c_BASYS3_BTN_RIGHT      : integer := 1;  --! Índice del pulsador derecho
     constant c_BASYS3_BTN_TOP        : integer := 2;  --! Índice del pulsador superior
@@ -33,26 +37,29 @@ package config_pkg is
     constant c_MT9V111_I2C_FIFO_DEPTH   : integer                       := 16;        --! Profundidad de las FIFOs de escritura y lectura I2C
     constant c_MT9V111_I2C_SENSOR_ADDR  : std_logic_vector(6 downto 0)  := "1011100"; --! Dirección I2C de 7 bits del MT9V111 (0x5C)
     constant c_MT9V111_DATA_BITS        : integer                       := 8;         --! Anchura del bus de datos de imagen del sensor
-    constant c_MT9V111_MCLK_DIV         : integer                       := 4;         --! Divisor de c_SYSTEM_CLK_FREQ_HZ para generar mt_clk_o
+    constant c_MT9V111_MCLK_DIV         : integer                       := 4;         --! Divisor de c_SYSTEM_CLK_FREQ_HZ para generar mt_clk_o = mclk/(div*2)
     constant c_MT9V111_CHIP_ID_EXPECTED : std_logic_vector(15 downto 0) := x"823A";   --! Chip ID fijo del MT9V111 (registro 0xFF, page 0)
     constant c_MT9V111_H_RES            : integer                       := 640;       --! Resolución horizontal del sensor en píxeles
-    constant c_MT9V111_V_RES            : integer                       := 480;       --! Resolución vertical del sensor en píxeles \warning original era 640
-    -- Temporización de reset (valores del datasheet; los ciclos se calculan en TOP)   
+    constant c_MT9V111_V_RES            : integer                       := 480;       --! Resolución vertical del sensor en píxeles 
     constant c_MT9V111_RESET_HOLD_US    : integer                       := 1;         --! Tiempo mínimo de RESET# a nivel bajo (µs)
     constant c_MT9V111_RESET_WAIT_US    : integer                       := 150_000;   --! Tiempo de espera tras liberar RESET# para estabilización del PLL (µs)
-    ---------------------------------------------------------------------------
-    -- cam_sim — Resolución del generador de imagen sintética en hardware
-    -- Default de g_CAM_SIM_H_RES y g_CAM_SIM_V_RES en TOP con g_USE_CAM_SIM=true
-    ---------------------------------------------------------------------------
-    constant c_CAM_SIM_H_RES : integer := 8;    --! Resolución horizontal del cam_sim en hardware (píxeles)
-    constant c_CAM_SIM_V_RES : integer := 4;    --! Resolución vertical del cam_sim en hardware (líneas)
+    constant c_MT9V111_FPS              : integer                       := 15     ;   --! FPS que genera el sensor por defecto
+    constant c_MT9V111_TARGET_FPS       : integer                       := 15     ;   --! FPS que deseamos adquirir, descartando los restantes. No puede ser mayor que c_MT9V111_FPS
     
+    -----------------------------------------------------------------------------------------------------
+    -- MT9V111 IMAGE — Uso de generación de imagen sintética (cam_sim) en Hardware para pruebas en simulación y en placa
+    -------------------------------------------------------------------------------------------------------
+    constant c_USE_CAM_SIM    : boolean := true; --! 1: Usar datos de imagen simulada, 0: usar datos de imagen real
+    constant c_CAM_SIM_H_RES  : integer := 255;  --! Resolución horizontal de la imagen sintética generada en píxeles
+    constant c_CAM_SIM_V_RES  : integer := 200;  --! Resolución vertical de la imagen sintética generada en líneas
+    constant c_CAM_SIM_HBLANK : integer := 20;   --! Blanking horizontal de la imagen sintética (ciclos pixclk): similar a P1 real
+    constant c_CAM_SIM_VBLANK : integer := 50;   --! Blanking vertical de la imagen sintética (filas): similar a Reg0x06+9 real
+
     ---------------------------------------------------------------------------
     -- FT232H — Chip FTDI en modo Synchronous FIFO
     ---------------------------------------------------------------------------
     constant c_FTDI_DATABUS_W    : integer := 8; --! Anchura del bus de datos ADBUS (bits)
     constant c_FTDI_CONTROLBUS_W : integer := 8; --! Anchura del bus de control ACBUS (bits)
-    -- Mapeo de pines ACBUS según esquemático                                       
     constant c_FTDI_ACBUS_RXF_N  : integer := 0; --! RXF#   — RX empty flag  (entrada): '0'=dato disponible para leer
     constant c_FTDI_ACBUS_TXE_N  : integer := 1; --! TXE#   — TX full flag   (entrada): '0'=FT232H listo para recibir
     constant c_FTDI_ACBUS_RD_N   : integer := 2; --! RD#    — read strobe    (salida):  '0'=leer byte de ADBUS

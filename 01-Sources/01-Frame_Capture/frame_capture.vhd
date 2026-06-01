@@ -9,8 +9,6 @@
 --!   0x00 → 0x01
 --!   0xAA → 0xAB
 --!   0x55 → 0x56
---!
---! En Python usar: MARKER = bytes([0xAA, 0x55, 0xAA, 0x55])
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -19,10 +17,14 @@ use IEEE.NUMERIC_STD.ALL;
 library work;
 use work.config_pkg.all;
 
+--! \brief Frame Capture: interfaz con la imagen y con la fifo de salida
+--! \fsm_show_actions
 entity frame_capture is
     generic (
-        g_H_RES : integer := c_MT9V111_H_RES;  --! Resolución horizontal en píxeles
-        g_V_RES : integer := c_MT9V111_V_RES   --! Resolución vertical en líneas
+        g_H_RES      : integer := c_MT9V111_H_RES;     --! Resolución horizontal en píxeles del sensor MT9V111
+        g_V_RES      : integer := c_MT9V111_V_RES;     --! Resolución vertical en líneas del sensor MT9V111
+        g_CAM_FPS    : integer := c_MT9V111_FPS;       --! FPS que genera la cámara (según MCLK y registros del sensor)
+        g_TARGET_FPS : integer := c_MT9V111_TARGET_FPS --! FPS que se desean capturar (≤ g_CAM_FPS)
     );
     port (
         pixclk_i     : in  std_logic;                      --! Reloj de píxel del sensor MT9V111
@@ -40,7 +42,6 @@ entity frame_capture is
 end entity frame_capture;
 
 architecture rtl of frame_capture is
-
     type t_cap_state is (
         ST_IDLE,              --! Esperando capture_en_i activo
         ST_WAIT_FRAME_START,  --! Esperando flanco de subida de fvalid_i
@@ -51,20 +52,25 @@ architecture rtl of frame_capture is
         ST_WAIT_LINE,         --! Esperando inicio de línea (lvalid_i='1') o fin de frame
         ST_CAPTURE,           --! Capturando píxeles Y de la línea activa
         ST_LINE_END,          --! Línea completada; incrementar s_row_cnt
-        ST_FRAME_END          --! Frame completado; emitir frame_done_o
+        ST_FRAME_END,         --! Frame completado; emitir frame_done_o
+        ST_SKIP_FRAME         --! Frame ignorado por decimación; esperar fin de fvalid
     );
 
     signal s_state : t_cap_state := ST_IDLE;  --! Estado actual de la FSM de captura
 
-    signal s_byte_cnt : unsigned(10 downto 0)        := (others => '0');  --! Contador de bytes recibidos en la línea (par=Y, impar=croma)
+    signal s_byte_cnt : unsigned(10 downto 0)        := (others => '0'); --! Contador de bytes recibidos en la línea (par=Y, impar=croma)
     signal s_col_cnt  : integer range 0 to g_H_RES-1 := 0;               --! Columna actual dentro de la línea
     signal s_row_cnt  : integer range 0 to g_V_RES-1 := 0;               --! Fila actual dentro del frame
+    signal s_lvalid_r : std_logic                    := '0';             --! Registro de lvalid del ciclo anterior para detectar flanco de subida
 
-    signal overflow_r   : std_logic := '0';  --! Registro de overflow; se mantiene hasta el siguiente ST_IDLE
-    signal frame_done_r : std_logic := '0';  --! Registro de frame_done; pulso de 1 ciclo
+    constant c_FRAME_DIV : integer := g_CAM_FPS / g_TARGET_FPS;  --! Capturar 1 de cada c_FRAME_DIV frames
+
+    signal s_frame_div_cnt : integer range 0 to c_FRAME_DIV - 1 := 0;   --! Contador de decimación de frames
+    signal overflow_r      : std_logic                          := '0'; --! Registro de overflow; se mantiene hasta el siguiente ST_IDLE
+    signal frame_done_r    : std_logic                          := '0'; --! Registro de frame_done; pulso de 1 ciclo
 
     signal rst_pixclk_2ff: std_logic_vector(1 downto 0) :=(others => '1');
-    signal rst_pixclk : std_logic;
+    signal rst_pixclk    : std_logic;
 
 begin
 
@@ -89,17 +95,20 @@ begin
         -- /todo Reset aquí no se cumple porque pixclk_i es una señal post-reset 
         if rising_edge(pixclk_i) then
             if rst_pixclk = '1' then
-                s_state      <= ST_IDLE;
-                s_byte_cnt   <= (others => '0');
-                s_col_cnt    <= 0;
-                s_row_cnt    <= 0;
-                fifo_data_o  <= (others => '0');
-                fifo_wr_o    <= '0';
-                overflow_r   <= '0';
-                frame_done_r <= '0';
+                s_state         <= ST_IDLE;
+                s_byte_cnt      <= (others => '0');
+                s_col_cnt       <= 0;
+                s_row_cnt       <= 0;
+                s_frame_div_cnt <= 0;
+                fifo_data_o     <= (others => '0');
+                fifo_wr_o       <= '0';
+                overflow_r      <= '0';
+                frame_done_r    <= '0';
+                s_lvalid_r      <= '0';
             else
                 fifo_wr_o    <= '0';
                 frame_done_r <= '0';
+                s_lvalid_r   <= lvalid_i;  --! Registrar lvalid para detectar flanco de subida
 
                 case s_state is
 
@@ -118,7 +127,13 @@ begin
                         if capture_en_i = '0' then
                             s_state <= ST_IDLE;
                         elsif fvalid_i = '1' then
-                            s_state <= ST_MARKER_0;
+                            if s_frame_div_cnt = 0 then
+                                s_frame_div_cnt <= c_FRAME_DIV - 1;  --! Capturar este frame
+                                s_state         <= ST_MARKER_0;
+                            else
+                                s_frame_div_cnt <= s_frame_div_cnt - 1;  --! Saltar este frame
+                                s_state         <= ST_SKIP_FRAME;
+                            end if;
                         end if;
 
                     -----------------------------------------------------------
@@ -157,7 +172,7 @@ begin
                         s_col_cnt  <= 0;
                         if fvalid_i = '0' then
                             s_state <= ST_FRAME_END;
-                        elsif lvalid_i = '1' then
+                        elsif lvalid_i = '1' and s_lvalid_r = '0' then  --! Flanco de subida
                             s_state <= ST_CAPTURE;
                         end if;
 
@@ -195,6 +210,7 @@ begin
                     when ST_LINE_END =>
                         s_byte_cnt <= (others => '0');
                         s_col_cnt  <= 0;
+                        s_lvalid_r <= '0';  --! Forzar reset para garantizar detección de flanco en siguiente línea
                         if s_row_cnt = g_V_RES - 1 then
                             s_row_cnt <= 0;
                         else
@@ -209,6 +225,12 @@ begin
                     when ST_FRAME_END =>
                         frame_done_r <= '1';
                         s_state      <= ST_IDLE;
+
+                    --! Esperar fin de frame ignorado (fvalid baja)
+                    when ST_SKIP_FRAME =>
+                        if fvalid_i = '0' then
+                            s_state <= ST_WAIT_FRAME_START;
+                        end if;
 
                     when others =>
                         s_state <= ST_IDLE;

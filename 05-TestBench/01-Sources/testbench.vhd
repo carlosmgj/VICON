@@ -25,9 +25,21 @@ use IEEE.NUMERIC_STD.ALL;
 
 library work;
 use work.config_pkg.all;
-use work.sim_utils_pkg.all;
 
 entity testbench is
+    generic (  
+        g_MT9V111_RESET_HOLD_US   : integer                      := c_MT9V111_RESET_HOLD_US;
+        g_MT9V111_RESET_WAIT_US   : integer                      := c_MT9V111_RESET_WAIT_US;     --! Sensor real de imagen: Tiempo mínimo de RESET# a nivel bajo según datasheet (µs)
+        g_MT9V111_H_RES           : integer                      := c_MT9V111_H_RES;
+        g_MT9V111_V_RES           : integer                      := c_MT9V111_V_RES;
+        g_MT9V111_I2C_FREQ_HZ     : integer                      := c_MT9V111_I2C_FREQ_HZ;
+        g_USE_CAM_SIM             : boolean                      := c_USE_CAM_SIM;
+        g_CAM_SIM_HBLANK          : integer                      := c_CAM_SIM_HBLANK;
+        g_CAM_SIM_VBLANK          : integer                      := c_CAM_SIM_VBLANK;
+        g_CAM_SIM_H_RES           : integer                      := c_CAM_SIM_H_RES;
+        g_CAM_SIM_V_RES           : integer                      := c_CAM_SIM_V_RES;
+        g_MT9V111_I2C_SENSOR_ADDR : std_logic_vector(6 downto 0) := c_MT9V111_I2C_SENSOR_ADDR
+    );
 end entity testbench;
 
 architecture sim of testbench is
@@ -88,16 +100,17 @@ begin
     ---------------------------------------------------------------------------
     u_dut : entity work.TOP
         generic map (
-            g_MT9V111_RESET_HOLD_US => c_SIM_RESET_HOLD_US,
-            g_MT9V111_RESET_WAIT_US => c_SIM_RESET_WAIT_US,
-            g_MT9V111_H_RES         => c_SIM_H_RES,
-            g_MT9V111_V_RES         => c_SIM_V_RES,
-            g_MT9V111_I2C_FREQ_HZ   => c_SIM_I2C_FREQ_HZ,
+            g_USE_ILA               => false,
+            g_MT9V111_RESET_HOLD_US => g_MT9V111_RESET_HOLD_US,
+            g_MT9V111_RESET_WAIT_US => g_MT9V111_RESET_WAIT_US,
+            g_MT9V111_H_RES         => g_MT9V111_H_RES,
+            g_MT9V111_V_RES         => g_MT9V111_V_RES,
+            g_MT9V111_I2C_FREQ_HZ   => g_MT9V111_I2C_FREQ_HZ,
             g_USE_CAM_SIM           => true,                 --! Imagen generada internamente en TOP
-            g_CAM_SIM_HBLANK        => c_SIM_HBLANK,  --! Blanking horizontal reducido para simulación
-            g_CAM_SIM_VBLANK        => c_SIM_VBLANK,  --! Blanking vertical reducido para simulación
-            g_CAM_SIM_H_RES         => c_SIM_H_RES,   --! Resolución horizontal del cam_sim en simulación
-            g_CAM_SIM_V_RES         => c_SIM_V_RES    --! Resolución vertical del cam_sim en simulación
+            g_CAM_SIM_HBLANK        => g_CAM_SIM_VBLANK,     --! Blanking horizontal reducido para simulación
+            g_CAM_SIM_VBLANK        => g_CAM_SIM_VBLANK,     --! Blanking vertical reducido para simulación
+            g_CAM_SIM_H_RES         => g_CAM_SIM_H_RES,      --! Resolución horizontal del cam_sim en simulación
+            g_CAM_SIM_V_RES         => g_CAM_SIM_V_RES       --! Resolución vertical del cam_sim en simulación
         )
         port map (
             basys3_clk_i  => s_clk_base,

@@ -1,6 +1,9 @@
 --! \file ftdi_controller.vhd
 --! \brief Controlador para el FT232H en modo Synchronous FIFO.
-
+--!
+--! Timing optimizado: 2 ciclos por byte (antes 3).
+--! En ST_WRITE se baja WR# y se carga el dato simultáneamente.
+--! En ST_HOLD se sube WR# y si hay más datos se vuelve a ST_WRITE directamente.
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -38,20 +41,18 @@ end entity ftdi_controller;
 architecture rtl of ftdi_controller is
 
     ---------------------------------------------------------------------------
-    -- FSM
+    -- FSM — eliminado ST_SETUP para pasar de 3 a 2 ciclos por byte
     ---------------------------------------------------------------------------
     type t_state is (
         ST_IDLE,   --! Esperar datos en FIFO y TXE#='0'
-        ST_SETUP,  --! Dato estable en ADBUS; WR# todavía alto (setup time)
         ST_WRITE,  --! WR#='0' — FT232H captura dato en flanco de subida de CLKOUT
         ST_HOLD    --! WR#='1' — avanzar FIFO; decidir burst o volver a ST_IDLE
     );
 
-    signal s_state : t_state := ST_IDLE;  --! Estado actual de la FSM
+    signal s_state : t_state := ST_IDLE;
 
-    signal data_r    : std_logic_vector(7 downto 0) := (others => '0');  --! Registro del dato a enviar por ADBUS
-    signal fifo_rd_r : std_logic                    := '0';              --! Registro de habilitación de lectura de FIFO
-
+    signal data_r    : std_logic_vector(7 downto 0) := (others => '0');
+    signal fifo_rd_r : std_logic                    := '0';
 
 begin
 
@@ -82,24 +83,12 @@ begin
                         wr_n_o      <= '1';
                         tx_active_o <= '0';
                         if fifo_empty_i = '0' and txe_n_i = '0' then
-                            fifo_rd_r <= '1';
-                            data_r    <= fifo_data_i;
-                            s_state   <= ST_SETUP;
+                            data_r      <= fifo_data_i;  --! Dato estable en ADBUS
+                            wr_n_o      <= '0';          --! WR# baja en el mismo ciclo
+                            fifo_rd_r   <= '1';          --! Avanzar FIFO
+                            tx_active_o <= '1';
+                            s_state     <= ST_HOLD;
                         end if;
-
-                    -----------------------------------------------------------
-                    -- Dato estable en ADBUS; WR# todavía alto
-                    -----------------------------------------------------------
-                    when ST_SETUP =>
-                        tx_active_o <= '1';
-                        s_state     <= ST_WRITE;
-
-                    -----------------------------------------------------------
-                    -- WR#='0' — FT232H captura dato en flanco de subida de CLKOUT
-                    -----------------------------------------------------------
-                    when ST_WRITE =>
-                        wr_n_o  <= '0';
-                        s_state <= ST_HOLD;
 
                     -----------------------------------------------------------
                     -- WR#='1' — decidir si continuar burst o volver a ST_IDLE
@@ -107,11 +96,13 @@ begin
                     when ST_HOLD =>
                         wr_n_o <= '1';
                         if fifo_empty_i = '0' and txe_n_i = '0' then
-                            fifo_rd_r <= '1';
-                            data_r    <= fifo_data_i;
-                            s_state   <= ST_SETUP;
+                            data_r    <= fifo_data_i;  --! Siguiente dato
+                            wr_n_o    <= '0';          --! WR# baja inmediatamente
+                            fifo_rd_r <= '1';          --! Avanzar FIFO
+                            s_state   <= ST_HOLD;      --! Burst continuo
                         else
-                            s_state <= ST_IDLE;
+                            tx_active_o <= '0';
+                            s_state     <= ST_IDLE;
                         end if;
 
                     when others =>
