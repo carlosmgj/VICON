@@ -82,10 +82,12 @@ vopt work.testbench -o testbench_opt \
     -g g_MT9V111_RESET_HOLD_US=1 \
     -g g_MT9V111_RESET_WAIT_US=2 \
     -g g_USE_CAM_SIM=true \
-    -g g_CAM_SIM_HBLANK=20 \
-    -g g_CAM_SIM_VBLANK=30 \
-    -g g_CAM_SIM_H_RES=10 \
-    -g g_CAM_SIM_V_RES=5 \
+    -g g_CAM_SIM_HBLANK=10 \
+    -g g_CAM_SIM_VBLANK=20 \
+    -g g_CAM_SIM_H_RES=640 \
+    -g g_CAM_SIM_V_RES=480 \
+    -g g_MT9V111_FPS=15 \
+    -g g_MT9V111_TARGET_FPS=15 \
     -L unisim -L unisims_ver -L secureip \
     -L xpm -L xilinx_vip -L fifo_generator_v13_2_5
 
@@ -100,21 +102,6 @@ vsim -t 1ps -fsmdebug \
     -L xilinx_vip \
     -L fifo_generator_v13_2_5 \
     work.testbench_opt
-
-# -----------------------------------------------------------------------------
-# Breakpoints — parar automáticamente al llegar a estados clave
-# -----------------------------------------------------------------------------
-# when {/testbench/u_dut/s_state = "ST_FINISH"} {
-#     run 5 us
-#     stop
-#     echo ">>> OK: ST_FINISH alcanzado en $now — Chip ID correcto"
-# }
-# when {/testbench/u_dut/s_state = "ST_ERROR"} {
-#     run 5 us
-#     stop
-#     echo ">>> ERROR: ST_ERROR en $now"
-# }
-
 
 
 
@@ -134,4 +121,25 @@ WaveRestoreZoom {0} {100 us}
 # -----------------------------------------------------------------------------
 # Correr simulación
 # -----------------------------------------------------------------------------
-run 50 us
+
+# -----------------------------------------------------------------------------
+# Breakpoints — parar automáticamente
+# -----------------------------------------------------------------------------
+set frame_cnt 0
+when {/testbench/u_dut/u_frame_capture/frame_done_o'event and /testbench/u_dut/u_frame_capture/frame_done_o = '1'} {
+    global frame_cnt
+    incr frame_cnt
+    echo "Frame $frame_cnt completado en $now"
+    if {$frame_cnt >= 2} {
+        stop
+    }
+}
+run -all
+
+# when {/testbench/u_dut/s_cap_overflow = '1'} {
+#     echo "OVERFLOW detectado en $now"
+#     stop
+# }
+# run -all
+
+# Correr la simulación un poco más para ver el último frame done
