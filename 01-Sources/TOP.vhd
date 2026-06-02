@@ -32,6 +32,8 @@ entity TOP is
         g_MT9V111_V_RES             : integer                      := c_MT9V111_V_RES;             --! Sensor real de imagen: Resolución vertical en líneas
         g_MT9V111_RESET_HOLD_US     : integer                      := c_MT9V111_RESET_HOLD_US;     --! Sensor real de imagen: Tiempo mínimo de RESET# a nivel bajo según datasheet (µs)
         g_MT9V111_RESET_WAIT_US     : integer                      := c_MT9V111_RESET_WAIT_US;     --! Sensor real de imagen: Tiempo de espera tras liberar RESET# para estabilización del PLL (µs)
+        g_MT9V111_FPS               : integer                      := c_MT9V111_FPS;
+        g_MT9V111_TARGET_FPS        : integer                      := c_MT9V111_TARGET_FPS;
         
         -- Imagen sintética
         g_USE_CAM_SIM               : boolean                      := c_USE_CAM_SIM;               --! true → imagen interna (cam_sim); false → imagen del sensor real
@@ -443,8 +445,8 @@ begin
         generic map (
             g_H_RES      => c_CAP_H_RES,
             g_V_RES      => c_CAP_V_RES,
-            g_CAM_FPS    => 15,
-            g_TARGET_FPS => 5
+            g_CAM_FPS    => g_MT9V111_FPS,
+            g_TARGET_FPS => g_MT9V111_TARGET_FPS
         )
         port map (
             pixclk_i     => s_mt_pixclk_int,

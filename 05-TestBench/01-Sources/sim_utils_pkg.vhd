@@ -18,19 +18,9 @@ package sim_utils_pkg is
     ---------------------------------------------------------------------------
     -- Constantes globales de simulación
     ---------------------------------------------------------------------------
-    constant c_CLK_PERIOD : time := 10 ns;  --! Periodo del reloj de sistema en simulación (100 MHz)
-
-    ---------------------------------------------------------------------------
-    -- Constantes reducidas para acelerar la simulación
-    -- Sustituyen a las de config_pkg en el generic map del testbench.
-    ---------------------------------------------------------------------------
-    constant c_SIM_RESET_HOLD_US        : integer   := 1;           --! Tiempo de RESET# bajo (µs) — igual al real, ya es mínimo
-    constant c_SIM_RESET_WAIT_US        : integer   := 2;           --! Tiempo de espera post-reset (µs) — 150_000 → 10
-    constant c_SIM_H_RES                : integer   := 30;         --! Resolución horizontal (píxeles) — 640 → 8
-    constant c_SIM_V_RES                : integer   := 20;         --! Resolución vertical (líneas)    — 480 → 4
-    constant c_SIM_I2C_FREQ_HZ          : integer   := 4_000_000;   --! Frecuencia I2C (Hz) — 400k → 4M para reducir ciclos de simulación
-    constant c_SIM_HBLANK               : integer   := 15;         --! Tiempo usado en simulación para espaciado hotizontal en lugar de 300
-    constant c_SIM_VBLANK               : integer   := 50;       --! Tiempo usado en simulación para espaciado vertical en lugar de 13
+    constant c_CLK_PERIOD       : time    := 10 ns;  --! Periodo del reloj de sistema en simulación (100 MHz)
+    constant c_TXE_READY_CYCLES : integer := 200;
+    constant c_TXE_BUSY_CYCLES  : integer := 800;
 
     ---------------------------------------------------------------------------
     -- Funciones de conversión para logging

@@ -25,6 +25,7 @@ use IEEE.NUMERIC_STD.ALL;
 
 library work;
 use work.config_pkg.all;
+use work.sim_utils_pkg.all;
 
 entity testbench is
     generic (  
@@ -33,13 +34,16 @@ entity testbench is
         g_MT9V111_H_RES           : integer                      := c_MT9V111_H_RES;
         g_MT9V111_V_RES           : integer                      := c_MT9V111_V_RES;
         g_MT9V111_I2C_FREQ_HZ     : integer                      := c_MT9V111_I2C_FREQ_HZ;
+        g_MT9V111_FPS             : integer                      := c_MT9V111_FPS;
+        g_MT9V111_TARGET_FPS      : integer                      := c_MT9V111_TARGET_FPS;
+        g_MT9V111_I2C_SENSOR_ADDR : std_logic_vector(6 downto 0) := c_MT9V111_I2C_SENSOR_ADDR;
+
         g_USE_CAM_SIM             : boolean                      := c_USE_CAM_SIM;
         g_CAM_SIM_HBLANK          : integer                      := c_CAM_SIM_HBLANK;
         g_CAM_SIM_VBLANK          : integer                      := c_CAM_SIM_VBLANK;
         g_CAM_SIM_H_RES           : integer                      := c_CAM_SIM_H_RES;
-        g_CAM_SIM_V_RES           : integer                      := c_CAM_SIM_V_RES;
-        g_MT9V111_I2C_SENSOR_ADDR : std_logic_vector(6 downto 0) := c_MT9V111_I2C_SENSOR_ADDR
-    );
+        g_CAM_SIM_V_RES           : integer                      := c_CAM_SIM_V_RES
+        );
 end entity testbench;
 
 architecture sim of testbench is
@@ -110,7 +114,9 @@ begin
             g_CAM_SIM_HBLANK        => g_CAM_SIM_HBLANK,     --! Blanking horizontal reducido para simulación
             g_CAM_SIM_VBLANK        => g_CAM_SIM_VBLANK,     --! Blanking vertical reducido para simulación
             g_CAM_SIM_H_RES         => g_CAM_SIM_H_RES,      --! Resolución horizontal del cam_sim en simulación
-            g_CAM_SIM_V_RES         => g_CAM_SIM_V_RES       --! Resolución vertical del cam_sim en simulación
+            g_CAM_SIM_V_RES         => g_CAM_SIM_V_RES,       --! Resolución vertical del cam_sim en simulación
+            g_MT9V111_FPS           => g_MT9V111_FPS,
+            g_MT9V111_TARGET_FPS    => g_MT9V111_TARGET_FPS
         )
         port map (
             basys3_clk_i  => s_clk_base,
@@ -152,7 +158,9 @@ begin
     u_ftdi_agent : entity work.ftdi_agent
         generic map (
             g_LOG_FILE  => "ftdi_rx_log.txt",
-            g_TXE_READY => '0'   --! '0' = FT232H siempre listo (sin backpressure)
+            g_TXE_READY => '0',   --! '0' = FT232H siempre listo (sin backpressure)
+            g_TXE_READY_CYCLES => c_TXE_READY_CYCLES,
+            g_TXE_BUSY_CYCLES  => c_TXE_BUSY_CYCLES
         )
         port map (
             acbus_io => s_ftdi_acbus,

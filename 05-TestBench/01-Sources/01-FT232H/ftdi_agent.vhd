@@ -12,8 +12,10 @@ use work.sim_utils_pkg.all;
 
 entity ftdi_agent is
     generic (
-        g_LOG_FILE    : string  := "ftdi_rx_log.txt";  --! Fichero de salida para bytes recibidos
-        g_TXE_READY   : std_logic := '0'               --! Valor inicial de TXE# ('0'=listo, '1'=ocupado)
+        g_LOG_FILE         : string    := "ftdi_rx_log.txt";  --! Fichero de salida para bytes recibidos
+        g_TXE_READY        : std_logic := '0';                --! Valor de TXE# cuando el agente está listo
+        g_TXE_READY_CYCLES : integer   := 100;                --! Ciclos consecutivos con TXE#='0' (listo)
+        g_TXE_BUSY_CYCLES  : integer   := 0                   --! Ciclos consecutivos con TXE#='1' (ocupado); 0=siempre listo
     );
     port (
         acbus_io : inout std_logic_vector(c_FTDI_CONTROLBUS_W-1 downto 0);  --! Bus de control FTDI (comparte con TOP)
@@ -53,9 +55,39 @@ begin
     end process p_clkout;
 
     ---------------------------------------------------------------------------
-    --! \brief Control de TXE# y recepción de datos
+    --! \brief Generador de TXE# con ráfagas de ocupado para simular latencia del host
     --!
-    --! Mantiene TXE# al valor de g_TXE_READY.
+    --! Si g_TXE_BUSY_CYCLES=0 → TXE# fijo a g_TXE_READY (comportamiento original)
+    --! Si g_TXE_BUSY_CYCLES>0 → alterna g_TXE_READY_CYCLES ciclos listo /
+    --!                           g_TXE_BUSY_CYCLES ciclos ocupado
+    ---------------------------------------------------------------------------
+    p_txe : process
+    begin
+        s_txe_n <= g_TXE_READY;
+
+        if g_TXE_BUSY_CYCLES = 0 then
+            -- Comportamiento original: TXE# fijo
+            wait;
+        else
+            loop
+                -- Fase listo
+                s_txe_n <= '0';
+                for i in 1 to g_TXE_READY_CYCLES loop
+                    wait until rising_edge(s_clkout);
+                end loop;
+
+                -- Fase ocupado
+                s_txe_n <= '1';
+                for i in 1 to g_TXE_BUSY_CYCLES loop
+                    wait until rising_edge(s_clkout);
+                end loop;
+            end loop;
+        end if;
+    end process p_txe;
+
+    ---------------------------------------------------------------------------
+    --! \brief Control de recepción de datos
+    --!
     --! En cada flanco de subida de WR# (fin del pulso de escritura) captura
     --! el byte presente en ADBUS y lo vuelca al fichero de log.
     ---------------------------------------------------------------------------
@@ -64,8 +96,6 @@ begin
         variable v_line     : line;
         file     f_log      : text;
     begin
-        s_txe_n <= g_TXE_READY;
-
         file_open(f_log, g_LOG_FILE, write_mode);
         write(v_line, string'("[FTDI AGENT] Inicio de captura"));
         writeline(f_log, v_line);
