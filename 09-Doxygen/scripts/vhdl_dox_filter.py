@@ -169,14 +169,78 @@ class GhdlParser:
             print(f"[vhdl_dox_filter] pyGHDL error en {path}: {e}", file=sys.stderr)
             return None
 
-        if not doc.Entities:
-            return None
+        entities_list = list(doc.Entities)
+        print(f"DEBUG entities_list: {entities_list}", file=sys.stderr)
 
-        comment_map = _build_comment_map(source)
+        # Si no hay entidad en este fichero, buscar en el proyecto
+        # (soporte para proyectos con entidad y arquitectura en ficheros separados)
+        if not entities_list:
+            import os
+            project_dir = os.environ.get('DOX_PROJECT_DIR', '')
+            print(f"DEBUG DOX_PROJECT_DIR={project_dir}", file=sys.stderr)
+            if not project_dir:
+                return None
+            arch_re = re.compile(r'\barchitecture\s+\w+\s+of\s+(\w+)\s+is\b', re.IGNORECASE)
+            m = arch_re.search(source)
+            if not m:
+                return None
+            entity_name_to_find = m.group(1).lower()
+            print(f"DEBUG buscando entidad: {entity_name_to_find}", file=sys.stderr)
+            ghdl_entity = None
+            entity_name = None
+            EXCLUDE = {'02-IPs', 'ip', '__pycache__', 'node_modules', '.git'}
+            for vhd in sorted(Path(project_dir).rglob('*.vhd')):
+                if vhd == path:
+                    continue
+                if any(p in EXCLUDE for p in vhd.parts):
+                    continue
+                try:
+                    candidate_doc = Document(vhd)
+                    for unit in candidate_doc.DesignUnits:
+                        unit_type = type(unit).__name__
+                        if unit_type == 'Entity':
+                            ename = str(unit.Identifier)
+                            print(f"DEBUG candidato Entity: {ename}", file=sys.stderr)
+                            if ename.lower() == entity_name_to_find:
+                                entity_name = ename
+                                ghdl_entity = unit
+                                print(f"DEBUG entidad encontrada: {ename} en {vhd}", file=sys.stderr)
+                                break
+                except Exception as ex:
+                    print(f"DEBUG error en {vhd}: {ex}", file=sys.stderr)
+                    continue
+                if ghdl_entity:
+                    break
+            if ghdl_entity is None:
+                print(f"DEBUG entidad no encontrada en proyecto", file=sys.stderr)
+                return None
+            comment_map = _build_comment_map(source)
+            entity = VhdlEntity(name=_clean(entity_name))
+            print(f"DEBUG entidad creada: {entity.name}", file=sys.stderr)
+            print(f"DEBUG entidad name: {type(ghdl_entity).__name__}", file=sys.stderr)
+            print(f"DEBUG entidad attrs: {[x for x in dir(ghdl_entity) if not x.startswith('__')]}", file=sys.stderr)
+        else:
+            comment_map = _build_comment_map(source)
+            first = entities_list[0]
+            if isinstance(first, str):
+                entity_name = first
+                ghdl_entity = None
+                for unit in doc.DesignUnits:
+                    if type(unit).__name__ == 'Entity':
+                        if str(unit.Identifier).lower() == entity_name.lower():
+                            ghdl_entity = unit
+                            break
+                if ghdl_entity is None:
+                    ghdl_entity = (doc._entities.get(entity_name) or
+                                   doc._entities.get(entity_name.lower()))
+                if ghdl_entity is None:
+                    return None
+            else:
+                entity_name = _clean(first.Identifier) if hasattr(first, 'Identifier') else str(first)
+                ghdl_entity = first
+            entity = VhdlEntity(name=_clean(entity_name))
 
-        # Tomamos la primera entidad del fichero
-        entity_name, ghdl_entity = next(iter(doc.Entities.items()))
-        entity = VhdlEntity(name=_clean(entity_name))
+        print(f"DEBUG PROCESANDO GENERICOS:", file=sys.stderr)
 
         # --- Genéricos ---
         for g in ghdl_entity.GenericItems:
@@ -187,9 +251,10 @@ class GhdlParser:
                     name=_clean(ident),
                     type_str=_clean(g.Subtype),
                     default=_clean(g.DefaultExpression) if g.DefaultExpression else None,
-                    comment=comment_map.get(line_no),
+                    comment=comment_map.get(line_no)  or comment_map.get(line_no-1 if line_no else None) ,
                 ))
 
+        print(f"DEBUG PROCESANDO PUERTOS:", file=sys.stderr)
         # --- Puertos ---
         for p in ghdl_entity.PortItems:
             for ident in p.Identifiers:
@@ -200,15 +265,30 @@ class GhdlParser:
                     direction=_clean(p.Mode).lower(),
                     type_str=_clean(p.Subtype),
                     default=_clean(p.DefaultExpression) if p.DefaultExpression else None,
-                    comment=comment_map.get(line_no),
+                    comment=comment_map.get(line_no) or comment_map.get(line_no-1 if line_no else None),
                 ))
-
+        print(f"DEBUG PROCESANDO ARQUITECTURAcom:", file=sys.stderr)
         # --- Arquitectura ---
         if not doc.Architectures:
             return entity
 
-        _, archs = next(iter(doc.Architectures.items()))
-        _, arch  = next(iter(archs.items()))
+        archs_list = list(doc.Architectures)
+        first_arch = archs_list[0]
+        if isinstance(first_arch, str):
+            archs_dict = (doc._architectures.get(first_arch) or
+                          doc._architectures.get(first_arch.lower()))
+            if archs_dict:
+                arch = list(archs_dict.values())[0]
+            else:
+                return entity
+        else:
+            arch = first_arch
+        print(f"DEBUG arch: {arch}", file=sys.stderr)
+        print(f"DEBUG arch type: {type(arch).__name__}", file=sys.stderr)
+
+        for item in arch.DeclaredItems:
+            print(f"DEBUG item: {type(item).__name__}", file=sys.stderr)
+
 
         # Señales y constantes en la sección declarativa
         for item in arch.DeclaredItems:
@@ -221,7 +301,7 @@ class GhdlParser:
                         name=_clean(ident),
                         type_str=_clean(item.Subtype),
                         default=_clean(item.DefaultExpression) if item.DefaultExpression else None,
-                        comment=comment_map.get(line_no),
+                        comment=comment_map.get(line_no)  or comment_map.get(line_no-1 if line_no else None),
                     ))
 
             elif isinstance(item, GhdlConstant):
@@ -230,14 +310,20 @@ class GhdlParser:
                         name=_clean(ident),
                         type_str=_clean(item.Subtype),
                         value=_clean(item.DefaultExpression) if item.DefaultExpression else '?',
-                        comment=comment_map.get(line_no),
+                        comment=comment_map.get(line_no)  or comment_map.get(line_no-1 if line_no else None),
                     ))
 
             elif isinstance(item, EnumeratedType):
+                print(f"DEBUG enum encontrado: {item.Identifier} literales {list(item.Literals)}", file=sys.stderr)
+                lit = list(item.Literals)[0]
+                print(f"DEBUG lit type: {type(lit).__name__}", file=sys.stderr)
+                print(f"DEBUG lit dir: {[x for x in dir(lit) if not x.startswith('__')]}", file=sys.stderr)
                 entity.enum_types.append(EnumType(
                     name=_clean(item.Identifier),
+                    # states=[_clean(lit) for lit in item.Literals],
                     states=[_clean(lit) for lit in item.Literals],
                 ))
+                print(f"DEBUG enum_types: {entity.enum_types}", file=sys.stderr)
 
         # --- FSM: buscar CaseStatement sobre señal de estado ---
         enum_names = {t.name.lower() for t in entity.enum_types}
@@ -245,11 +331,20 @@ class GhdlParser:
             s.name.lower() for s in entity.signals
             if s.type_str.lower() in enum_names and 'next' not in s.name.lower()
         }
+        # transition_signals incluye next_state para detectar asignaciones en FSMs de 2 procesos
+        transition_signals = {
+            s.name.lower() for s in entity.signals
+            if s.type_str.lower() in enum_names
+        }
+
+        print(f"DEBUG enum_names: {enum_names}", file=sys.stderr)
+        print(f"DEBUG state_signals: {state_signals}", file=sys.stderr)
+        print(f"DEBUG transition_signals: {transition_signals}", file=sys.stderr)
 
         if state_signals:
             known_states = {s.lower() for t in entity.enum_types for s in t.states}
             entity.fsm_transitions = self._extract_fsm(
-                arch.Statements, state_signals, known_states,
+                arch.Statements, state_signals, transition_signals, known_states,
                 CaseStatement, SequentialSimpleSignalAssignment, IfStatement
             )
             entity.fsm_states = getattr(self, '_last_fsm_states', [])
@@ -258,35 +353,51 @@ class GhdlParser:
         return entity
 
 
-    def _extract_fsm(self, statements, state_signals, known_states,
+    def _extract_fsm(self, statements, state_signals, transition_signals, known_states,
                      CaseStatement, SequentialSimpleSignalAssignment, IfStatement):
+        # state_signals: usadas para detectar el case correcto (excluye next_state)
+        # transition_signals: usadas para detectar asignaciones (incluye next_state)
+        if not transition_signals:
+            transition_signals = state_signals
+        print(f"DEBUG _extract_fsm: state_signals={state_signals}", file=sys.stderr)
+        print(f"DEBUG _extract_fsm: transition_signals={transition_signals}", file=sys.stderr)
+        print(f"DEBUG _extract_fsm: known_states={known_states}", file=sys.stderr)
         transitions = []
         fsm_states_dict = {}
         pointer_uses = {}
 
-
         for stmt in statements:
+            print(f"DEBUG stmt type: {type(stmt).__name__}", file=sys.stderr)
             proc_stmts = getattr(stmt, 'Statements', [])
-            case_stmts = self._find_case_statements(proc_stmts, CaseStatement, IfStatement)
-    
+            proc_list = list(proc_stmts)
+            print(f"DEBUG proc_stmts count: {len(proc_list)}", file=sys.stderr)
+            case_stmts = self._find_case_statements(proc_list, CaseStatement, IfStatement)
+            print(f"DEBUG case_stmts encontrados: {len(case_stmts)}", file=sys.stderr)
+
             for case_stmt in case_stmts:
                 case_expr = _clean(str(case_stmt._expression)).lower()
+                print(f"DEBUG case_expr: '{case_expr}', state_signals: {state_signals}", file=sys.stderr)
                 if not any(sig in case_expr for sig in state_signals):
+                    print(f"DEBUG case_expr NO coincide", file=sys.stderr)
                     continue
-    
+                print(f"DEBUG case_expr COINCIDE!", file=sys.stderr)
+
                 for branch in case_stmt.Cases:
                     choices = getattr(branch, 'Choices', [])
                     if not choices:
                         continue
                     from_state = _clean(str(choices[0].Expression))
+                    print(f"DEBUG from_state: {from_state}", file=sys.stderr)
                     if from_state.upper() in ('OTHERS', 'NULL', ''):
                         continue
-    
+
                     state_actions = []
                     fsm_states_dict[from_state] = state_actions
-    
+
+                    branch_stmts = list(branch.Statements)
+                    print(f"DEBUG branch.Statements count: {len(branch_stmts)}", file=sys.stderr)
                     self._extract_branch_transitions(
-                        branch.Statements, from_state, state_signals,
+                        branch_stmts, from_state, transition_signals,
                         transitions, CaseStatement,
                         SequentialSimpleSignalAssignment, IfStatement,
                         known_states=known_states,
@@ -345,16 +456,19 @@ class GhdlParser:
                     ))
         return result
 
-    def _extract_branch_transitions(self, statements, from_state, state_signals,
+    def _extract_branch_transitions(self, statements, from_state, transition_signals,
                                      transitions, CaseStatement,
                                      SequentialSimpleSignalAssignment, IfStatement,
                                      condition=None, known_states=None,
                                      state_actions=None, pointer_uses=None):
-        for bs in statements:
+        stmts_list = list(statements)
+        print(f"DEBUG _extract_branch: from_state={from_state}, stmts={len(stmts_list)}, condition={condition}", file=sys.stderr)
+        for bs in stmts_list:
+            print(f"DEBUG bs type: {type(bs).__name__}", file=sys.stderr)
             if isinstance(bs, IfStatement):
                 cond = _format_condition(bs.IfBranch._condition)
                 self._extract_branch_transitions(
-                    bs.IfBranch.Statements, from_state, state_signals,
+                    bs.IfBranch.Statements, from_state, transition_signals,
                     transitions, CaseStatement,
                     SequentialSimpleSignalAssignment, IfStatement,
                     condition=cond, known_states=known_states,
@@ -364,7 +478,7 @@ class GhdlParser:
                 for elsif in getattr(bs, 'ElsIfBranches', []) or []:
                     elsif_cond = _format_condition(elsif._condition)
                     self._extract_branch_transitions(
-                        getattr(elsif, 'Statements', []), from_state, state_signals,
+                        getattr(elsif, 'Statements', []), from_state, transition_signals,
                         transitions, CaseStatement,
                         SequentialSimpleSignalAssignment, IfStatement,
                         condition=elsif_cond, known_states=known_states,
@@ -373,7 +487,7 @@ class GhdlParser:
                 # Else branch
                 if bs.ElseBranch:
                     self._extract_branch_transitions(
-                        bs.ElseBranch.Statements, from_state, state_signals,
+                        bs.ElseBranch.Statements, from_state, transition_signals,
                         transitions, CaseStatement,
                         SequentialSimpleSignalAssignment, IfStatement,
                         condition=f'not ({cond})', known_states=known_states,
@@ -382,12 +496,16 @@ class GhdlParser:
     
             elif isinstance(bs, SequentialSimpleSignalAssignment):
                 target = _clean(str(bs.Target)).lower()
-                if any(sig in target for sig in state_signals):
+                print(f"DEBUG SSA target='{target}', transition_signals={transition_signals}, match={any(sig in target for sig in transition_signals)}", file=sys.stderr)
+                if any(sig in target for sig in transition_signals):
                     for wave in bs.Waveform:
                         to_state = _clean(str(wave.Expression))
+                        print(f"DEBUG to_state='{to_state}', known_states={known_states}, match={to_state.lower() in known_states if known_states else 'N/A'}", file=sys.stderr)
                         if to_state.upper() in ('OTHERS', 'NULL', ''):
+                            print(f"DEBUG to_state descartado (OTHERS/NULL/empty)", file=sys.stderr)
                             continue
                         if known_states and to_state.lower() not in known_states:
+                            print(f"DEBUG to_state '{to_state}' NO en known_states -> pointer", file=sys.stderr)
                             if pointer_uses is not None:
                                 key = to_state
                                 if key not in pointer_uses:
@@ -395,6 +513,7 @@ class GhdlParser:
                                 if from_state not in pointer_uses[key]:
                                     pointer_uses[key].append(from_state)
                             continue
+                        print(f"DEBUG TRANSICION: {from_state} -> {to_state} [{condition}]", file=sys.stderr)
                         transitions.append(FsmTransition(
                             from_state=from_state,
                             to_state=to_state,

@@ -13,10 +13,11 @@ from dataclasses import dataclass, field
 @dataclass
 class VhdlModule:
     """Representa una entidad VHDL con sus instanciaciones."""
-    name: str                          # nombre de la entidad
-    path: Path                         # ruta del fichero fuente
-    instantiates: list[str] = field(default_factory=list)  # entidades que instancia
-    architecture: str = ''  # nombre de la arquitectura
+    name: str
+    path: Path
+    instantiates: list[str] = field(default_factory=list)
+    architecture: str = ''
+
 
 # =============================================================================
 # PARSER DE JERARQUÍA
@@ -38,8 +39,9 @@ class HierarchyParser:
     )
 
     # Detecta instanciación directa: label : entity work.nombre
+    # Soporta nombre de arquitectura opcional: entity work.nombre(rtl)
     _RE_ENTITY_INST = re.compile(
-        r':\s*entity\s+\w+\.(\w+)\s*(?:generic|port|\n)',
+        r':\s*entity\s+\w+\.(\w+)(?:\s*\(\w+\))?\s*(?:generic|port|\n)',
         re.IGNORECASE
     )
 
@@ -67,12 +69,8 @@ class HierarchyParser:
         r'\barchitecture\s+(\w+)\s+of\s+(\w+)\s+is\b',
         re.IGNORECASE
     )
-    
+
     def parse_file(self, path: Path) -> list[VhdlModule]:
-        """
-        Parsea un fichero VHDL y devuelve los módulos (entidades) encontrados
-        con sus instanciaciones.
-        """
         try:
             source = path.read_text(encoding='utf-8', errors='replace')
         except Exception as e:
@@ -98,10 +96,10 @@ class HierarchyParser:
             arch_match = self._RE_ARCH.search(source_clean)
             if arch_match:
                 module.architecture = arch_match.group(1)
-                
+
             rest = source_clean[entity_match.start():]
 
-            # 1. Instanciaciones directas: entity work.X o entity lib.X
+            # 1. Instanciaciones directas: entity work.X(arch) o entity lib.X
             for inst_match in self._RE_ENTITY_INST.finditer(rest):
                 inst_name = inst_match.group(1)
                 if inst_name.lower() not in self._VHDL_KEYWORDS:
@@ -121,21 +119,19 @@ class HierarchyParser:
 
 
 # =============================================================================
-# GENERADOR DE DIAGRAMA PLANTUML
+# GENERADOR DE DIAGRAMA WBS (Work Breakdown Structure)
 # =============================================================================
 
-class HierarchyDiagramGenerator:
+class HierarchyWbsGenerator:
     """
-    Genera el diagrama PlantUML de jerarquía a partir de los módulos extraídos.
+    Genera un diagrama de jerarquía PlantUML con dirección top-to-bottom.
+    Más legible que left-to-right cuando hay muchos módulos.
     """
 
     def generate(self, modules: list[VhdlModule]) -> str:
-        """
-        Genera el string PlantUML del diagrama de jerarquía.
-        Las flechas representan instanciaciones: A --> B significa A instancia B.
-        Los módulos raíz (no instanciados por nadie) se marcan en verde.
-        """
-        # Detectar módulos raíz (no instanciados por ningún otro módulo)
+        module_map = {m.name.lower(): m for m in modules}
+
+        # Detectar módulos raíz
         all_instantiated = set()
         for m in modules:
             for inst in m.instantiates:
@@ -143,10 +139,16 @@ class HierarchyDiagramGenerator:
 
         root_modules = {m.name for m in modules if m.name.lower() not in all_instantiated}
 
+        def is_testbench(name: str) -> bool:
+            n = name.lower()
+            return (n.startswith('tb_') or n.endswith('_tb') or
+                    'testbench' in n or n.startswith('tb'))
+
         lines = [
             '@startuml',
             'skinparam componentStyle rectangle',
             'skinparam defaultFontName Helvetica',
+            'skinparam defaultFontSize 11',
             'skinparam component {',
             '  BackgroundColor #E8F4FD',
             '  BorderColor #2E86AB',
@@ -154,20 +156,21 @@ class HierarchyDiagramGenerator:
             '}',
             'skinparam arrow {',
             '  Color #2E86AB',
-            '  FontColor #1a1a1a',
             '}',
-            'left to right direction',
+            'top to bottom direction',
             '',
         ]
 
-        # Declarar módulos raíz con color verde
+        # Declarar módulos con colores según tipo
         for m in modules:
-            if m.name in root_modules:
+            if is_testbench(m.name):
+                lines.append(f'component "{m.name}" as {m.name} #FFF3CD')
+            elif m.name in root_modules:
                 lines.append(f'component "{m.name}" as {m.name} #D4EDDA')
 
         lines.append('')
 
-        # Generar relaciones de instanciación
+        # Relaciones
         added = set()
         for m in modules:
             for inst_name in m.instantiates:
@@ -189,21 +192,136 @@ class HierarchyDiagramGenerator:
 class DoxFileGenerator:
     """Genera el fichero .dox con la página Doxygen del diagrama de jerarquía."""
 
-    def generate(self, plantuml_diagram: str, modules: list[VhdlModule]) -> str:
-        """
-        Genera el contenido del fichero .dox con:
-          - Página Doxygen con título y descripción
-          - Diagrama PlantUML de jerarquía
-          - Tabla de módulos con sus ficheros fuente e instanciaciones
-        """
+class HierarchyTreeGenerator:
+    """Genera un árbol HTML colapsable estilo Vivado Sources."""
+
+    def _is_testbench(self, name: str) -> bool:
+        n = name.lower()
+        return (n.startswith('tb_') or n.endswith('_tb') or
+                'testbench' in n or n.startswith('tb'))
+
+    def _build_tree_html(self, module_map: dict, name: str,
+                         visited_path: set, depth: int = 0) -> str:
+        """Genera el HTML de un nodo y sus hijos recursivamente."""
+        mod = module_map.get(name.lower())
+        is_tb = self._is_testbench(name)
+
+        if is_tb:
+            icon = '🟡'
+            color = '#7a6000'
+        elif depth == 0:
+            icon = '🟢'
+            color = '#1a5c2a'
+        else:
+            icon = '🔵'
+            color = '#1a3a5c'
+
+        has_children = mod and mod.instantiates
+        toggle = 'class="toggle" onclick="toggleNode(this)"' if has_children else ''
+        arrow = '▶ ' if has_children else '◾ '
+
+        html = f'<li>\n'
+        html += f'<span {toggle} style="color:{color};cursor:{"pointer" if has_children else "default"}">'
+        html += f'{arrow}{icon} <a href="{{doxref_{name}}}">{name}</a>'
+        if mod:
+            html += f' <span style="font-size:0.85em;color:#888;">({mod.path.name})</span>'
+        html += f'</span>\n'
+
+        if has_children:
+            html += '<ul class="subtree" style="display:none;">\n'
+            # Evitar ciclos en la misma rama
+            for inst in mod.instantiates:
+                if inst.lower() not in visited_path:
+                    new_path = visited_path | {inst.lower()}
+                    html += self._build_tree_html(module_map, inst, new_path, depth + 1)
+            html += '</ul>\n'
+
+        html += '</li>\n'
+        return html
+
+    def generate_html(self, modules: list[VhdlModule]) -> str:
+        module_map = {m.name.lower(): m for m in modules}
+
+        # Detectar raíces
+        all_instantiated = set()
+        for m in modules:
+            for inst in m.instantiates:
+                all_instantiated.add(inst.lower())
+        root_modules = [m for m in modules if m.name.lower() not in all_instantiated]
+
+        # Generar columnas (una por raíz)
+        columns_html = ''
+        for root in root_modules:
+            tree_html = self._build_tree_html(module_map, root.name, {root.name.lower()}, 0)
+            columns_html += f'''
+<div class="hier-column">
+  <ul class="hier-tree">
+    {tree_html}
+  </ul>
+</div>'''
+
+        return f'''
+<style>
+.hier-container {{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  font-family: monospace;
+  font-size: 13px;
+  margin: 16px 0;
+}}
+.hier-column {{
+  min-width: 220px;
+  background: var(--page-background-color, #fff);
+  border: 1px solid var(--separator-color, #ddd);
+  border-radius: 6px;
+  padding: 10px 14px;
+}}
+.hier-tree, .subtree {{
+  list-style: none;
+  padding-left: 16px;
+  margin: 2px 0;
+}}
+.hier-tree {{
+  padding-left: 0;
+}}
+.toggle {{
+  user-select: none;
+}}
+.toggle.open > span {{
+  /* flecha girada */
+}}
+</style>
+<script>
+function toggleNode(el) {{
+  var sub = el.nextElementSibling;
+  if (!sub) return;
+  var open = sub.style.display !== 'none';
+  sub.style.display = open ? 'none' : 'block';
+  el.innerHTML = el.innerHTML.replace(open ? '▼' : '▶', open ? '▶' : '▼');
+}}
+</script>
+<div class="hier-container">
+{columns_html}
+</div>'''
+
+
+class DoxFileGenerator:
+    """Genera el fichero .dox con la página Doxygen del diagrama de jerarquía."""
+
+    def generate(self, modules: list[VhdlModule]) -> str:
+        # Árbol colapsable HTML
+        tree_gen = HierarchyTreeGenerator()
+        tree_html = tree_gen.generate_html(modules)
+
         # Tabla de módulos
         table_lines = [
             '| Module | File | Instantiates |',
             '|--------|------|--------------|',
         ]
         for m in sorted(modules, key=lambda x: x.name.lower()):
-            inst_str = ', '.join(f'`{i}`' for i in m.instantiates) if m.instantiates else '—'
-            table_lines.append(f'| `{m.name}` | `{m.path.name}` | {inst_str} |')
+            inst_str = ', '.join(f'\\ref {i}' for i in m.instantiates) if m.instantiates else '—'
+            table_lines.append(f'| \\ref {m.name} | `{m.path.name}` | {inst_str} |')
 
         table = '\n'.join(table_lines)
 
@@ -212,14 +330,13 @@ class DoxFileGenerator:
 
 \\brief Jerarquía de instanciaciones del proyecto VHDL.
 
-Este diagrama muestra la jerarquía de instanciaciones entre las entidades
-del proyecto. Los módulos en verde son los módulos raíz (top-level),
-es decir, los que no son instanciados por ningún otro módulo.
+🟢 Módulo raíz (top-level) &nbsp;&nbsp; 🔵 Submódulo &nbsp;&nbsp; 🟡 Testbench
 
-\\par Hierarchy Diagram
-\\startuml
-{plantuml_diagram}
-\\enduml
+Haz click en los nodos con ▶ para expandir/colapsar.
+
+\\htmlonly
+{tree_html}
+\\endhtmlonly
 
 \\par Module List
 {table}
@@ -253,17 +370,13 @@ def main():
         print(f"[generate_hierarchy] Error: no existe la ruta {project_path}", file=sys.stderr)
         sys.exit(1)
 
-    # Recoger todos los ficheros VHDL recursivamente
-    #vhd_files = list(project_path.rglob('*.vhd')) + list(project_path.rglob('*.vhdl'))
+    # Excluir carpetas de IPs y generadas
+    EXCLUDE_DIRS = {'02-IPs', 'ip', '__pycache__', 'node_modules', '.git'}
 
-    #Ecluimos las carpetas de ip
-    EXCLUDE_DIRS = {'02-IPs', 'ip', '__pycache__', 'node_modules'}
-    
     vhd_files = [
         f for f in list(project_path.rglob('*.vhd')) + list(project_path.rglob('*.vhdl'))
         if not any(part in EXCLUDE_DIRS for part in f.parts)
     ]
-
 
     if not vhd_files:
         print(f"[generate_hierarchy] No se encontraron ficheros .vhd en {project_path}", file=sys.stderr)
@@ -284,9 +397,9 @@ def main():
         print("[generate_hierarchy] No se encontraron entidades VHDL", file=sys.stderr)
         sys.exit(1)
 
-    # Generar diagrama y fichero .dox
-    diagram = HierarchyDiagramGenerator().generate(all_modules)
-    dox_content = DoxFileGenerator().generate(diagram, all_modules)
+    # Generar árbol HTML y fichero .dox
+    diagram = HierarchyWbsGenerator().generate(all_modules)
+    dox_content = DoxFileGenerator().generate(all_modules)
 
     # Escribir el fichero de salida
     out_path = Path(args.out)
