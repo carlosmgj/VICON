@@ -1,6 +1,7 @@
 --! Usaremos el **UM232H-B** ([Datasheet](https://www.mouser.es/datasheet/3/35/1/DS_UM232H_B.pdf)),
 --! que es una placa de desarrollo o módulo de evaluación de FTDI que monta el chip **TD232H** ([Datasheet](https://akizukidenshi.com/goodsaffix/ft232h.pdf)).
 --! 
+--!
 --! \section sec_ft245_mode MODO FT245 (FIFO)
 --! 
 --! Modo para enviar datos continuamente con una alta tasa de transferencia de datos.

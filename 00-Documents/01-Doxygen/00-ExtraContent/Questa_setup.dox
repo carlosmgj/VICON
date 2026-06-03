@@ -1,0 +1,188 @@
+/*!
+\page page_questasetup QuestaSim Setup — Guía de configuración y simulación
+
+Esta página documenta el proceso completo para configurar QuestaSim y simular
+el proyecto VICON desde cero. Seguir los pasos en orden.
+
+\section sec_requisitos Requisitos previos
+
+- Vivado 2020.2 instalado en <tt>C:/Xilinx/Vivado/2020.2</tt>
+- QuestaSim Pro (Microchip Edition) instalado en <tt>C:/Microchip/Libero_SoC_2025.2/...</tt>
+- GCC disponible en <tt>C:/msys64/mingw64/bin</tt>
+- Proyecto Vivado abierto y las IPs generadas (Generate Output Products)
+
+\warning Si las IPs no tienen sus Output Products generados, los archivos
+<tt>.vhdl</tt> de simulación no existirán y la compilación fallará.
+En Vivado: botón derecho sobre cada IP en Sources → <b>Generate Output Products</b>.
+
+---
+
+\section sec_compile_simlib Paso 1 — Compilar librerías de Vivado para QuestaSim
+
+Este paso solo es necesario <b>una vez</b> por instalación. No repetir salvo que
+cambies de versión de Vivado o de QuestaSim.
+
+En Vivado: <b>Tools → Compile Simulation Libraries</b>
+
+| Campo                      | Valor                                                                 |
+|----------------------------|-----------------------------------------------------------------------|
+| Simulator                  | Questa Advanced Simulator                                             |
+| Language                   | VHDL                                                                  |
+| Library                    | All                                                                   |
+| Family                     | All                                                                   |
+| Compiled library location  | (dejar el valor por defecto del proyecto)                             |
+| Simulator executable path  | <tt>C:/Microchip/.../QuestaSim_Pro/win64</tt> (solo la carpeta)      |
+| GCC executable path        | <tt>C:/msys64/mingw64/bin</tt>                                        |
+| Compile Xilinx IP          | ✅ Marcado                                                             |
+
+\note El campo <b>GCC executable path</b> es necesario aunque el diseño sea
+VHDL puro — algunas IPs de Xilinx requieren GCC durante la compilación de sus
+modelos de simulación.
+
+El proceso tarda entre 10 y 30 minutos. Al finalizar aparece un resumen con
+la columna <b>Error(s)</b> — debe ser 0 en todas las filas relevantes
+(<tt>unisim</tt>, <tt>secureip</tt>, <tt>xpm</tt>, <tt>fifo_generator_v13_x_x</tt>).
+
+\warning Los warnings en el resumen (columna Warning(s)) son normales y
+provienen de las propias IPs de Xilinx. No indican ningún problema.
+
+Las librerías quedan en:
+\code
+VICON/06-Project/vicon_cmgj/vicon_cmgj.cache/compile_simlib/questa/
+\endcode
+
+---
+
+\section sec_ips Paso 2 — Identificar los modelos de simulación de las IPs
+
+Los modelos de simulación se generan en:
+\code
+VICON/06-Project/vicon_cmgj/vicon_cmgj.gen/sources_1/ip/
+\endcode
+
+\subsection subsec_clk_wiz clk_wiz_0 (MMCM)
+
+\warning El modelo de simulación del <tt>clk_wiz_0</tt> debe usarse en su
+versión <b>VHDL</b> (<tt>clk_wiz_0_sim_netlist.vhdl</tt>), NO el Verilog
+(<tt>clk_wiz_0.v</tt>). Usar el Verilog provoca un error fatal en elaboración:
+\code
+** Fatal: (vsim-3729) Value ?(1095521093) of generic "CLKFBOUT_USE_FINE_PS"
+is out of range FALSE (0) to TRUE (1).
+\endcode
+Esto se debe a un conflicto de tipos entre el modelo Verilog y el primitivo
+VHDL <tt>MMCME2_ADV</tt> de <tt>unisim</tt>.
+
+Archivo a compilar:
+\code
+clk_wiz_0/clk_wiz_0_sim_netlist.vhdl
+\endcode
+
+\subsection subsec_fifo fifo_generator_0 (FIFO asíncrona)
+
+Archivo a compilar:
+\code
+fifo_generator_0/fifo_generator_0_sim_netlist.vhdl
+\endcode
+
+---
+
+\section sec_simdo Paso 3 — Script de simulación (sim.do)
+
+El script se encuentra en:
+\code
+VICON/05-TestBench/02-Simulation/sim.do
+\endcode
+
+Se ejecuta con QuestaSim abierto desde ese mismo directorio. El script:
+-# Crea y mapea la librería <tt>work</tt>
+-# Mapea las librerías compiladas de Vivado
+-# Compila las IPs (clk_wiz_0 y fifo_generator_0)
+-# Compila los módulos del diseño en orden de dependencias
+-# Compila los módulos del testbench
+-# Lanza la elaboración con <tt>vsim</tt>
+-# Configura la ventana de waves
+-# Ejecuta la simulación
+
+\warning Si QuestaSim tiene en caché un diseño elaborado anterior (<tt>_opt</tt>),
+puede ignorar los cambios y usar la versión antigua. Si el comportamiento es
+inesperado, borrar la caché antes de relanzar:
+\code
+quit -sim
+file delete -force _opt
+do sim.do
+\endcode
+
+---
+
+\section sec_ejecutar Paso 4 — Ejecutar la simulación
+
+Abrir QuestaSim y navegar al directorio de simulación:
+\code
+cd C:/.../VICON/05-TestBench/02-Simulation
+do sim.do
+\endcode
+
+O si ya está compilado y solo se quiere relanzar la elaboración:
+\code
+vsim -t 1ps -vopt_acc +acc \
+    -L unisim -L unisims_ver -L secureip \
+    -L xpm -L xilinx_vip \
+    -L fifo_generator_v13_2_5 \
+    work.testbench
+\endcode
+
+\note <tt>-vopt_acc +acc</tt> preserva la visibilidad de señales internas
+optimizadas (como <tt>s_chip_id</tt>, estados de FSM, etc.) en la ventana
+de waves. Sin este flag QuestaSim elimina señales que no afectan a las salidas
+y no pueden añadirse al wave viewer.
+
+\note El flag <tt>-novopt</tt> está <b>deprecado</b> en QuestaSim 2024.3 y
+causa un error de carga. No usarlo.
+
+---
+
+\section sec_waves Paso 5 — Ventana de waves
+
+El script configura automáticamente los grupos de señales:
+
+| Grupo           | Señales clave                                              |
+|-----------------|------------------------------------------------------------|
+| FSM             | <tt>s_state</tt>, <tt>s_init_cnt</tt>                     |
+| Reloj y Reset   | <tt>s_mclk</tt>, <tt>s_locked</tt>, <tt>s_rst_final</tt> |
+| I2C             | <tt>s_scl_bus</tt>, <tt>s_sda_bus</tt>, <tt>s_i2c_done</tt>, <tt>s_i2c_error</tt>, <tt>s_chip_id</tt> |
+| Agente I2C      | <tt>s_debug_state</tt>                                     |
+| Sensor          | <tt>s_mt_pixclk</tt>, <tt>s_mt_fvalid</tt>, <tt>s_mt_lvalid</tt>, <tt>s_mt_data</tt> |
+| Captura         | <tt>s_cap_en</tt>, <tt>s_cap_fifo_wr</tt>, <tt>s_cap_frame_done</tt>, <tt>s_cap_overflow</tt> |
+| FTDI            | <tt>s_ftdi_acbus</tt>, <tt>s_ftdi_adbus</tt>              |
+| LEDs            | <tt>s_basys3_led</tt>                                      |
+
+---
+
+\section sec_flujo_esperado Flujo esperado de la simulación
+
+-# Reset activo → FSM en <tt>ST_CAM_RESET_ASSERT</tt>
+-# Reset liberado → FSM en <tt>ST_CAM_RESET_WAIT</tt>
+-# FSM escribe Page Select (reg <tt>0x01</tt> = <tt>0x0004</tt>) por I2C
+-# FSM lee Chip ID (reg <tt>0xFF</tt>) → agente responde <tt>0x823A</tt>
+-# FSM llega a <tt>ST_FINISH</tt> → <tt>basys3_led_o(0)='1'</tt>, captura activa
+-# <tt>cam_sim</tt> genera frames → <tt>frame_capture</tt> escribe FIFO
+-# <tt>ftdi_controller</tt> vacía FIFO → bytes registrados en <tt>ftdi_rx_log.txt</tt>
+
+\warning Si la FSM llega a <tt>ST_ERROR</tt> en lugar de <tt>ST_FINISH</tt>,
+las causas más probables son:
+- El agente I2C no responde al Chip ID (verificar que <tt>16#FF#</tt> tiene el valor <tt>0x823A</tt>)
+- Error de NACK en la transacción I2C (revisar <tt>s_debug_state</tt> del agente)
+- El MMCM no genera reloj estable (<tt>s_locked</tt> nunca sube)
+
+---
+
+\section sec_logs Archivos de log generados
+
+| Archivo                  | Contenido                                              |
+|--------------------------|--------------------------------------------------------|
+| <tt>ftdi_rx_log.txt</tt> | Bytes recibidos por el agente FTDI con timestamp       |
+| <tt>reporte_final_1.txt</tt> | Resultados de <tt>check_value</tt> del scoreboard |
+
+Ambos se generan en <tt>VICON/05-TestBench/02-Simulation/</tt>.
+
+*/

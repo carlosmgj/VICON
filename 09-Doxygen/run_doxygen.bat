@@ -27,19 +27,19 @@ REM FLAGS DE CONFIGURACIÓN
 REM ============================================================
 
 REM VSG
-set VSG_ENABLED       = 1
-set VSG_FAIL_ON_ERROR = 0
-set VSG_DETAIL        = 1
-set VSG_CONFIG        = 1
+set VSG_ENABLED=0
+set VSG_FAIL_ON_ERROR=0
+set VSG_DETAIL=1
+set VSG_CONFIG=1
 
 REM GHDL
-set GHDL_ENABLED       = 1
-set GHDL_FAIL_ON_ERROR = 0
-set GHDL_DETAIL        = 1
+set GHDL_ENABLED=0
+set GHDL_FAIL_ON_ERROR=0
+set GHDL_DETAIL=1
 
 REM Word
-set WORD_ENABLED       = 1
-set WORD_FAIL_ON_ERROR = 0
+set WORD_ENABLED=0
+set WORD_FAIL_ON_ERROR=0
 
 REM ============================================================
 
