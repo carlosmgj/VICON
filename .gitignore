@@ -12,6 +12,7 @@
 *.xpr
 *.xsa
 *.bit
+!07-Versions/**/*.bit
 *.bin
 *.mcs
 
