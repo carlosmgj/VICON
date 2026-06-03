@@ -67,7 +67,7 @@ int main(void)
 
     // ─── Buffer de trabajo ────────────────────────────────────────────────────
     uint8_t raw[BUF_SIZE];
-    uint8_t accum[BUF_SIZE * 4];
+    uint8_t accum[BUF_SIZE * 8];
     int     accum_len = 0;
     uint8_t frame[FRAME_BYTES];
     uint8_t rgb[W * H * 3];   // imagen RGB para SDL

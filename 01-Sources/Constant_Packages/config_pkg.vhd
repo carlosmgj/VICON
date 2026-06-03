@@ -49,7 +49,7 @@ package config_pkg is
     -----------------------------------------------------------------------------------------------------
     -- MT9V111 IMAGE — Uso de generación de imagen sintética (cam_sim) en Hardware para pruebas en simulación y en placa
     -------------------------------------------------------------------------------------------------------
-    constant c_USE_CAM_SIM    : boolean := true; --! 1: Usar datos de imagen simulada, 0: usar datos de imagen real
+    constant c_USE_CAM_SIM    : boolean := false; --! 1: Usar datos de imagen simulada, 0: usar datos de imagen real
     constant c_CAM_SIM_H_RES  : integer := 255;  --! Resolución horizontal de la imagen sintética generada en píxeles
     constant c_CAM_SIM_V_RES  : integer := 200;  --! Resolución vertical de la imagen sintética generada en líneas
     constant c_CAM_SIM_HBLANK : integer := 20;   --! Blanking horizontal de la imagen sintética (ciclos pixclk): similar a P1 real

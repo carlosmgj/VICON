@@ -10,8 +10,8 @@
 #include "ftd2xx.h"
 
 // ─── Configuración ────────────────────────────────────────────────────────────
-static const int    H           = 200;       // filas
-static const int    W           = 250;       // columnas
+static const int    H           = 480;       // filas
+static const int    W           = 640;       // columnas
 static const int    FRAME_BYTES = H * W;
 static const uint8_t MARKER[4] = {0xAA, 0x55, 0xAA, 0x55};
 static const int    BUF_SIZE    = 65536;
@@ -54,7 +54,7 @@ int main(void)
 
     // ─── Buffer de trabajo ───────────────────────────────────────────────────
     uint8_t  raw[BUF_SIZE];
-    uint8_t  accum[BUF_SIZE * 4];   // buffer acumulador
+    uint8_t  accum[BUF_SIZE * 8];   // buffer acumulador
     int      accum_len  = 0;
 
     int      frame_num  = 0;
