@@ -33,18 +33,18 @@ package config_pkg is
     ---------------------------------------------------------------------------
     -- MT9V111 — Sensor óptico
     ---------------------------------------------------------------------------
-    constant c_MT9V111_I2C_FREQ_HZ      : integer                       := 400_000;   --! Frecuencia del bus I2C (Hz); MT9V111 soporta hasta 400 kHz
+    constant c_MT9V111_I2C_FREQ_HZ      : integer                       := 200_000;   --! Frecuencia del bus I2C (Hz); MT9V111 soporta hasta 400 kHz (parece que falla a 400)
     constant c_MT9V111_I2C_FIFO_DEPTH   : integer                       := 16;        --! Profundidad de las FIFOs de escritura y lectura I2C
     constant c_MT9V111_I2C_SENSOR_ADDR  : std_logic_vector(6 downto 0)  := "1011100"; --! Dirección I2C de 7 bits del MT9V111 (0x5C)
     constant c_MT9V111_DATA_BITS        : integer                       := 8;         --! Anchura del bus de datos de imagen del sensor
-    constant c_MT9V111_MCLK_DIV         : integer                       := 4;         --! Divisor de c_SYSTEM_CLK_FREQ_HZ para generar mt_clk_o = mclk/(div*2)
+    constant c_MT9V111_MCLK_DIV         : integer                       := 2;         --! Deprecated, usamos salida mmcm. Divisor de c_SYSTEM_CLK_FREQ_HZ para generar mt_clk_o = mclk/(div*2)
     constant c_MT9V111_CHIP_ID_EXPECTED : std_logic_vector(15 downto 0) := x"823A";   --! Chip ID fijo del MT9V111 (registro 0xFF, page 0)
     constant c_MT9V111_H_RES            : integer                       := 640;       --! Resolución horizontal del sensor en píxeles
     constant c_MT9V111_V_RES            : integer                       := 480;       --! Resolución vertical del sensor en píxeles 
     constant c_MT9V111_RESET_HOLD_US    : integer                       := 1;         --! Tiempo mínimo de RESET# a nivel bajo (µs)
     constant c_MT9V111_RESET_WAIT_US    : integer                       := 150_000;   --! Tiempo de espera tras liberar RESET# para estabilización del PLL (µs)
-    constant c_MT9V111_FPS              : integer                       := 15     ;   --! FPS que genera el sensor por defecto
-    constant c_MT9V111_TARGET_FPS       : integer                       := 15     ;   --! FPS que deseamos adquirir, descartando los restantes. No puede ser mayor que c_MT9V111_FPS
+    constant c_MT9V111_FPS              : integer                       := 30     ;   --! FPS que genera el sensor por defecto
+    constant c_MT9V111_TARGET_FPS       : integer                       := 30     ;   --! FPS que deseamos adquirir, descartando los restantes. No puede ser mayor que c_MT9V111_FPS
     
     -----------------------------------------------------------------------------------------------------
     -- MT9V111 IMAGE — Uso de generación de imagen sintética (cam_sim) en Hardware para pruebas en simulación y en placa
