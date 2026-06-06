@@ -9,6 +9,8 @@
 #include "ftd2xx.h"
 #include <SDL3/SDL.h>
 #include <string>
+#include <chrono>
+#include <deque>
 
 // ─── Configuración ────────────────────────────────────────────────────────────
 static const int     H           = 480;
@@ -16,8 +18,8 @@ static const int     W           = 640;
 static const int     FRAME_BYTES = H * W;
 static const uint8_t MARKER[4]  = {0xAA, 0x55, 0xAA, 0x55};
 static const int     BUF_SIZE    = 65536;
-static const int     WIN_W       = 1020;   // 255 * 4
-static const int     WIN_H       = 800;    // 200 * 4
+static const int     WIN_W       = 1020;
+static const int     WIN_H       = 800;
 
 // ─── Búsqueda de marcador ─────────────────────────────────────────────────────
 static int find_marker(const uint8_t* buf, int len)
@@ -31,7 +33,7 @@ static int find_marker(const uint8_t* buf, int len)
 }
 
 int main(void)
-{   
+{
     printf("Hola mundo \n");
 
     // ─── Inicializar SDL3 ─────────────────────────────────────────────────────
@@ -40,9 +42,9 @@ int main(void)
         return 1;
     }
 
-    SDL_Window*   window = SDL_CreateWindow("VICON cam_sim", WIN_W, WIN_H, 0);
+    SDL_Window*   window   = SDL_CreateWindow("VICON cam_sim", WIN_W, WIN_H, 0);
     SDL_Renderer* renderer = SDL_CreateRenderer(window, NULL);
-    SDL_Texture*  texture = SDL_CreateTexture(renderer,
+    SDL_Texture*  texture  = SDL_CreateTexture(renderer,
                                 SDL_PIXELFORMAT_RGB24,
                                 SDL_TEXTUREACCESS_STREAMING,
                                 W, H);
@@ -65,12 +67,12 @@ int main(void)
 
     printf("FT232H listo. Mostrando %dx%d escalado a %dx%d\n", W, H, WIN_W, WIN_H);
 
-    // ─── Buffer de trabajo ────────────────────────────────────────────────────
+    // ─── Buffers de trabajo ───────────────────────────────────────────────────
     uint8_t raw[BUF_SIZE];
     uint8_t accum[BUF_SIZE * 8];
     int     accum_len = 0;
     uint8_t frame[FRAME_BYTES];
-    uint8_t rgb[W * H * 3];   // imagen RGB para SDL
+    uint8_t rgb[W * H * 3];
     DWORD   bytes_read;
 
     // ─── Sincronizar ─────────────────────────────────────────────────────────
@@ -89,9 +91,14 @@ int main(void)
     }
     printf("Sincronizado.\n");
 
+    // ─── Variables FPS ────────────────────────────────────────────────────────
+    using Clock = std::chrono::steady_clock;
+    std::deque<Clock::time_point> frame_times;
+    float fps = 0.0f;
+
     // ─── Bucle principal ──────────────────────────────────────────────────────
-    int      frame_num = 0;
-    bool running = true;
+    int       frame_num = 0;
+    bool      running   = true;
     SDL_Event event;
 
     while (running) {
@@ -119,9 +126,9 @@ int main(void)
 
         // Convertir Y (grayscale) → RGB para SDL
         for (int i = 0; i < FRAME_BYTES; i++) {
-            rgb[i * 3 + 0] = frame[i];  // R
-            rgb[i * 3 + 1] = frame[i];  // G
-            rgb[i * 3 + 2] = frame[i];  // B
+            rgb[i * 3 + 0] = frame[i];
+            rgb[i * 3 + 1] = frame[i];
+            rgb[i * 3 + 2] = frame[i];
         }
 
         // Actualizar textura y renderizar escalado
@@ -133,8 +140,23 @@ int main(void)
         SDL_RenderPresent(renderer);
 
         frame_num++;
-        SDL_SetWindowTitle(window,
-            (std::string("VICON cam_sim — frame ") + std::to_string(frame_num)).c_str());
+
+        // ─── Calcular FPS (ventana deslizante de 30 frames) ──────────────────
+        auto now = Clock::now();
+        frame_times.push_back(now);
+        if (frame_times.size() > 30)
+            frame_times.pop_front();
+
+        if (frame_times.size() >= 2) {
+            float elapsed = std::chrono::duration<float>(
+                frame_times.back() - frame_times.front()).count();
+            fps = (frame_times.size() - 1) / elapsed;
+        }
+
+        char title[64];
+        snprintf(title, sizeof(title),
+                 "VICON cam_sim — frame %d | %.1f fps", frame_num, fps);
+        SDL_SetWindowTitle(window, title);
 
         // Buscar siguiente marcador
         int idx = find_marker(accum, accum_len);
@@ -145,7 +167,8 @@ int main(void)
             while (running) {
                 while (SDL_PollEvent(&event)) {
                     if (event.type == SDL_EVENT_QUIT) running = false;
-                    if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE) running = false;
+                    if (event.type == SDL_EVENT_KEY_DOWN &&
+                        event.key.key == SDLK_ESCAPE) running = false;
                 }
                 FT_Read(handle, raw, BUF_SIZE, &bytes_read);
                 if (bytes_read > 0) {
