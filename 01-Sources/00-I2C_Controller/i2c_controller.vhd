@@ -176,7 +176,64 @@ architecture rtl of i2c_master is
     attribute fsm_encoding : string;
     attribute fsm_encoding of s_state : signal is "auto";
 
+
+    -- signal debug_state_slv : std_logic_vector(4 downto 0);  --! ILA: estado FSM codificado
+
 begin
+
+    -- with s_state select debug_state_slv <=
+    -- "00000" when ST_IDLE,
+    -- "00001" when ST_START_0,
+    -- "00010" when ST_START_1,
+    -- "00011" when ST_START_2,
+    -- "00100" when ST_START_3,
+    -- "00101" when ST_TX_0,
+    -- "00110" when ST_TX_1,
+    -- "00111" when ST_TX_2,
+    -- "01000" when ST_TX_3,
+    -- "01001" when ST_RACK_0,
+    -- "01010" when ST_RACK_1,
+    -- "01011" when ST_RACK_2,
+    -- "01100" when ST_RACK_3,
+    -- "01101" when ST_RX_0,
+    -- "01110" when ST_RX_1,
+    -- "01111" when ST_RX_2,
+    -- "10000" when ST_RX_3,
+    -- "10001" when ST_MACK_0,
+    -- "10010" when ST_MACK_1,
+    -- "10011" when ST_MACK_2,
+    -- "10100" when ST_MACK_3,
+    -- "10101" when ST_DECIDE_AFTER_ADDR_WR,
+    -- "10110" when ST_DECIDE_AFTER_REG_ADDR,
+    -- "10111" when ST_LOAD_DATA_H,
+    -- "11000" when ST_DECIDE_AFTER_DATA_H,
+    -- "11001" when ST_DECIDE_AFTER_DATA_L,
+    -- "11010" when ST_LOAD_NEXT_DATA_H,
+    -- "11011" when ST_DECIDE_AFTER_ADDR_RD,
+    -- "11100" when ST_DECIDE_AFTER_RX_H,
+    -- "11101" when ST_DECIDE_AFTER_RX_L,
+    -- "11110" when ST_STOP_0,
+    -- "11111" when ST_STOP_1,
+    -- "11111" when ST_STOP_2,  -- se solapan pero son poco críticos
+    -- "11111" when ST_DONE,
+    -- "11111" when ST_ERROR_STOP,
+    -- "11111" when ST_ERROR,
+    -- "11111" when others;
+
+    -- u_ila_i2c : entity work.ila_1
+    -- port map (
+    --     clk       => clk_i,
+    --     probe0(0) => scl_r,
+    --     probe1(0) => sda_out_r,
+    --     probe2(0) => sda_i,
+    --     probe3    => addr_reg_r,
+    --     probe4(0) => rw_r,
+    --     probe5(0) => s_busy,
+    --     probe6(0) => s_sda_oe,
+    --     probe7(0) => s_error,
+    --     probe8(0) => s_start_rd_mode,
+    --     probe9 => debug_state_slv
+    -- );
 
     ---------------------------------------------------------------------------
     -- WR FIFO
