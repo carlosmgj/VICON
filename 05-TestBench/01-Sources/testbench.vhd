@@ -125,7 +125,7 @@ begin
             mt_clk_o      => open,
             i2c_sclk_io   => s_scl_bus,
             i2c_sdata_io  => s_sda_bus,
-            ftdi_adbus_o  => s_ftdi_adbus,
+            ftdi_adbus_io => s_ftdi_adbus,
             ftdi_acbus_io => s_ftdi_acbus
         );
 

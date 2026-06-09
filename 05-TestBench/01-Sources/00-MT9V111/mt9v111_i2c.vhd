@@ -2,7 +2,8 @@
 --! \brief Agente de simulación I2C esclavo del MT9V111.
 --!
 --! Implementa el comportamiento del bus I2C del sensor MT9V111.
---! Soporta escritura y lectura de registros de 16 bits con auto-incremento.
+--! Soporta escritura y lectura de registros de 16 bits con auto-incremento
+--! y page select mediante el registro 0x01 (0x0000=Core, 0x0001=IFP).
 --!
 --! \note Las líneas I2C son open-drain. El TOP conduce '0' o 'Z' (nunca '1').
 --!       Con el pull-up del testbench (s_scl_bus='H', s_sda_bus='H'), los
@@ -35,23 +36,27 @@ architecture sim of mt9v111_i2c is
 
     ---------------------------------------------------------------------------
     -- Bancos de registros del MT9V111
-    -- \note Page select no implementado; s_regs_ifp declarado pero no accedido
     ---------------------------------------------------------------------------
     signal s_regs_core : t_reg_map := (
-        16#FF# => x"823A",  --! Chip ID (registro 0xFF, page 0)
+        16#FF# => x"823A",  --! Chip ID (registro 0xFF, page Core)
         16#0D# => x"0008",  --! Reset register
         others => x"CACA"   --! Valor centinela para detectar accesos no inicializados
     );
 
     signal s_regs_ifp : t_reg_map := (
-        16#01# => x"0001",  --! IFP: registro 1
+        16#01# => x"0001",  --! Page Map register (IFP)
         others => x"0FE0"   --! Valor por defecto IFP
     );
 
     ---------------------------------------------------------------------------
+    -- Página activa: '0'=Core, '1'=IFP
+    ---------------------------------------------------------------------------
+    signal s_current_page : std_logic := '0';  --! Página activa tras el último Page Select
+
+    ---------------------------------------------------------------------------
     -- Señales de debug
     ---------------------------------------------------------------------------
-    signal s_reg_addr    : integer range 0 to 255 := 0;             --! Dirección del registro en curso
+    signal s_reg_addr    : integer range 0 to 255 := 0;              --! Dirección del registro en curso
     signal s_debug_state : string(1 to 24)        := (others => ' '); --! Estado textual del proceso I2C
 
 begin
@@ -62,6 +67,10 @@ begin
     --! Todas las comparaciones de nivel usan To_X01() para normalizar
     --! 'H'→'1' y 'L'→'0', ya que el bus open-drain presenta 'H'/'L'
     --! en lugar de '1'/'0' cuando está en reposo con pull-up.
+    --!
+    --! Page select: escritura en reg 0x01
+    --!   valor 0x0000 → Core (s_current_page='0')
+    --!   valor 0x0001 → IFP  (s_current_page='1')
     ---------------------------------------------------------------------------
     p_i2c_slave : process
         variable v_addr_byte  : std_logic_vector(7 downto 0);
@@ -82,7 +91,6 @@ begin
 
             -----------------------------------------------------------------------
             -- Esperar condición START: SDA baja mientras SCL está alto
-            -- Usando eventos en SDA + comprobación de SCL con To_X01
             -----------------------------------------------------------------------
             s_debug_state <= "WAIT_START              ";
             loop
@@ -93,7 +101,6 @@ begin
 
             -----------------------------------------------------------------------
             -- Leer byte de dirección + R/W (8 bits, MSB primero)
-            -- wait on scl_i + To_X01: normaliza 'H'→'1' para detectar flancos en bus open-drain
             -----------------------------------------------------------------------
             for i in 7 downto 0 loop
                 wait on scl_i; while To_X01(scl_i) /= '1' loop wait on scl_i; end loop;
@@ -173,12 +180,16 @@ begin
                                 end if;
                             end if;
                         else
-                            -- READ: enviar bit al master
+                            -- READ: enviar bit al master desde la página activa
                             if i /= 7 then
                                 wait on scl_i; while To_X01(scl_i) /= '0' loop wait on scl_i; end loop;
                             end if;
                             s_reg_addr <= v_reg_inc;
-                            sda_io <= s_regs_core(v_reg_inc)(8 + i);
+                            if s_current_page = '0' then
+                                sda_io <= s_regs_core(v_reg_inc)(8 + i);
+                            else
+                                sda_io <= s_regs_ifp(v_reg_inc)(8 + i);
+                            end if;
                             if i = 0 then
                                 wait on scl_i; while To_X01(scl_i) /= '0' loop wait on scl_i; end loop;
                             end if;
@@ -274,10 +285,15 @@ begin
                                 end if;
                             end if;
                         else
+                            -- READ: enviar bit al master desde la página activa
                             if i /= 7 then
                                 wait on scl_i; while To_X01(scl_i) /= '0' loop wait on scl_i; end loop;
                             end if;
-                            sda_io <= s_regs_core(v_reg_inc)(i);
+                            if s_current_page = '0' then
+                                sda_io <= s_regs_core(v_reg_inc)(i);
+                            else
+                                sda_io <= s_regs_ifp(v_reg_inc)(i);
+                            end if;
                             if i = 0 then
                                 wait on scl_i; while To_X01(scl_i) /= '0' loop wait on scl_i; end loop;
                             end if;
@@ -296,7 +312,25 @@ begin
                         wait on scl_i; while To_X01(scl_i) /= '0' loop wait on scl_i; end loop;
 
                         v_data_16 := v_data_h & v_data_l;
-                        s_regs_core(v_reg_inc) <= v_data_16;
+
+                        -- Page select: escritura en reg 0x01
+                        --   0x0000 → Core,  0x0001 → IFP
+                        if v_reg_inc = 1 then
+                            if v_data_16 = x"0000" then
+                                s_current_page <= '0';
+                                s_debug_state  <= "PAGE_SEL_CORE           ";
+                            elsif v_data_16 = x"0001" then
+                                s_current_page <= '1';
+                                s_debug_state  <= "PAGE_SEL_IFP            ";
+                            end if;
+                        end if;
+
+                        -- Guardar en el banco activo
+                        if s_current_page = '0' then
+                            s_regs_core(v_reg_inc) <= v_data_16;
+                        else
+                            s_regs_ifp(v_reg_inc) <= v_data_16;
+                        end if;
                     else
                         sda_io <= 'Z';
                         wait on scl_i; while To_X01(scl_i) /= '1' loop wait on scl_i; end loop;

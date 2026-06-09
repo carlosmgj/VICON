@@ -184,29 +184,29 @@ set_property IOSTANDARD LVCMOS33 [get_ports mt_clk_o]
 #UM232H-B
 
 #Bus 1 - BROWN   - D0 - PINPMOD: 1
-set_property PACKAGE_PIN A14 [get_ports {ftdi_adbus_o[0]}]
-set_property IOSTANDARD LVCMOS33 [get_ports {ftdi_adbus_o[0]}]
+set_property PACKAGE_PIN A14 [get_ports {ftdi_adbus_io[0]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {ftdi_adbus_io[0]}]
 #Bus 1 - RED     - D1 - PINPMOD: 7
-set_property PACKAGE_PIN A15 [get_ports {ftdi_adbus_o[1]}]
-set_property IOSTANDARD LVCMOS33 [get_ports {ftdi_adbus_o[1]}]
+set_property PACKAGE_PIN A15 [get_ports {ftdi_adbus_io[1]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {ftdi_adbus_io[1]}]
 #Bus 1 - ORANGE  - D2 - PINPMOD: 2
-set_property PACKAGE_PIN A16 [get_ports {ftdi_adbus_o[2]}]
-set_property IOSTANDARD LVCMOS33 [get_ports {ftdi_adbus_o[2]}]
+set_property PACKAGE_PIN A16 [get_ports {ftdi_adbus_io[2]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {ftdi_adbus_io[2]}]
 #Bus 1 - YELLOW  - D3 - PINPMOD: 8
-set_property PACKAGE_PIN A17 [get_ports {ftdi_adbus_o[3]}]
-set_property IOSTANDARD LVCMOS33 [get_ports {ftdi_adbus_o[3]}]
+set_property PACKAGE_PIN A17 [get_ports {ftdi_adbus_io[3]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {ftdi_adbus_io[3]}]
 #Bus 1 - GREEN   - D4 - PINPMOD: 3
-set_property PACKAGE_PIN B15 [get_ports {ftdi_adbus_o[4]}]
-set_property IOSTANDARD LVCMOS33 [get_ports {ftdi_adbus_o[4]}]
+set_property PACKAGE_PIN B15 [get_ports {ftdi_adbus_io[4]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {ftdi_adbus_io[4]}]
 #Bus 1 - BLUE    - D5 - PINPMOD: 9
-set_property PACKAGE_PIN C15 [get_ports {ftdi_adbus_o[5]}]
-set_property IOSTANDARD LVCMOS33 [get_ports {ftdi_adbus_o[5]}]
+set_property PACKAGE_PIN C15 [get_ports {ftdi_adbus_io[5]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {ftdi_adbus_io[5]}]
 #Bus 1 - PURPLE  - D6 - PINPMOD: 4
-set_property PACKAGE_PIN B16 [get_ports {ftdi_adbus_o[6]}]
-set_property IOSTANDARD LVCMOS33 [get_ports {ftdi_adbus_o[6]}]
+set_property PACKAGE_PIN B16 [get_ports {ftdi_adbus_io[6]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {ftdi_adbus_io[6]}]
 #Bus 1 - GREY    - D7 - PINPMOD: 10
-set_property PACKAGE_PIN C16 [get_ports {ftdi_adbus_o[7]}]
-set_property IOSTANDARD LVCMOS33 [get_ports {ftdi_adbus_o[7]}]
+set_property PACKAGE_PIN C16 [get_ports {ftdi_adbus_io[7]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {ftdi_adbus_io[7]}]
 
 #Bus 2 - RED     - C0 - PINPMOD: 1
 set_property PACKAGE_PIN K17 [get_ports {ftdi_acbus_io[0]}]
@@ -235,3 +235,13 @@ set_property IOSTANDARD LVCMOS33 [get_ports {ftdi_acbus_io[7]}]
 
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {ftdi_acbus_io_IBUF[5]}]
 create_clock -period 16.667 -name ftdi_clk [get_ports {ftdi_acbus_io[5]}]
+
+###########################################################
+# CDC False Paths — sincronizadores 2FF ftdi_clk → s_mclk
+###########################################################
+set_false_path -from [get_cells u_ftdi_ctrl/s_cmd_valid_r_reg*] \
+               -to   [get_cells s_cmd_valid_sync0_reg*]
+set_false_path -from [get_cells u_ftdi_ctrl/cmd_type_o_reg*] \
+               -to   [get_cells s_cmd_type_sync0_reg*]
+set_false_path -from [get_cells u_ftdi_ctrl/cmd_data_o_reg*] \
+               -to   [get_cells s_cmd_data_sync0_reg*]

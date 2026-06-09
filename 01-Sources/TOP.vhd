@@ -49,7 +49,7 @@ entity TOP is
         mt_clk_o       : out   std_logic;
         i2c_sclk_io    : inout std_logic;
         i2c_sdata_io   : inout std_logic;
-        ftdi_adbus_o   : out   std_logic_vector(c_FTDI_DATABUS_W-1        downto 0);
+        ftdi_adbus_io  : inout std_logic_vector(c_FTDI_DATABUS_W-1        downto 0);  --! ADBUS bidireccional: TX imagen / RX comandos
         ftdi_acbus_io  : inout std_logic_vector(c_FTDI_CONTROLBUS_W-1     downto 0)
     );
 end entity TOP;
@@ -83,10 +83,6 @@ architecture rtl of TOP is
 
     type t_reg_table is array (natural range <>) of t_reg_entry;
 
-    -- constant c_CFG_TABLE : t_reg_table := (
-        -- 0 => ('0', x"00", x"0000")
-    -- );
-
     constant c_CFG_TABLE : t_reg_table := (
         -- Core page (page 0)
         ('0', x"05", std_logic_vector(to_unsigned(132,   16))),  --! R5  HBLANK
@@ -102,8 +98,7 @@ architecture rtl of TOP is
         ('1', x"5A", std_logic_vector(to_unsigned(605,   16))),  --! R90
         ('1', x"5C", std_logic_vector(to_unsigned(8222,  16))),  --! R92
         ('1', x"5D", std_logic_vector(to_unsigned(10021, 16))),  --! R93
-        ('1', x"64", std_logic_vector(to_unsigned(4477,  16))),   --! R100
-        ('1', x"37", x"0080")  --! R55 [9:5]=4 → frame rate mínimo 30fps
+        ('1', x"64", std_logic_vector(to_unsigned(4477,  16)))   --! R100
     );
 
     constant c_CFG_TABLE_LEN : integer := c_CFG_TABLE'length;  --! 13 entradas
@@ -145,9 +140,35 @@ architecture rtl of TOP is
     ---------------------------------------------------------------------------
     signal s_ftdi_clk       : std_logic;
     signal s_ftdi_txe_n     : std_logic;
+    signal s_ftdi_rxf_n     : std_logic;                    --! RXF# — dato disponible del PC
     signal s_ftdi_wr_n      : std_logic;
-    signal s_ftdi_adbus     : std_logic_vector(7 downto 0);
+    signal s_ftdi_rd_n      : std_logic;                    --! RD#  — strobe de lectura
+    signal s_ftdi_oe_n      : std_logic;                    --! OE#  — habilita salida FTDI en ADBUS
+    signal s_ftdi_adbus_out : std_logic_vector(7 downto 0); --! ADBUS hacia el FTDI (TX imagen)
+    signal s_ftdi_adbus_in  : std_logic_vector(7 downto 0); --! ADBUS desde el FTDI (RX comandos)
+    signal s_ftdi_adbus_oe  : std_logic;                    --! '1'=FPGA conduce ADBUS, '0'=tristate
     signal s_ftdi_tx_active : std_logic;
+
+    -- Comandos decodificados — dominio ftdi_clk
+    signal s_cmd_valid_ftdi : std_logic;
+    signal s_cmd_type_ftdi  : std_logic_vector(7 downto 0);
+    signal s_cmd_data_ftdi  : std_logic_vector(15 downto 0);
+    signal s_cmd_page_ftdi  : std_logic;
+    signal s_cmd_addr_ftdi  : std_logic_vector(7 downto 0);
+
+    ---------------------------------------------------------------------------
+    -- CDC: ftdi_clk → s_mclk (sincronizadores 2FF para cmd_valid y payload)
+    ---------------------------------------------------------------------------
+    signal s_cmd_valid_sync0 : std_logic := '0';
+    signal s_cmd_valid_sync1 : std_logic := '0';
+    signal s_cmd_type_sync0  : std_logic_vector(7 downto 0)  := (others => '0');
+    signal s_cmd_type_sync1  : std_logic_vector(7 downto 0)  := (others => '0');
+    signal s_cmd_data_sync0  : std_logic_vector(15 downto 0) := (others => '0');
+    signal s_cmd_data_sync1  : std_logic_vector(15 downto 0) := (others => '0');
+
+    attribute ASYNC_REG : string;
+    attribute ASYNC_REG of s_cmd_valid_sync0 : signal is "TRUE";
+    attribute ASYNC_REG of s_cmd_valid_sync1 : signal is "TRUE";
 
     ---------------------------------------------------------------------------
     -- FIFO de captura (pixclk → ftdi_clk)
@@ -196,6 +217,7 @@ architecture rtl of TOP is
     signal s_fill_cnt   : integer range 0 to g_MT9V111_I2C_FIFO_DEPTH    := 0;
     signal cam_reset_r  : std_logic                                      := '0';
     signal s_chip_id    : std_logic_vector(15 downto 0)                  := (others => '0');
+    signal s_led15_r    : std_logic                                      := '0';  --! Registro del LED 15 controlado por comando
 
     --! Índice en c_CFG_TABLE del registro que se está configurando
     signal s_cfg_idx    : integer range 0 to c_CFG_TABLE_LEN - 1        := 0;
@@ -238,21 +260,51 @@ begin
     s_cap_en <= '1' when s_state = ST_FINISH else '0';
 
     ---------------------------------------------------------------------------
+    -- FTDI — ADBUS tristate: FPGA conduce cuando adbus_oe='1', tristate cuando '0'
+    ---------------------------------------------------------------------------
+    ftdi_adbus_io   <= s_ftdi_adbus_out when s_ftdi_adbus_oe = '1' else (others => 'Z');
+    s_ftdi_adbus_in <= ftdi_adbus_io;
+
+    ---------------------------------------------------------------------------
     -- FTDI — CLKOUT via BUFG
     ---------------------------------------------------------------------------
     ftdi_clk_buf : BUFG
         port map (I => ftdi_acbus_io(c_FTDI_ACBUS_CLKOUT), O => s_ftdi_clk);
 
-    ftdi_acbus_io(c_FTDI_ACBUS_RXF_N)  <= 'Z';
-    ftdi_acbus_io(c_FTDI_ACBUS_TXE_N)  <= 'Z';
-    ftdi_acbus_io(c_FTDI_ACBUS_RD_N)   <= '1';
-    ftdi_acbus_io(c_FTDI_ACBUS_WR_N)   <= s_ftdi_wr_n;
-    ftdi_acbus_io(c_FTDI_ACBUS_SIWU_N) <= '1';
-    ftdi_acbus_io(c_FTDI_ACBUS_OE_N)   <= '1';
-    ftdi_acbus_io(c_FTDI_ACBUS_PWRSAV) <= '1';
-
+    -- Entradas de control del FTDI
+    s_ftdi_rxf_n <= ftdi_acbus_io(c_FTDI_ACBUS_RXF_N);
     s_ftdi_txe_n <= ftdi_acbus_io(c_FTDI_ACBUS_TXE_N);
-    ftdi_adbus_o <= s_ftdi_adbus;
+
+    -- Salidas de control del FTDI
+    ftdi_acbus_io(c_FTDI_ACBUS_RXF_N)  <= 'Z';           --! Entrada — no conducir
+    ftdi_acbus_io(c_FTDI_ACBUS_TXE_N)  <= 'Z';           --! Entrada — no conducir
+    ftdi_acbus_io(c_FTDI_ACBUS_RD_N)   <= s_ftdi_rd_n;   --! Strobe lectura (controlado por ftdi_controller)
+    ftdi_acbus_io(c_FTDI_ACBUS_WR_N)   <= s_ftdi_wr_n;   --! Strobe escritura (controlado por ftdi_controller)
+    ftdi_acbus_io(c_FTDI_ACBUS_SIWU_N) <= '1';           --! Send immediate — inactivo
+    ftdi_acbus_io(c_FTDI_ACBUS_OE_N)   <= s_ftdi_oe_n;   --! Output enable FTDI (controlado por ftdi_controller)
+    ftdi_acbus_io(c_FTDI_ACBUS_PWRSAV) <= '1';           --! Power save — inactivo
+
+    ---------------------------------------------------------------------------
+    -- CDC: ftdi_clk → s_mclk
+    -- Solo sincronizamos cmd_valid, cmd_type y cmd_data (suficiente para el toggle)
+    ---------------------------------------------------------------------------
+    p_cdc : process(s_mclk)
+    begin
+        if rising_edge(s_mclk) then
+            if s_rst_final = '1' then
+                s_cmd_valid_sync0 <= '0'; s_cmd_valid_sync1 <= '0';
+                s_cmd_type_sync0  <= (others => '0'); s_cmd_type_sync1  <= (others => '0');
+                s_cmd_data_sync0  <= (others => '0'); s_cmd_data_sync1  <= (others => '0');
+            else
+                s_cmd_valid_sync0 <= s_cmd_valid_ftdi;
+                s_cmd_valid_sync1 <= s_cmd_valid_sync0;
+                s_cmd_type_sync0  <= s_cmd_type_ftdi;
+                s_cmd_type_sync1  <= s_cmd_type_sync0;
+                s_cmd_data_sync0  <= s_cmd_data_ftdi;
+                s_cmd_data_sync1  <= s_cmd_data_sync0;
+            end if;
+        end if;
+    end process p_cdc;
 
     basys3_cat_o <= (others => '0');
     basys3_dp_o  <= '0';
@@ -311,6 +363,7 @@ begin
                 s_cur_page      <= '1';  -- tras Chip ID quedamos en IFP
                 basys3_led_o(0) <= '0';
                 basys3_led_o(1) <= '0';
+                s_led15_r       <= '0';  --! LED 15 apagado en reset
             else
                 s_i2c_start   <= '0';
                 s_i2c_wr_push <= '0';
@@ -493,6 +546,11 @@ begin
                     when ST_FINISH =>
                         basys3_led_o(0) <= '1';
                         basys3_led_o(1) <= '0';
+                        -- Procesar comandos recibidos del PC
+                        -- CMD 0x01 (LED): toggle LED 15
+                        if s_cmd_valid_sync1 = '1' and s_cmd_type_sync1 = x"01" then
+                            s_led15_r <= not s_led15_r;
+                        end if;
                         s_state <= ST_FINISH;
 
                     when ST_ERROR =>
@@ -508,7 +566,8 @@ begin
         end if;
     end process p_fsm;
 
-    basys3_led_o(15 downto 2) <= basys3_sw_i(15 downto 2);
+    basys3_led_o(14 downto 2) <= basys3_sw_i(14 downto 2);  --! LEDs 14:2 reflejan switches
+    basys3_led_o(15)          <= s_led15_r;                  --! LED 15 controlado por comando toggle desde PC
 
     ---------------------------------------------------------------------------
     -- IPs Xilinx
@@ -540,8 +599,8 @@ begin
             port map (
                 clk       => s_ftdi_clk,
                 probe0    => s_cap_fifo_dout,
-                probe1(0) => s_cap_fifo_full,
-                probe2(0) => s_cap_fifo_rd_en,
+                probe1(0) => s_ftdi_rxf_n,   --! RXF# — '0' cuando hay dato del PC disponible
+                probe2(0) => s_ftdi_rd_n,    --! RD#  — '0' cuando la FPGA está leyendo
                 probe3(0) => s_ftdi_wr_n,
                 probe4(0) => s_ftdi_txe_n
             );
@@ -555,6 +614,22 @@ begin
                 probe4(0) => s_cap_fifo_wr
             );
     end generate;
+
+
+    u_ila_ftdi : entity work.ila_2
+    port map (
+        clk       => s_ftdi_clk,
+        probe0(0) => s_ftdi_rxf_n,
+        probe1(0) => s_ftdi_txe_n,
+        probe2(0) => s_ftdi_rd_n,
+        probe3    => s_ftdi_adbus_in,   -- 8 bits
+        probe4(0) => s_ftdi_wr_n,
+        probe5(0) => s_ftdi_oe_n,
+        probe6(0) => s_ftdi_adbus_oe,
+        probe7(0) => s_ftdi_tx_active,
+        probe8(0) => s_cmd_valid_ftdi,
+        probe9    => s_cmd_type_ftdi    -- 8 bits
+    );
 
     ---------------------------------------------------------------------------
     -- Módulos propios
@@ -587,10 +662,20 @@ begin
             fifo_data_i  => s_cap_fifo_dout,
             fifo_empty_i => s_cap_fifo_empty,
             fifo_rd_en_o => s_cap_fifo_rd_en,
+            rxf_n_i      => s_ftdi_rxf_n,       --! RXF# — dato disponible del PC
             txe_n_i      => s_ftdi_txe_n,
+            rd_n_o       => s_ftdi_rd_n,         --! RD#  — strobe lectura
             wr_n_o       => s_ftdi_wr_n,
-            adbus_o      => s_ftdi_adbus,
-            tx_active_o  => s_ftdi_tx_active
+            oe_n_o       => s_ftdi_oe_n,         --! OE#  — habilita FTDI en ADBUS
+            adbus_i      => s_ftdi_adbus_in,     --! ADBUS entrada (comandos del PC)
+            adbus_o      => s_ftdi_adbus_out,    --! ADBUS salida  (imagen hacia PC)
+            adbus_oe     => s_ftdi_adbus_oe,     --! Dirección del tristate
+            tx_active_o  => s_ftdi_tx_active,
+            cmd_valid_o  => s_cmd_valid_ftdi,    --! Pulso 1 ciclo: comando decodificado listo
+            cmd_type_o   => s_cmd_type_ftdi,     --! Tipo de comando
+            cmd_data_o   => s_cmd_data_ftdi,     --! Payload del comando
+            cmd_page_o   => s_cmd_page_ftdi,     --! Page (solo CMD I2C)
+            cmd_addr_o   => s_cmd_addr_ftdi      --! Addr  (solo CMD I2C)
         );
 
     u_i2c : entity work.i2c_master
