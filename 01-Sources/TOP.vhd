@@ -10,6 +10,7 @@ use UNISIM.VComponents.all;
 
 library work;
 use work.config_pkg.all;
+use work.top_pkg.all;
 
 --! \brief Entidad de Sistema de Visión.
 --! \fsm_show_actions
@@ -186,31 +187,6 @@ architecture rtl of TOP is
     ---------------------------------------------------------------------------
     -- FSM principal
     ---------------------------------------------------------------------------
-    type main_state_t is (
-        ST_CAM_RESET_ASSERT,    --! RESET# bajo durante RESET_HOLD_CYCLES
-        ST_CAM_RESET_WAIT,      --! Espera RESET_WAIT_CYCLES para estabilización del PLL
-        -- Lectura Chip ID
-        ST_PAGE_SEL_FILL,       --! Encola page=0x0004 → IFP (para leer Chip ID en 0xFF)
-        ST_PAGE_SEL_START,      --! Lanza escritura I2C reg 0x01
-        ST_PAGE_SEL_WAIT,
-        ST_CHIPID_RD_START,     --! Lanza lectura I2C reg 0xFF
-        ST_CHIPID_RD_WAIT,
-        ST_CHIPID_RD_DRAIN,     --! Extrae y verifica Chip ID
-        -- Configuración 30 fps mediante subFSM write+verify
-        ST_CFG_PAGE_FILL,       --! Encola el valor de page del registro actual
-        ST_CFG_PAGE_START,      --! Lanza escritura Page Map (reg 0x01)
-        ST_CFG_PAGE_WAIT,
-        ST_CFG_WR_FILL,         --! Encola el dato del registro actual
-        ST_CFG_WR_START,        --! Lanza escritura del registro
-        ST_CFG_WR_WAIT,
-        ST_CFG_RD_START,        --! Lanza lectura del mismo registro (verify)
-        ST_CFG_RD_WAIT,
-        ST_CFG_RD_DRAIN,        --! Compara readback con valor esperado
-        ST_CFG_NEXT,            --! Avanza al siguiente registro o va a ST_FINISH
-        -- Estados finales
-        ST_FINISH,              --! Configuración OK: captura activa
-        ST_ERROR                --! Error I2C, Chip ID o verify fallido
-    );
 
     signal s_state      : main_state_t                                   := ST_CAM_RESET_ASSERT;
     signal s_init_cnt   : integer range 0 to c_MT9V111_RESET_WAIT_CYCLES := 0;

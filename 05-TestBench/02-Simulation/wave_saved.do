@@ -7,7 +7,50 @@ radix define color_fsm {
     "8 ST_FINISH -color Green" "9 ST_ERROR -color Red",
     -default default
 }
+radix define ftdi_state_radix {
+    "#" "TX",
+    "/" "Reposo",
+    "(Tonos" "Grises/Apagados)",
+    "0" "ST_IDLE" -color "Gray",
+    "1" "ST_HOLD" -color "Cyan",
+    "#" "RX",
+    "Bus" "-",
+    "4" "fases",
+    "(Tonos" "Azules/Cian)",
+    "2" "ST_RX_OE" -color "Cyan",
+    "3" "ST_RX_OE2" -color "LightBlue",
+    "4" "ST_RX_RD" -color "Blue",
+    "5" "ST_RX_RELEASE" -color "DeepSkyBlue",
+    "#" "RX",
+    "Decodificación" "de",
+    "Bytes" "(Tonos",
+    "Naranjas/Amarillos)" "6",
+    "ST_CMD_BYTE1" "-color",
+    "Orange" "7",
+    "ST_CMD_BYTE2" "-color",
+    "LightOrange" "8",
+    "ST_CMD_BYTE3" "-color",
+    "Yellow" "9",
+    "ST_CMD_BYTE4" "-color",
+    "Gold" "10",
+    "ST_CMD_BYTE5" "-color",
+    "LightYellow" "11",
+    "ST_CMD_BYTE6" "-color",
+    "Khaki" "#",
+    "RX" "Ejecución",
+    "(Verde" "-",
+    "¡Acción!)" "12",
+    "ST_CMD_EXEC" "-color",
+    "Green" "",
+    -default default
+}
 quietly WaveActivateNextPane {} 0
+add wave -noupdate /testbench/s_basys3_led
+add wave -noupdate /testbench/s_basys3_cat
+add wave -noupdate /testbench/s_basys3_an
+add wave -noupdate /testbench/s_basys3_dp
+add wave -noupdate /testbench/s_basys3_sw
+add wave -noupdate /testbench/s_basys3_btn
 add wave -noupdate -divider FSM
 add wave -noupdate -radix color_fsm -radixenum symbolic -radixshowbase 1 /testbench/u_dut/s_state
 add wave -noupdate -radix unsigned /testbench/u_dut/s_init_cnt
@@ -45,22 +88,22 @@ add wave -noupdate -group image_agent /testbench/u_dut/g_cam_sim_on/u_cam_sim/s_
 add wave -noupdate -group image_agent /testbench/u_dut/g_cam_sim_on/u_cam_sim/clkin_i
 add wave -noupdate -group image_agent /testbench/u_dut/s_mclk_div_cnt
 add wave -noupdate -divider -height 25 <NULL>
-add wave -noupdate -group {frame capture} -label PIXLCLK /testbench/u_dut/u_frame_capture/pixclk_i
-add wave -noupdate -group {frame capture} -label RESET /testbench/u_dut/u_frame_capture/reset_i
-add wave -noupdate -group {frame capture} -label {FRAME VALID} /testbench/u_dut/u_frame_capture/fvalid_i
-add wave -noupdate -group {frame capture} -label {LINE VALID} /testbench/u_dut/u_frame_capture/lvalid_i
-add wave -noupdate -group {frame capture} -label DATA /testbench/u_dut/u_frame_capture/data_i
-add wave -noupdate -group {frame capture} -label {CAPTURE EN} /testbench/u_dut/u_frame_capture/capture_en_i
-add wave -noupdate -group {frame capture} -label {FIFO DATA} /testbench/u_dut/u_frame_capture/fifo_data_o
-add wave -noupdate -group {frame capture} -label {FIFO WR} /testbench/u_dut/u_frame_capture/fifo_wr_o
-add wave -noupdate -group {frame capture} -label {FIFO FULL} /testbench/u_dut/u_frame_capture/fifo_full_i
-add wave -noupdate -group {frame capture} -label {FRAME DONE} /testbench/u_dut/u_frame_capture/frame_done_o
-add wave -noupdate -group {frame capture} -label OVERFLOW /testbench/u_dut/u_frame_capture/overflow_o
-add wave -noupdate -group {frame capture} -label {FSM STATE} /testbench/u_dut/u_frame_capture/s_state
-add wave -noupdate -group {frame capture} -label {BYTE CNT} /testbench/u_dut/u_frame_capture/s_byte_cnt
-add wave -noupdate -group {frame capture} -label {COL CNT} /testbench/u_dut/u_frame_capture/s_col_cnt
-add wave -noupdate -group {frame capture} -label {ROW CNT} /testbench/u_dut/u_frame_capture/s_row_cnt
-add wave -noupdate -group {frame capture} -label OVERFLOW /testbench/u_dut/u_frame_capture/overflow_r
+add wave -noupdate -expand -group {frame capture} -label PIXLCLK /testbench/u_dut/u_frame_capture/pixclk_i
+add wave -noupdate -expand -group {frame capture} -label RESET /testbench/u_dut/u_frame_capture/reset_i
+add wave -noupdate -expand -group {frame capture} -label {FRAME VALID} /testbench/u_dut/u_frame_capture/fvalid_i
+add wave -noupdate -expand -group {frame capture} -label {LINE VALID} /testbench/u_dut/u_frame_capture/lvalid_i
+add wave -noupdate -expand -group {frame capture} -label DATA /testbench/u_dut/u_frame_capture/data_i
+add wave -noupdate -expand -group {frame capture} -label {CAPTURE EN} /testbench/u_dut/u_frame_capture/capture_en_i
+add wave -noupdate -expand -group {frame capture} -label {FIFO DATA} /testbench/u_dut/u_frame_capture/fifo_data_o
+add wave -noupdate -expand -group {frame capture} -label {FIFO WR} /testbench/u_dut/u_frame_capture/fifo_wr_o
+add wave -noupdate -expand -group {frame capture} -label {FIFO FULL} /testbench/u_dut/u_frame_capture/fifo_full_i
+add wave -noupdate -expand -group {frame capture} -label {FRAME DONE} /testbench/u_dut/u_frame_capture/frame_done_o
+add wave -noupdate -expand -group {frame capture} -label OVERFLOW /testbench/u_dut/u_frame_capture/overflow_o
+add wave -noupdate -expand -group {frame capture} -label {FSM STATE} /testbench/u_dut/u_frame_capture/s_state
+add wave -noupdate -expand -group {frame capture} -label {BYTE CNT} /testbench/u_dut/u_frame_capture/s_byte_cnt
+add wave -noupdate -expand -group {frame capture} -label {COL CNT} /testbench/u_dut/u_frame_capture/s_col_cnt
+add wave -noupdate -expand -group {frame capture} -label {ROW CNT} /testbench/u_dut/u_frame_capture/s_row_cnt
+add wave -noupdate -expand -group {frame capture} -label OVERFLOW /testbench/u_dut/u_frame_capture/overflow_r
 add wave -noupdate -divider -height 25 <NULL>
 add wave -noupdate -group ASYNC_FIFO /testbench/u_dut/u_async_fifo/rst
 add wave -noupdate -group ASYNC_FIFO /testbench/u_dut/u_async_fifo/wr_clk
@@ -74,31 +117,31 @@ add wave -noupdate -group ASYNC_FIFO /testbench/u_dut/u_async_fifo/empty
 add wave -noupdate -group ASYNC_FIFO /testbench/u_dut/u_async_fifo/wr_rst_busy
 add wave -noupdate -group ASYNC_FIFO /testbench/u_dut/u_async_fifo/rd_rst_busy
 add wave -noupdate -divider -height 25 <NULL>
-add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/clk_i
-add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/reset_i
-add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/fifo_data_i
-add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/fifo_empty_i
-add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/fifo_rd_en_o
-add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/txe_n_i
-add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/wr_n_o
-add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/adbus_o
-add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/tx_active_o
-add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/s_state
-add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/data_r
-add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/fifo_rd_r
+add wave -noupdate -expand -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/clk_i
+add wave -noupdate -expand -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/reset_i
+add wave -noupdate -expand -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/fifo_data_i
+add wave -noupdate -expand -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/fifo_empty_i
+add wave -noupdate -expand -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/fifo_rd_en_o
+add wave -noupdate -expand -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/txe_n_i
+add wave -noupdate -expand -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/wr_n_o
+add wave -noupdate -expand -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/adbus_o
+add wave -noupdate -expand -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/tx_active_o
+add wave -noupdate -expand -group FTDI_CTRL -radix ftdi_state_radix -radixenum numeric /testbench/u_dut/u_ftdi_ctrl/s_state
+add wave -noupdate -expand -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/data_r
+add wave -noupdate -expand -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/fifo_rd_r
 add wave -noupdate -divider -height 25 <NULL>
-add wave -noupdate -group ftdi_agent -label PWRSAV /testbench/u_ftdi_agent/acbus_io(7)
-add wave -noupdate -group ftdi_agent -label OE_N /testbench/u_ftdi_agent/acbus_io(6)
-add wave -noupdate -group ftdi_agent -label CLKOUT /testbench/u_ftdi_agent/acbus_io(5)
-add wave -noupdate -group ftdi_agent -label SIWU_N /testbench/u_ftdi_agent/acbus_io(4)
-add wave -noupdate -group ftdi_agent -label WR_N /testbench/u_ftdi_agent/acbus_io(3)
-add wave -noupdate -group ftdi_agent -label RD_N /testbench/u_ftdi_agent/acbus_io(2)
-add wave -noupdate -group ftdi_agent -label TXE_N /testbench/u_ftdi_agent/acbus_io(1)
-add wave -noupdate -group ftdi_agent -label RXF_N /testbench/u_ftdi_agent/acbus_io(0)
-add wave -noupdate -group ftdi_agent -radix unsigned /testbench/u_ftdi_agent/adbus_i
-add wave -noupdate -group ftdi_agent -divider -height 25 <NULL>
+add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/acbus_io
+add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/adbus_io
+add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/s_clkout
+add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/s_txe_n
+add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/s_rxf_n
+add wave -noupdate -expand -group ftdi_agent -format Analog-Step -height 74 -max 480.0 -radix unsigned /testbench/u_ftdi_agent/s_rx_fifo_level
+add wave -noupdate -expand -group ftdi_agent -format Analog-Step -height 74 -max 70.0 /testbench/u_ftdi_agent/s_tx_fifo_level
+add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/s_rx_fifo_drain
+add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/s_tx_fifo_dout
+add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/s_tx_fifo_rd
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {999590907 ps} 0} {{Cursor 2} {2342194721 ps} 0}
+WaveRestoreCursors {{Cursor 1} {375109995 ps} 0} {{Cursor 2} {2342194721 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 553
 configure wave -valuecolwidth 100
@@ -114,4 +157,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits us
 update
-WaveRestoreZoom {972465 ns} {1072465 ns}
+WaveRestoreZoom {0 ps} {622518838 ps}
