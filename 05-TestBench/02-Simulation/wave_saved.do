@@ -60,6 +60,9 @@ add wave -noupdate /testbench/s_clk_base
 add wave -noupdate /testbench/s_rst_raw
 add wave -noupdate /testbench/u_dut/s_mclk
 add wave -noupdate /testbench/u_dut/s_locked
+add wave -noupdate /testbench/u_dut/u_MMCM/clk_out1
+add wave -noupdate /testbench/u_dut/u_MMCM/clk_out3
+add wave -noupdate /testbench/u_dut/u_MMCM/clk_out2
 add wave -noupdate -divider I2C
 add wave -noupdate -height 30 /testbench/s_scl_bus
 add wave -noupdate -radix unsigned /testbench/u_dut/s_i2c_busy
@@ -147,7 +150,7 @@ add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/adbus_io
 add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/s_clkout
 add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/s_txe_n
 add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/s_rxf_n
-add wave -noupdate -expand -group ftdi_agent -height 15 -max 479.99999999999994 -radix unsigned /testbench/u_ftdi_agent/s_rx_fifo_level
+add wave -noupdate -expand -group ftdi_agent -radix unsigned /testbench/u_ftdi_agent/s_rx_fifo_level
 add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/s_tx_fifo_dout
 TreeUpdate [SetDefaultTree]
 WaveRestoreCursors {{Cursor 1} {369310000 ps} 0} {{Cursor 2} {2342194721 ps} 0}
@@ -166,4 +169,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits us
 update
-WaveRestoreZoom {0 ps} {833479069 ps}
+WaveRestoreZoom {0 ps} {100 us}

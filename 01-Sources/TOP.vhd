@@ -112,8 +112,10 @@ architecture rtl of TOP is
     signal s_locked       : std_logic;
     signal s_rst_final    : std_logic;
     signal s_mclk_div_cnt : integer range 0 to g_MT9V111_MCLK_DIV - 1 := 0;
-    signal cam_mclk_r     : std_logic := '0';  --! clk_out2 del MMCM = 27 MHz
-
+    signal cam_mclk_r     : std_logic := '0';  
+    signal cam_mclk_r1    : std_logic := '0';  --! clk_out2 del MMCM = 12 MHz
+    signal cam_mclk_r2    : std_logic := '0';  --! clk_out3 del MMCM = 27 MHz
+    signal s_cam_clk_sel  : std_logic := '1';
     ---------------------------------------------------------------------------
     -- Interfaz FSM <-> controlador I2C
     ---------------------------------------------------------------------------
@@ -584,9 +586,18 @@ begin
             clk_in1  => basys3_clk_i,
             reset    => basys3_btn_i(c_BASYS3_BTN_CENTER),
             clk_out1 => s_mclk,
-            clk_out2 => cam_mclk_r,
+            clk_out2 => cam_mclk_r1,
+            clk_out3 => cam_mclk_r2,
             locked   => s_locked
         );
+    
+    u_cam_clk_mux : BUFGMUX_CTRL
+    port map (
+        I0 => cam_mclk_r1,
+        I1 => cam_mclk_r2,
+        S  => s_cam_clk_sel,  -- '0'=12MHz, '1'=30MHz
+        O  => cam_mclk_r
+    );
 
     u_async_fifo : entity work.fifo_generator_0
         port map (
