@@ -71,6 +71,7 @@ vcom -2008 -work work "${SRC}/top_pkg.vhd"
 vcom -2008 -work work "${SRC}/00-I2C_Controller/i2c_controller.vhd"
 vcom -2008 -work work "${SRC}/01-Frame_Capture/frame_capture.vhd"
 vcom -2008 -work work "${SRC}/02-FTDI_Controller/ftdi_controller.vhd"
+vcom -2008 -work work "${SRC}/03-CMD_Processor/cmd_processor.vhd"
 vcom -2008 -work work "${TB_SRC}/00-MT9V111/mt9v111_image.vhd"
 vcom -2008 -work work "${TB_SRC}/stubs/ila_stub.vhd"
 vcom -2008 -work work "${SRC}/TOP.vhd"
@@ -146,7 +147,7 @@ when {/testbench/u_dut/u_frame_capture/frame_done_o'event and /testbench/u_dut/u
     global frame_cnt
     incr frame_cnt
     echo "Frame $frame_cnt completado en $now"
-    if {$frame_cnt >= 2} {
+    if {$frame_cnt >= 9} {
         run 100 us
         stop
     }

@@ -81,7 +81,9 @@ architecture sim of ftdi_agent is
     constant c_CMD_TABLE : t_cmd_table := (
         -- Comando 0: Toggle LED 15
         0 => (len => 4, bytes => (x"CC", x"01", x"00", x"00", x"00", x"00")),
-        1 => (len => 4, bytes => (x"CC", x"01", x"00", x"00", x"00", x"00"))
+        1 => (len => 4, bytes => (x"CC", x"01", x"00", x"00", x"00", x"00")),
+        2 => (len => 4, bytes => (x"CC", x"01", x"00", x"00", x"00", x"00")),
+        3 => (len => 6, bytes => (x"CC", x"03", x"01", x"37", x"00", x"80"))
 
         -- Descomenta y ajusta para mas comandos:
         --,1 => (len => 6, bytes => (x"CC", x"03", x"00", x"05", x"00", x"84"))
