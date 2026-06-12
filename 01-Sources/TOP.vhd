@@ -162,6 +162,7 @@ architecture rtl of TOP is
     ---------------------------------------------------------------------------
     signal s_cmd_valid_sync0 : std_logic := '0';
     signal s_cmd_valid_sync1 : std_logic := '0';
+    signal s_cmd_valid_sync2 : std_logic := '0';
     signal s_cmd_type_sync0  : std_logic_vector(7 downto 0)  := (others => '0');
     signal s_cmd_type_sync1  : std_logic_vector(7 downto 0)  := (others => '0');
     signal s_cmd_data_sync0  : std_logic_vector(15 downto 0) := (others => '0');
@@ -268,12 +269,13 @@ begin
     begin
         if rising_edge(s_mclk) then
             if s_rst_final = '1' then
-                s_cmd_valid_sync0 <= '0'; s_cmd_valid_sync1 <= '0';
+                s_cmd_valid_sync0 <= '0'; s_cmd_valid_sync1 <= '0'; s_cmd_valid_sync2 <= '0';
                 s_cmd_type_sync0  <= (others => '0'); s_cmd_type_sync1  <= (others => '0');
                 s_cmd_data_sync0  <= (others => '0'); s_cmd_data_sync1  <= (others => '0');
             else
                 s_cmd_valid_sync0 <= s_cmd_valid_ftdi;
                 s_cmd_valid_sync1 <= s_cmd_valid_sync0;
+                s_cmd_valid_sync2 <= s_cmd_valid_sync1;
                 s_cmd_type_sync0  <= s_cmd_type_ftdi;
                 s_cmd_type_sync1  <= s_cmd_type_sync0;
                 s_cmd_data_sync0  <= s_cmd_data_ftdi;
@@ -523,10 +525,12 @@ begin
                         basys3_led_o(0) <= '1';
                         basys3_led_o(1) <= '0';
                         -- Procesar comandos recibidos del PC
-                        -- CMD 0x01 (LED): toggle LED 15
-                        if s_cmd_valid_sync1 = '1' and s_cmd_type_sync1 = x"01" then
-                            s_led15_r <= not s_led15_r;
-                        end if;
+                        -- CMD 0x01 (LED): toggle LED 15 -- detectar flanco de subida
+                        -- de s_cmd_valid_sync1 para evitar doble toggle
+                        if s_cmd_valid_sync1 = '1' and s_cmd_valid_sync2 = '0'
+                           and s_cmd_type_sync1 = x"01" then
+                                s_led15_r <= not s_led15_r;
+                            end if;
                         s_state <= ST_FINISH;
 
                     when ST_ERROR =>

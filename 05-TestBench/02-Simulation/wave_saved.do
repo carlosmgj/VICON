@@ -46,6 +46,7 @@ radix define ftdi_state_radix {
 }
 quietly WaveActivateNextPane {} 0
 add wave -noupdate /testbench/s_basys3_led
+add wave -noupdate /testbench/u_dut/s_led15_r
 add wave -noupdate /testbench/s_basys3_cat
 add wave -noupdate /testbench/s_basys3_an
 add wave -noupdate /testbench/s_basys3_dp
@@ -117,31 +118,39 @@ add wave -noupdate -group ASYNC_FIFO /testbench/u_dut/u_async_fifo/empty
 add wave -noupdate -group ASYNC_FIFO /testbench/u_dut/u_async_fifo/wr_rst_busy
 add wave -noupdate -group ASYNC_FIFO /testbench/u_dut/u_async_fifo/rd_rst_busy
 add wave -noupdate -divider -height 25 <NULL>
-add wave -noupdate -expand -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/clk_i
-add wave -noupdate -expand -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/reset_i
-add wave -noupdate -expand -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/fifo_data_i
-add wave -noupdate -expand -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/fifo_empty_i
-add wave -noupdate -expand -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/fifo_rd_en_o
-add wave -noupdate -expand -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/txe_n_i
-add wave -noupdate -expand -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/wr_n_o
-add wave -noupdate -expand -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/adbus_o
-add wave -noupdate -expand -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/tx_active_o
-add wave -noupdate -expand -group FTDI_CTRL -radix ftdi_state_radix -radixenum numeric /testbench/u_dut/u_ftdi_ctrl/s_state
-add wave -noupdate -expand -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/data_r
-add wave -noupdate -expand -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/fifo_rd_r
+add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/clk_i
+add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/reset_i
+add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/fifo_data_i
+add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/fifo_empty_i
+add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/fifo_rd_en_o
+add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/txe_n_i
+add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/wr_n_o
+add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/adbus_o
+add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/tx_active_o
+add wave -noupdate -group FTDI_CTRL -radix symbolic -radixenum symbolic /testbench/u_dut/u_ftdi_ctrl/s_state
+add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/data_r
+add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/fifo_rd_r
+add wave -noupdate /testbench/u_dut/u_ftdi_ctrl/rxf_n_i
+add wave -noupdate /testbench/u_dut/u_ftdi_ctrl/s_oe_n
+add wave -noupdate /testbench/u_dut/u_ftdi_ctrl/adbus_oe
+add wave -noupdate /testbench/u_dut/u_ftdi_ctrl/s_rd_n
+add wave -noupdate /testbench/u_dut/u_ftdi_ctrl/s_rx_byte
+add wave -noupdate /testbench/u_dut/u_ftdi_ctrl/adbus_i
+add wave -noupdate /testbench/u_dut/u_ftdi_ctrl/s_cmd_valid_r
+add wave -noupdate -divider -height 25 <NULL>
+add wave -noupdate -expand -group CMD /testbench/u_dut/s_cmd_valid_sync1
+add wave -noupdate -expand -group CMD /testbench/u_dut/s_cmd_type_sync1
+add wave -noupdate -expand -group CMD /testbench/u_dut/s_cmd_data_sync1
 add wave -noupdate -divider -height 25 <NULL>
 add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/acbus_io
 add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/adbus_io
 add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/s_clkout
 add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/s_txe_n
 add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/s_rxf_n
-add wave -noupdate -expand -group ftdi_agent -format Analog-Step -height 74 -max 480.0 -radix unsigned /testbench/u_ftdi_agent/s_rx_fifo_level
-add wave -noupdate -expand -group ftdi_agent -format Analog-Step -height 74 -max 70.0 /testbench/u_ftdi_agent/s_tx_fifo_level
-add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/s_rx_fifo_drain
+add wave -noupdate -expand -group ftdi_agent -height 15 -max 479.99999999999994 -radix unsigned /testbench/u_ftdi_agent/s_rx_fifo_level
 add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/s_tx_fifo_dout
-add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/s_tx_fifo_rd
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {375109995 ps} 0} {{Cursor 2} {2342194721 ps} 0}
+WaveRestoreCursors {{Cursor 1} {369310000 ps} 0} {{Cursor 2} {2342194721 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 553
 configure wave -valuecolwidth 100
@@ -157,4 +166,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits us
 update
-WaveRestoreZoom {0 ps} {622518838 ps}
+WaveRestoreZoom {0 ps} {833479069 ps}

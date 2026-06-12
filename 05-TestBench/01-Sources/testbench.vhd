@@ -244,32 +244,32 @@ begin
         -- Lee 8 bits MSB primero + el pulso de ACK/NACK.
         -- Si detecta RSTART o STOP durante la lectura, sale inmediatamente.
         procedure read_byte_ack (
-            variable data   : out std_logic_vector(7 downto 0);
-            variable ack    : out std_logic;
-            variable rstart : out boolean;
-            variable stop   : out boolean
-        ) is
-            variable v_bit  : std_logic;
-            variable v_rs   : boolean;
-            variable v_st   : boolean;
-        begin
-            data   := (others => '0');
-            ack    := '1';
-            rstart := false;
-            stop   := false;
+                variable data   : out std_logic_vector(7 downto 0);
+                variable ack    : out std_logic;
+                variable rstart : out boolean;
+                variable stop   : out boolean
+            ) is
+                variable v_bit  : std_logic;
+                variable v_rs   : boolean;
+                variable v_st   : boolean;
+            begin
+                data   := (others => '0');
+                ack    := '1';
+                rstart := false;
+                stop   := false;
 
-            for i in 7 downto 0 loop
-                read_bit(v_bit, v_rs, v_st);
-                if v_rs then rstart := true; return; end if;
-                if v_st then stop   := true; return; end if;
-                data(i) := v_bit;
-            end loop;
+                for i in 7 downto 0 loop
+                    read_bit(v_bit, v_rs, v_st);
+                    if v_rs then rstart := true; return; end if;
+                    if v_st then stop   := true; return; end if;
+                    data(i) := v_bit;
+                end loop;
 
-            -- Leer ACK/NACK
-            read_bit(ack, v_rs, v_st);
-            if v_rs then rstart := true; end if;
-            if v_st then stop   := true; end if;
-        end procedure;
+                -- Leer ACK/NACK
+                read_bit(ack, v_rs, v_st);
+                if v_rs then rstart := true; end if;
+                if v_st then stop   := true; end if;
+            end procedure;
 
         variable v_byte   : std_logic_vector(7 downto 0);
         variable v_ack    : std_logic;
