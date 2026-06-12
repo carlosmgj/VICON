@@ -100,6 +100,7 @@ architecture rtl of TOP is
         ('1', x"5C", std_logic_vector(to_unsigned(8222,  16))),  --! R92
         ('1', x"5D", std_logic_vector(to_unsigned(10021, 16))),  --! R93
         ('1', x"64", std_logic_vector(to_unsigned(4477,  16)))   --! R100
+        --('1', x"37", x"0080")  --! R55 [9:5]=4 → frame rate mínimo 30fps
     );
 
     constant c_CFG_TABLE_LEN : integer := c_CFG_TABLE'length;  --! 13 entradas

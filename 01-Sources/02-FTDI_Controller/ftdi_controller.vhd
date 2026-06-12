@@ -151,7 +151,7 @@ begin
     ---------------------------------------------------------------------------
     p_fsm : process(clk_i)
     begin
-        if rising_edge(clk_i) then
+        if falling_edge(clk_i) then
             if reset_i = '1' then
                 s_state      <= ST_IDLE;
                 s_wr_n <= '1';

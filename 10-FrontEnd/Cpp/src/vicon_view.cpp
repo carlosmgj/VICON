@@ -14,6 +14,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
+#include <iostream>
 #include "ftd2xx.h"
 #include <SDL3/SDL.h>
 #include <string>
@@ -94,11 +95,11 @@ static void parse_and_send(const std::string& line)
 
     if (cmd == "help" || cmd == "?") {
         printf("Comandos:\n");
-        printf("  led <hex>               → ej: led 0xFFFF\n");
-        printf("  bcd <4digitos>          → ej: bcd 1234\n");
-        printf("  i2c <page> <addr> <data>→ ej: i2c 1 0x37 0x0080\n");
-        printf("  cap on|off              → habilitar/deshabilitar captura\n");
-        printf("  quit                    → salir\n");
+        printf("  led <hex>               -> ej: led 0xFFFF\n");
+        printf("  bcd <4digitos>          -> ej: bcd 1234\n");
+        printf("  i2c <page> <addr> <data>-> ej: i2c 1 0x37 0x0080\n");
+        printf("  cap on|off              -> habilitar/deshabilitar captura\n");
+        printf("  quit                    -> salir\n");
         return;
     }
 
@@ -122,13 +123,13 @@ static void parse_and_send(const std::string& line)
         std::string val;
         iss >> val;
         if (val.size() != 4) {
-            printf("[ERR] bcd necesita exactamente 4 dígitos (0-9)\n");
+            printf("[ERR] bcd necesita exactamente 4 digitos (0-9)\n");
             return;
         }
         uint16_t data = 0;
         for (int i = 0; i < 4; i++) {
             if (val[i] < '0' || val[i] > '9') {
-                printf("[ERR] Dígito inválido '%c'\n", val[i]);
+                printf("[ERR] Digito invalido '%c'\n", val[i]);
                 return;
             }
             data = (data << 4) | (val[i] - '0');
@@ -141,15 +142,15 @@ static void parse_and_send(const std::string& line)
     }
 
     if (cmd == "i2c") {
-        std::string s_page, s_addr, s_data;
-        iss >> s_page >> s_addr >> s_data;
-        if (s_page.empty() || s_addr.empty() || s_data.empty()) {
+        std::string str_page, str_addr, str_data;
+        iss >> str_page >> str_addr >> str_data;
+        if (str_page.empty() || str_addr.empty() || str_data.empty()) {
             printf("[ERR] Uso: i2c <page> <addr> <data>\n");
             return;
         }
-        uint8_t  page = (uint8_t)strtoul(s_page.c_str(), nullptr, 0);
-        uint8_t  addr = (uint8_t)strtoul(s_addr.c_str(), nullptr, 0);
-        uint16_t data = (uint16_t)strtoul(s_data.c_str(), nullptr, 0);
+        uint8_t  page = (uint8_t)strtoul(str_page.c_str(), nullptr, 0);
+        uint8_t  addr = (uint8_t)strtoul(str_addr.c_str(), nullptr, 0);
+        uint16_t data = (uint16_t)strtoul(str_data.c_str(), nullptr, 0);
         if (send_cmd_i2c(page, addr, data))
             printf("[OK] I2C page=%d addr=0x%02X data=0x%04X\n", page, addr, data);
         else
@@ -242,9 +243,14 @@ int main(void)
     printf("Sincronizando...\n");
     int synced = 0;
     while (synced < 2 && g_running) {
-        {
+        {   
+            FT_STATUS st = FT_Read(g_handle, raw, BUF_SIZE, &bytes_read);
+            printf("FT_Read st=%d bytes=%lu\n", st, bytes_read);
             std::lock_guard<std::mutex> lk(g_ftdi_mtx);
             FT_Read(g_handle, raw, BUF_SIZE, &bytes_read);
+            printf("FT_Read st=%d bytes=%lu | ", st, bytes_read);
+            for (int i = 0; i < 16 && i < (int)bytes_read; i++) printf("%02X ", raw[i]);
+            printf("\n");
         }
         memcpy(accum + accum_len, raw, bytes_read);
         accum_len += bytes_read;
@@ -317,7 +323,7 @@ int main(void)
 
         char title[64];
         snprintf(title, sizeof(title),
-                 "VICON — frame %d | %.1f fps", frame_num, fps);
+                 "VICON - frame %d | %.1f fps", frame_num, fps);
         SDL_SetWindowTitle(window, title);
 
         // Buscar siguiente marcador
