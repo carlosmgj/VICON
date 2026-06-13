@@ -10,39 +10,39 @@
 --!   0xAA → 0xAB
 --!   0x55 → 0x56
 
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.NUMERIC_STD.ALL;
 
-library work;
-use work.config_pkg.all;
+LIBRARY work;
+USE work.config_pkg.ALL;
 
 --! \brief Frame Capture: interfaz con la imagen y con la fifo de salida
 --! \fsm_show_actions
-entity frame_capture is
-    generic (
-        g_H_RES      : integer := c_MT9V111_H_RES;     --! Resolución horizontal en píxeles del sensor MT9V111
-        g_V_RES      : integer := c_MT9V111_V_RES;     --! Resolución vertical en líneas del sensor MT9V111
-        g_CAM_FPS    : integer := c_MT9V111_FPS;       --! FPS que genera la cámara (según MCLK y registros del sensor)
-        g_TARGET_FPS : integer := c_MT9V111_TARGET_FPS --! FPS que se desean capturar (≤ g_CAM_FPS)
+ENTITY frame_capture IS
+    GENERIC (
+        g_H_RES      : INTEGER := c_MT9V111_H_RES;     --! Resolución horizontal en píxeles del sensor MT9V111
+        g_V_RES      : INTEGER := c_MT9V111_V_RES;     --! Resolución vertical en líneas del sensor MT9V111
+        g_CAM_FPS    : INTEGER := c_MT9V111_FPS;       --! FPS que genera la cámara (según MCLK y registros del sensor)
+        g_TARGET_FPS : INTEGER := c_MT9V111_TARGET_FPS --! FPS que se desean capturar (≤ g_CAM_FPS)
     );
-    port (
-        pixclk_i     : in  std_logic;                      --! Reloj de píxel del sensor MT9V111
-        reset_i      : in  std_logic;                      --! Reset síncrono activo alto (dominio pixclk)
-        fvalid_i     : in  std_logic;                      --! Frame valid: '1' durante la transmisión de un frame
-        lvalid_i     : in  std_logic;                      --! Line valid: '1' durante la transmisión de una línea
-        data_i       : in  std_logic_vector(7 downto 0);   --! Byte de datos del sensor (YCbCr intercalado)
-        capture_en_i : in  std_logic;                      --! Habilitación de captura; debe estar activo antes del inicio del frame
-        fifo_data_o  : out std_logic_vector(7 downto 0);   --! Byte a escribir en la FIFO asíncrona
-        fifo_wr_o    : out std_logic;                      --! Habilitación de escritura en la FIFO (1 ciclo por byte)
-        fifo_full_i  : in  std_logic;                      --! FIFO llena; si sube durante captura se activa overflow_o
-        frame_done_o : out std_logic;                      --! Pulso de 1 ciclo al completar el frame
-        overflow_o   : out std_logic                       --! '1' si la FIFO se llenó durante la captura; frame corrupto
+    PORT (
+        pixclk_i     : IN  STD_LOGIC;                      --! Reloj de píxel del sensor MT9V111
+        reset_i      : IN  STD_LOGIC;                      --! Reset síncrono activo alto (dominio pixclk)
+        fvalid_i     : IN  STD_LOGIC;                      --! Frame valid: '1' durante la transmisión de un frame
+        lvalid_i     : IN  STD_LOGIC;                      --! Line valid: '1' durante la transmisión de una línea
+        data_i       : IN  STD_LOGIC_VECTOR(7 DOWNTO 0);   --! Byte de datos del sensor (YCbCr intercalado)
+        capture_en_i : IN  STD_LOGIC;                      --! Habilitación de captura; debe estar activo antes del inicio del frame
+        fifo_data_o  : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);   --! Byte a escribir en la FIFO asíncrona
+        fifo_wr_o    : OUT STD_LOGIC;                      --! Habilitación de escritura en la FIFO (1 ciclo por byte)
+        fifo_full_i  : IN  STD_LOGIC;                      --! FIFO llena; si sube durante captura se activa overflow_o
+        frame_done_o : OUT STD_LOGIC;                      --! Pulso de 1 ciclo al completar el frame
+        overflow_o   : OUT STD_LOGIC                       --! '1' si la FIFO se llenó durante la captura; frame corrupto
     );
-end entity frame_capture;
+END ENTITY frame_capture;
 
-architecture rtl of frame_capture is
-    type t_cap_state is (
+ARCHITECTURE rtl of frame_capture IS
+    TYPE t_cap_state IS (
         ST_IDLE,              --! Esperando capture_en_i activo
         ST_WAIT_FRAME_START,  --! Esperando flanco de subida de fvalid_i
         ST_MARKER_0,          --! Escribiendo marcador byte 0: c_FRAME_MARKER_0
@@ -56,188 +56,188 @@ architecture rtl of frame_capture is
         ST_SKIP_FRAME         --! Frame ignorado por decimación; esperar fin de fvalid
     );
 
-    signal s_state : t_cap_state := ST_IDLE;  --! Estado actual de la FSM de captura
+    SIGNAL s_state : t_cap_state := ST_IDLE;  --! Estado actual de la FSM de captura
 
-    signal s_byte_cnt : unsigned(10 downto 0)        := (others => '0'); --! Contador de bytes recibidos en la línea (par=Y, impar=croma)
-    signal s_col_cnt  : integer range 0 to g_H_RES-1 := 0;               --! Columna actual dentro de la línea
-    signal s_row_cnt  : integer range 0 to g_V_RES-1 := 0;               --! Fila actual dentro del frame
-    signal s_lvalid_r : std_logic                    := '0';             --! Registro de lvalid del ciclo anterior para detectar flanco de subida
+    SIGNAL s_byte_cnt : unsigned(10 DOWNTO 0)        := (OTHERS => '0'); --! Contador de bytes recibidos en la línea (par=Y, impar=croma)
+    SIGNAL s_col_cnt  : INTEGER RANGE 0 TO g_H_RES-1 := 0;               --! Columna actual dentro de la línea
+    SIGNAL s_row_cnt  : INTEGER RANGE 0 TO g_V_RES-1 := 0;               --! Fila actual dentro del frame
+    SIGNAL s_lvalid_r : STD_LOGIC                    := '0';             --! Registro de lvalid del ciclo anterior para detectar flanco de subida
 
-    constant c_FRAME_DIV : integer := g_CAM_FPS / g_TARGET_FPS;  --! Capturar 1 de cada c_FRAME_DIV frames
+    CONSTANT c_FRAME_DIV : INTEGER := g_CAM_FPS / g_TARGET_FPS;  --! Capturar 1 de cada c_FRAME_DIV frames
 
-    signal s_frame_div_cnt : integer range 0 to c_FRAME_DIV - 1 := 0;   --! Contador de decimación de frames
-    signal overflow_r      : std_logic                          := '0'; --! Registro de overflow; se mantiene hasta el siguiente ST_IDLE
-    signal frame_done_r    : std_logic                          := '0'; --! Registro de frame_done; pulso de 1 ciclo
+    SIGNAL s_frame_div_cnt : INTEGER RANGE 0 TO c_FRAME_DIV - 1 := 0;   --! Contador de decimación de frames
+    SIGNAL overflow_r      : STD_LOGIC                          := '0'; --! Registro de overflow; se mantiene hasta el siguiente ST_IDLE
+    SIGNAL frame_done_r    : STD_LOGIC                          := '0'; --! Registro de frame_done; pulso de 1 ciclo
 
-    signal rst_pixclk_2ff: std_logic_vector(1 downto 0) :=(others => '1');
-    signal rst_pixclk    : std_logic;
+    SIGNAL rst_pixclk_2ff: STD_LOGIC_VECTOR(1 DOWNTO 0) :=(OTHERS => '1');
+    SIGNAL rst_pixclk    : STD_LOGIC;
 
-begin
+BEGIN
 
     frame_done_o <= frame_done_r;
     overflow_o   <= overflow_r;
 
-    p_reset_sync: process(pixclk_i, reset_i)
-    begin
-        if reset_i = '1' then
-            rst_pixclk_2ff <= (others => '1');
-        elsif rising_edge(pixclk_i) then
+    p_reset_sync: PROCESS(pixclk_i, reset_i)
+    BEGIN
+        IF reset_i = '1' THEN
+            rst_pixclk_2ff <= (OTHERS => '1');
+        ELSIF rising_edge(pixclk_i) THEN
             rst_pixclk_2ff(0) <= '0';
             rst_pixclk_2ff(1) <= rst_pixclk_2ff(0);
-        end if;
-    end process p_reset_sync;
+        END IF;
+    END PROCESS p_reset_sync;
     rst_pixclk <= rst_pixclk_2ff(1);
 
 
     --! \brief FSM de captura de frame — dominio pixclk_i
-    p_capture : process(pixclk_i)
-    begin
+    p_capture : PROCESS(pixclk_i)
+    BEGIN
         -- /todo Reset aquí no se cumple porque pixclk_i es una señal post-reset 
-        if rising_edge(pixclk_i) then
-            if rst_pixclk = '1' then
+        IF rising_edge(pixclk_i) THEN
+            IF rst_pixclk = '1' THEN
                 s_state         <= ST_IDLE;
-                s_byte_cnt      <= (others => '0');
+                s_byte_cnt      <= (OTHERS => '0');
                 s_col_cnt       <= 0;
                 s_row_cnt       <= 0;
                 s_frame_div_cnt <= 0;
-                fifo_data_o     <= (others => '0');
+                fifo_data_o     <= (OTHERS => '0');
                 fifo_wr_o       <= '0';
                 overflow_r      <= '0';
                 frame_done_r    <= '0';
                 s_lvalid_r      <= '0';
-            else
+            ELSE
                 fifo_wr_o    <= '0';
                 frame_done_r <= '0';
                 s_lvalid_r   <= lvalid_i;  --! Registrar lvalid para detectar flanco de subida
 
-                case s_state is
+                CASE s_state IS
 
-                    when ST_IDLE =>
-                        s_byte_cnt <= (others => '0');
+                    WHEN ST_IDLE =>
+                        s_byte_cnt <= (OTHERS => '0');
                         s_col_cnt  <= 0;
                         s_row_cnt  <= 0;
                         overflow_r <= '0';
-                        if capture_en_i = '1' then
-                            if fvalid_i = '0' then
+                        IF capture_en_i = '1' THEN
+                            IF fvalid_i = '0' THEN
                                 s_state <= ST_WAIT_FRAME_START;
-                            end if;
-                        end if;
+                            END IF;
+                        END IF;
 
-                    when ST_WAIT_FRAME_START =>
-                        if capture_en_i = '0' then
+                    WHEN ST_WAIT_FRAME_START =>
+                        IF capture_en_i = '0' THEN
                             s_state <= ST_IDLE;
-                        elsif fvalid_i = '1' then
-                            if s_frame_div_cnt = 0 then
+                        ELSIF fvalid_i = '1' THEN
+                            IF s_frame_div_cnt = 0 THEN
                                 s_frame_div_cnt <= c_FRAME_DIV - 1;  --! Capturar este frame
                                 s_state         <= ST_MARKER_0;
-                            else
+                            ELSE
                                 s_frame_div_cnt <= s_frame_div_cnt - 1;  --! Saltar este frame
                                 s_state         <= ST_SKIP_FRAME;
-                            end if;
-                        end if;
+                            END IF;
+                        END IF;
 
                     -----------------------------------------------------------
                     -- Marcador de inicio de frame
                     -----------------------------------------------------------
-                    when ST_MARKER_0 =>
-                        if fifo_full_i = '0' then
+                    WHEN ST_MARKER_0 =>
+                        IF fifo_full_i = '0' THEN
                             fifo_data_o <= c_FRAME_MARKER_0;
                             fifo_wr_o   <= '1';
                             s_state     <= ST_MARKER_1;
-                        end if;
+                        END IF;
 
-                    when ST_MARKER_1 =>
-                        if fifo_full_i = '0' then
+                    WHEN ST_MARKER_1 =>
+                        IF fifo_full_i = '0' THEN
                             fifo_data_o <= c_FRAME_MARKER_1;
                             fifo_wr_o   <= '1';
                             s_state     <= ST_MARKER_2;
-                        end if;
+                        END IF;
 
-                    when ST_MARKER_2 =>
-                        if fifo_full_i = '0' then
+                    WHEN ST_MARKER_2 =>
+                        IF fifo_full_i = '0' THEN
                             fifo_data_o <= c_FRAME_MARKER_2;
                             fifo_wr_o   <= '1';
                             s_state     <= ST_MARKER_3;
-                        end if;
+                        END IF;
 
-                    when ST_MARKER_3 =>
-                        if fifo_full_i = '0' then
+                    WHEN ST_MARKER_3 =>
+                        IF fifo_full_i = '0' THEN
                             fifo_data_o <= c_FRAME_MARKER_3;
                             fifo_wr_o   <= '1';
                             s_state     <= ST_WAIT_LINE;
-                        end if;
+                        END IF;
 
-                    when ST_WAIT_LINE =>
-                        s_byte_cnt <= (others => '0');
+                    WHEN ST_WAIT_LINE =>
+                        s_byte_cnt <= (OTHERS => '0');
                         s_col_cnt  <= 0;
-                        if fvalid_i = '0' then
+                        IF fvalid_i = '0' THEN
                             s_state <= ST_FRAME_END;
-                        elsif lvalid_i = '1' and s_lvalid_r = '0' then  --! Flanco de subida
+                        ELSIF lvalid_i = '1' and s_lvalid_r = '0' THEN  --! Flanco de subida
                             s_state <= ST_CAPTURE;
-                        end if;
+                        END IF;
 
                     -----------------------------------------------------------
                     -- Captura con sustituciones para evitar falsos positivos
                     -- s_byte_cnt(0)='1' → byte Y (capturar)
                     -- s_byte_cnt(0)='0' → byte croma (descartar)
                     -----------------------------------------------------------
-                    when ST_CAPTURE =>
-                        if lvalid_i = '0' then
+                    WHEN ST_CAPTURE =>
+                        IF lvalid_i = '0' THEN
                             s_state <= ST_LINE_END;
-                        else
+                        ELSE
                             s_byte_cnt <= s_byte_cnt + 1;
 
-                            if s_byte_cnt(0) = '0' then
-                                if fifo_full_i = '0' then
-                                    if    data_i = c_PROTO_RESERVED_FF then fifo_data_o <= c_PROTO_REPLACE_FF;
-                                    elsif data_i = c_PROTO_RESERVED_AA then fifo_data_o <= c_PROTO_REPLACE_AA;
-                                    elsif data_i = c_PROTO_RESERVED_55 then fifo_data_o <= c_PROTO_REPLACE_55;
-                                    else                                     fifo_data_o <= data_i;
-                                    end if;
+                            IF s_byte_cnt(0) = '0' THEN
+                                IF fifo_full_i = '0' THEN
+                                    IF    data_i = c_PROTO_RESERVED_FF THEN fifo_data_o <= c_PROTO_REPLACE_FF;
+                                    ELSIF data_i = c_PROTO_RESERVED_AA THEN fifo_data_o <= c_PROTO_REPLACE_AA;
+                                    ELSIF data_i = c_PROTO_RESERVED_55 THEN fifo_data_o <= c_PROTO_REPLACE_55;
+                                    ELSE                                     fifo_data_o <= data_i;
+                                    END IF;
                                     fifo_wr_o <= '1';
-                                else
+                                ELSE
                                     overflow_r <= '1';
-                                end if;
+                                END IF;
 
-                                if s_col_cnt = g_H_RES - 1 then
+                                IF s_col_cnt = g_H_RES - 1 THEN
                                     s_col_cnt <= 0;
-                                else
+                                ELSE
                                     s_col_cnt <= s_col_cnt + 1;
-                                end if;
-                            end if;
-                        end if;
+                                END IF;
+                            END IF;
+                        END IF;
 
-                    when ST_LINE_END =>
-                        s_byte_cnt <= (others => '0');
+                    WHEN ST_LINE_END =>
+                        s_byte_cnt <= (OTHERS => '0');
                         s_col_cnt  <= 0;
                         s_lvalid_r <= '0';  --! Forzar reset para garantizar detección de flanco en siguiente línea
-                        if s_row_cnt = g_V_RES - 1 then
+                        IF s_row_cnt = g_V_RES - 1 THEN
                             s_row_cnt <= 0;
-                        else
+                        ELSE
                             s_row_cnt <= s_row_cnt + 1;
-                        end if;
-                        if fvalid_i = '0' then
+                        END IF;
+                        IF fvalid_i = '0' THEN
                             s_state <= ST_FRAME_END;
-                        else
+                        ELSE
                             s_state <= ST_WAIT_LINE;
-                        end if;
+                        END IF;
 
-                    when ST_FRAME_END =>
+                    WHEN ST_FRAME_END =>
                         frame_done_r <= '1';
                         s_state      <= ST_IDLE;
 
                     --! Esperar fin de frame ignorado (fvalid baja)
-                    when ST_SKIP_FRAME =>
-                        if fvalid_i = '0' then
+                    WHEN ST_SKIP_FRAME =>
+                        IF fvalid_i = '0' THEN
                             s_state <= ST_WAIT_FRAME_START;
-                        end if;
+                        END IF;
 
-                    when others =>
+                    WHEN OTHERS =>
                         s_state <= ST_IDLE;
 
-                end case;
-            end if;
-        end if;
-    end process p_capture;
+                END CASE;
+            END IF;
+        END IF;
+    END PROCESS p_capture;
 
-end architecture rtl;
+END ARCHITECTURE rtl;
