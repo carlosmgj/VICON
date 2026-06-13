@@ -1,4 +1,4 @@
---! \file sim_utils_pkg.vhd
+--! \FILE sim_utils_pkg.vhd
 --! \brief Paquete de utilidades para simulación VHDL.
 --!
 --! Proporciona:
@@ -7,32 +7,33 @@
 --!   - Funciones de conversión de tipos para logging
 --!   - Procedimiento de log a fichero con timestamp
 --!   - Procedimiento de verificación con scoreboard y reporte a fichero
+--! \author Carlos Manuel Gomez Jimenez
 
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
-use std.textio.all;
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.NUMERIC_STD.ALL;
+USE std.textio.ALL;
 
-package sim_utils_pkg is
+PACKAGE sim_utils_pkg IS
 
     ---------------------------------------------------------------------------
     -- Constantes globales de simulación
     ---------------------------------------------------------------------------
-    constant c_CLK_PERIOD       : time    := 10 ns;  --! Periodo del reloj de sistema en simulación (100 MHz)
-    constant c_TXE_READY_CYCLES : integer := 200;
-    constant c_TXE_BUSY_CYCLES  : integer := 800;
+    CONSTANT c_CLK_PERIOD       : TIME    := 10 ns;  --! Periodo del reloj de sistema en simulación (100 MHz)
+    CONSTANT c_TXE_READY_CYCLES : INTEGER := 200;
+    CONSTANT c_TXE_BUSY_CYCLES  : INTEGER := 800;
 
     ---------------------------------------------------------------------------
     -- Funciones de conversión para logging
     ---------------------------------------------------------------------------
 
-    --! \brief Convierte un std_logic_vector a string de '0'/'1'/'X'
-    function vec_to_str(vec : std_logic_vector) return string;
+    --! \brief Convierte un STD_LOGIC_VECTOR a STRING de '0'/'1'/'X'
+    FUNCTION vec_to_str(vec : STD_LOGIC_VECTOR) RETURN STRING;
 
-    --! \brief Convierte un integer a string hexadecimal de anchura fija
+    --! \brief Convierte un INTEGER a STRING hexadecimal de anchura fija
     --! \param val   Valor a convertir
-    --! \param width Número de dígitos hex del resultado (default: 2)
-    function int_to_hex_str(val : integer; width : integer := 2) return string;
+    --! \param WIDTH Número de dígitos hex del resultado (default: 2)
+    FUNCTION int_to_hex_str(val : INTEGER; WIDTH : INTEGER := 2) RETURN STRING;
 
     ---------------------------------------------------------------------------
     -- Procedimientos de simulación
@@ -41,99 +42,99 @@ package sim_utils_pkg is
     --! \brief Escribe una línea en un fichero de log con timestamp y prefijo INFO/ERROR
     --! \param file_name Nombre del fichero de salida
     --! \param message   Mensaje a escribir
-    --! \param is_error  Si true, prefijo "ERROR:"; si false, prefijo "INFO :"
-    procedure log_to_file(
-        constant file_name : in string;
-        constant message   : in string;
-        constant is_error  : in boolean := false
+    --! \param is_error  Si true, prefijo "ERROR:"; si FALSE, prefijo "INFO :"
+    PROCEDURE log_to_file(
+        CONSTANT file_name : IN STRING;
+        CONSTANT message   : IN STRING;
+        CONSTANT is_error  : IN boolean := FALSE
     );
 
     --! \brief Compara actual con expected; registra resultado en scoreboard y fichero
     --! \param actual    Valor obtenido de la simulación
     --! \param expected  Valor esperado
     --! \param msg_tag   Etiqueta identificativa del punto de verificación
-    --! \param error_cnt Contador de errores acumulados (inout)
+    --! \param error_cnt Contador de errores acumulados (INOUT)
     --! \param file_name Fichero de reporte (default: "reporte_final_1.txt")
-    procedure check_value(
-        constant actual    : in    std_logic_vector;
-        constant expected  : in    std_logic_vector;
-        constant msg_tag   : in    string;
-        variable error_cnt : inout integer;
-        constant file_name : in    string := "reporte_final_1.txt"
+    PROCEDURE check_value(
+        CONSTANT actual    : IN    STD_LOGIC_VECTOR;
+        CONSTANT expected  : IN    STD_LOGIC_VECTOR;
+        CONSTANT msg_tag   : IN    STRING;
+        VARIABLE error_cnt : INOUT INTEGER;
+        CONSTANT file_name : IN    STRING := "reporte_final_1.txt"
     );
 
-end package sim_utils_pkg;
+END PACKAGE sim_utils_pkg;
 
-package body sim_utils_pkg is
-
-    ---------------------------------------------------------------------------
-    function vec_to_str(vec : std_logic_vector) return string is
-        variable v_res : string(1 to vec'length);
-    begin
-        for i in 0 to vec'length - 1 loop
-            if    vec(vec'high - i) = '1' then v_res(i + 1) := '1';
-            elsif vec(vec'high - i) = '0' then v_res(i + 1) := '0';
-            else                               v_res(i + 1) := 'X';
-            end if;
-        end loop;
-        return v_res;
-    end function vec_to_str;
+PACKAGE body sim_utils_pkg IS
 
     ---------------------------------------------------------------------------
-    function int_to_hex_str(val : integer; width : integer := 2) return string is
-        constant c_HEX_CHARS : string(1 to 16)                  := "0123456789ABCDEF";
-        variable v_temp      : std_logic_vector(width * 4 - 1 downto 0);
-        variable v_res       : string(1 to width);
-        variable v_nibble    : integer;
-    begin
-        v_temp := std_logic_vector(to_unsigned(val, width * 4));
-        for i in 0 to width - 1 loop
-            v_nibble         := to_integer(unsigned(v_temp((i + 1) * 4 - 1 downto i * 4)));
-            v_res(width - i) := c_HEX_CHARS(v_nibble + 1);
-        end loop;
-        return v_res;
-    end function int_to_hex_str;
+    FUNCTION vec_to_str(vec : STD_LOGIC_VECTOR) RETURN STRING IS
+        VARIABLE v_res : STRING(1 TO vec'length);
+    BEGIN
+        FOR i IN 0 TO vec'length - 1 LOOP
+            IF    vec(vec'high - i) = '1' THEN v_res(i + 1) := '1';
+            ELSIF vec(vec'high - i) = '0' THEN v_res(i + 1) := '0';
+            ELSE                               v_res(i + 1) := 'X';
+            END IF;
+        END LOOP;
+        RETURN v_res;
+    END FUNCTION vec_to_str;
 
     ---------------------------------------------------------------------------
-    procedure log_to_file(
-        constant file_name : in string;
-        constant message   : in string;
-        constant is_error  : in boolean := false
-    ) is
-        file     f_out   : text;
-        variable v_line  : line;
-        variable v_prefix : string(1 to 7);
-    begin
-        if is_error then
+    FUNCTION int_to_hex_str(val : INTEGER; WIDTH : INTEGER := 2) RETURN STRING IS
+        CONSTANT c_HEX_CHARS : STRING(1 TO 16)                  := "0123456789ABCDEF";
+        VARIABLE v_temp      : STD_LOGIC_VECTOR(WIDTH * 4 - 1 DOWNTO 0);
+        VARIABLE v_res       : STRING(1 TO WIDTH);
+        VARIABLE v_nibble    : INTEGER;
+    BEGIN
+        v_temp := STD_LOGIC_VECTOR(to_unsigned(val, WIDTH * 4));
+        FOR i IN 0 TO WIDTH - 1 LOOP
+            v_nibble         := to_integer(unsigned(v_temp((i + 1) * 4 - 1 DOWNTO i * 4)));
+            v_res(WIDTH - i) := c_HEX_CHARS(v_nibble + 1);
+        END LOOP;
+        RETURN v_res;
+    END FUNCTION int_to_hex_str;
+
+    ---------------------------------------------------------------------------
+    PROCEDURE log_to_file(
+        CONSTANT file_name : IN STRING;
+        CONSTANT message   : IN STRING;
+        CONSTANT is_error  : IN boolean := FALSE
+    ) IS
+        FILE     f_out   : text;
+        VARIABLE v_line  : line;
+        VARIABLE v_prefix : STRING(1 TO 7);
+    BEGIN
+        IF is_error THEN
             v_prefix := "ERROR :";
-        else
+        ELSE
             v_prefix := "INFO  :";
-        end if;
+        END IF;
         file_open(f_out, file_name, append_mode);
-        write(v_line, "[" & time'image(now) & "] - " & v_prefix & " " & message);
+        write(v_line, "[" & TIME'image(now) & "] - " & v_prefix & " " & message);
         writeline(f_out, v_line);
         file_close(f_out);
-    end procedure log_to_file;
+    END PROCEDURE log_to_file;
 
     ---------------------------------------------------------------------------
-    procedure check_value(
-        constant actual    : in    std_logic_vector;
-        constant expected  : in    std_logic_vector;
-        constant msg_tag   : in    string;
-        variable error_cnt : inout integer;
-        constant file_name : in    string := "reporte_final_1.txt"
-    ) is
-    begin
-        if actual = expected then
-            log_to_file(file_name, msg_tag & " OK    | Val: " & vec_to_str(actual), false);
-            report "[SIM] " & msg_tag & " OK";
-        else
+    PROCEDURE check_value(
+        CONSTANT actual    : IN    STD_LOGIC_VECTOR;
+        CONSTANT expected  : IN    STD_LOGIC_VECTOR;
+        CONSTANT msg_tag   : IN    STRING;
+        VARIABLE error_cnt : INOUT INTEGER;
+        CONSTANT file_name : IN    STRING := "reporte_final_1.txt"
+    ) IS
+    BEGIN
+        IF actual = expected THEN
+            log_to_file(file_name, msg_tag & " OK    | Val: " & vec_to_str(actual), FALSE);
+            REPORT "[SIM] " & msg_tag & " OK";
+        ELSE
             error_cnt := error_cnt + 1;
             log_to_file(file_name,
                 msg_tag & " FALLO | Exp: " & vec_to_str(expected) &
                           "  Act: " & vec_to_str(actual), true);
-            report "[SIM] " & msg_tag & " FAIL" severity error;
-        end if;
-    end procedure check_value;
+            REPORT "[SIM] " & msg_tag & " FAIL" SEVERITY error;
+        END IF;
+    END PROCEDURE check_value;
 
-end package body sim_utils_pkg;
+END PACKAGE body sim_utils_pkg;

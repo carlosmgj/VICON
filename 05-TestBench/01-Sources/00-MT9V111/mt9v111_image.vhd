@@ -16,52 +16,53 @@
 --!   - Cada línea es un gradiente horizontal idéntico
 --!   - Si frame_capture funciona correctamente, Python debe ver un gradiente
 --!     horizontal uniforme sin desplazamiento entre líneas
+--! \author Carlos Manuel Gomez Jimenez
 
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.NUMERIC_STD.ALL;
 
-library work;
-use work.config_pkg.all;
+LIBRARY work;
+USE work.config_pkg.ALL;
 
 --! \brief Simulador de cámara MT9V111
 --! \fsm_show_actions
-entity mt9v111_image is
-    generic (
-        g_H_RES  : integer := c_MT9V111_H_RES;  --! Resolución horizontal en píxeles
-        g_V_RES  : integer := c_MT9V111_V_RES;  --! Resolución vertical en líneas
-        g_HBLANK : integer := 100;               --! Ciclos de blanking horizontal entre líneas
-        g_VBLANK : integer := 1000              --! Ciclos de blanking vertical entre frames
+ENTITY mt9v111_image IS
+    GENERIC (
+        g_H_RES  : INTEGER := c_MT9V111_H_RES;  --! Resolución horizontal en píxeles
+        g_V_RES  : INTEGER := c_MT9V111_V_RES;  --! Resolución vertical en líneas
+        g_HBLANK : INTEGER := 100;               --! Ciclos de blanking horizontal entre líneas
+        g_VBLANK : INTEGER := 1000              --! Ciclos de blanking vertical entre frames
     );
-    port (
-        clkin_i  : in  std_logic;                     --! MCLK recibido del TOP (= mt_clk_o)
-        pixclk_o : out std_logic;                     --! Reloj de píxel generado por el sensor (dominio del sensor)
-        reset_i  : in  std_logic;                     --! Reset síncrono activo alto
-        fvalid_o : out std_logic;                     --! Frame valid: '1' durante la transmisión de un frame
-        lvalid_o : out std_logic;                     --! Line valid: '1' durante la transmisión de una línea
-        data_o   : out std_logic_vector(7 downto 0)   --! Byte de datos sintético (YCbCr 4:2:2)
+    PORT (
+        clkin_i  : IN  std_logic;                     --! MCLK recibido del TOP (= mt_clk_o)
+        pixclk_o : OUT std_logic;                     --! Reloj de píxel generado por el sensor (dominio del sensor)
+        reset_i  : IN  std_logic;                     --! Reset síncrono activo alto
+        fvalid_o : OUT std_logic;                     --! Frame valid: '1' durante la transmisión de un frame
+        lvalid_o : OUT std_logic;                     --! Line valid: '1' durante la transmisión de una línea
+        data_o   : OUT std_logic_vector(7 DOWNTO 0)   --! Byte de datos sintético (YCbCr 4:2:2)
     );
-end entity mt9v111_image;
+END ENTITY mt9v111_image;
 
-architecture rtl of mt9v111_image is
+ARCHITECTURE rtl OF mt9v111_image IS
 
     ---------------------------------------------------------------------------
     -- Constantes de timing
     ---------------------------------------------------------------------------
-    constant c_P2             : integer := 14;           --! Frame End Blanking: ciclos entre LVALID↓ y FVALID↓ (datasheet fijo)
-    constant c_BYTES_PER_LINE : integer := g_H_RES * 2;  --! Bytes activos por línea: 2 bytes/px × g_H_RES px
+    CONSTANT c_P2             : INTEGER := 14;           --! Frame END Blanking: ciclos entre LVALID↓ y FVALID↓ (datasheet fijo)
+    CONSTANT c_BYTES_PER_LINE : INTEGER := g_H_RES * 2;  --! Bytes activos por línea: 2 bytes/px × g_H_RES px
 
     ---------------------------------------------------------------------------
     -- FSM
     ---------------------------------------------------------------------------
-    type t_state is (
+    TYPE t_state IS (
         ST_VBLANK,     --! Blanking vertical: fvalid_o='0', esperando inicio de frame
         ST_HBLANK,     --! Blanking horizontal: fvalid_o='1', lvalid_o='0', esperando inicio de línea
         ST_ACTIVE,     --! Línea activa: fvalid_o='1', lvalid_o='1', generando datos YCbCr
         ST_FRAME_END   --! P2: 14 ciclos entre último LVALID↓ y FVALID↓
     );
 
-    signal s_state : t_state := ST_VBLANK;  --! Estado actual de la FSM
+    SIGNAL s_state : t_state := ST_VBLANK;  --! Estado actual de la FSM
 
     ---------------------------------------------------------------------------
     -- s_col_cnt cuenta bytes (4 bytes por píxel):
@@ -71,21 +72,21 @@ architecture rtl of mt9v111_image is
     --   s_col_cnt mod 4 = 3 → Y_{i+1}
     -- Rango: 0 .. g_H_RES*2-1 (2 bytes/px × g_H_RES px)
     ---------------------------------------------------------------------------
-    signal s_col_cnt   : unsigned(11 downto 0)           := (others => '0');  --! Contador de bytes en la línea (4 bytes por par de píxeles)
-    signal s_row_cnt   : integer range 0 to g_V_RES  - 1 := 0;                --! Contador de líneas dentro del frame
-    signal s_blank_cnt : integer := 0;  --! Contador de ciclos de blanking (usado para HBLANK y VBLANK)
+    SIGNAL s_col_cnt   : UNSIGNED(11 DOWNTO 0)           := (OTHERS => '0');  --! Contador de bytes en la línea (4 bytes por par de píxeles)
+    SIGNAL s_row_cnt   : INTEGER RANGE 0 TO g_V_RES  - 1 := 0;                --! Contador de líneas dentro del frame
+    SIGNAL s_blank_cnt : INTEGER := 0;  --! Contador de ciclos de blanking (usado para HBLANK y VBLANK)
 
-    signal fvalid_r : std_logic                    := '0';              --! Registro de frame valid
-    signal lvalid_r : std_logic                    := '0';              --! Registro de line valid
-    signal data_r   : std_logic_vector(7 downto 0) := (others => '0'); --! Registro de dato de salida
+    SIGNAL fvalid_r : std_logic                    := '0';              --! Registro de frame valid
+    SIGNAL lvalid_r : std_logic                    := '0';              --! Registro de line valid
+    SIGNAL data_r   : std_logic_vector(7 DOWNTO 0) := (OTHERS => '0'); --! Registro de dato de salida
 
     ---------------------------------------------------------------------------
     -- Número de píxel correspondiente al byte actual:
     --   píxel_num = s_col_cnt / 2  (cada par Cb/Y o Cr/Y comparte índice de píxel)
     ---------------------------------------------------------------------------
-    signal s_pix_num : unsigned(10 downto 0);  --! Índice del píxel en la línea (0..g_H_RES-1)
+    SIGNAL s_pix_num : UNSIGNED(10 DOWNTO 0);  --! Índice del píxel en la línea (0..g_H_RES-1)
 
-begin
+BEGIN
 
     pixclk_o <= clkin_i;  -- el sensor pasa MCLK como PIXCLK (mismo periodo, sin delay en sim)
 
@@ -94,46 +95,46 @@ begin
     data_o   <= data_r;
 
     -- El número de píxel es s_col_cnt >> 1 (2 bytes comparten el mismo píxel)
-    s_pix_num <= s_col_cnt(11 downto 1);
+    s_pix_num <= s_col_cnt(11 DOWNTO 1);
 
     --! \brief FSM generadora de timing de cámara — dominio pixclk_o
-    p_sim : process(clkin_i)
-    begin
-        if rising_edge(clkin_i) then
-            if reset_i = '1' then
+    p_sim : PROCESS(clkin_i)
+    BEGIN
+        IF rising_edge(clkin_i) THEN
+            IF reset_i = '1' THEN
                 s_state     <= ST_VBLANK;
-                s_col_cnt   <= (others => '0');
+                s_col_cnt   <= (OTHERS => '0');
                 s_row_cnt   <= 0;
                 s_blank_cnt <= 0;
                 fvalid_r    <= '0';
                 lvalid_r    <= '0';
-                data_r      <= (others => '0');
-            else
-                case s_state is
+                data_r      <= (OTHERS => '0');
+            ELSE
+                CASE s_state IS
 
-                    when ST_VBLANK =>
+                    WHEN ST_VBLANK =>
                         fvalid_r <= '0';
                         lvalid_r <= '0';
-                        data_r   <= (others => '0');
-                        if s_blank_cnt = g_VBLANK - 1 then
+                        data_r   <= (OTHERS => '0');
+                        IF s_blank_cnt = g_VBLANK - 1 THEN
                             s_blank_cnt <= 0;
                             s_row_cnt   <= 0;
                             s_state     <= ST_HBLANK;
-                        else
+                        ELSE
                             s_blank_cnt <= s_blank_cnt + 1;
-                        end if;
+                        END IF;
 
-                    when ST_HBLANK =>
+                    WHEN ST_HBLANK =>
                         fvalid_r <= '1';
                         lvalid_r <= '0';
-                        data_r   <= (others => '0');
-                        if s_blank_cnt = g_HBLANK - 1 then
+                        data_r   <= (OTHERS => '0');
+                        IF s_blank_cnt = g_HBLANK - 1 THEN
                             s_blank_cnt <= 0;
-                            s_col_cnt   <= (others => '0');
+                            s_col_cnt   <= (OTHERS => '0');
                             s_state     <= ST_ACTIVE;
-                        else
+                        ELSE
                             s_blank_cnt <= s_blank_cnt + 1;
-                        end if;
+                        END IF;
 
                     -----------------------------------------------------------
                     -- Línea activa — formato YCbCr 4:2:2 según MT9V111 datasheet:
@@ -143,48 +144,48 @@ begin
                     --   s_col_cnt(1:0) = "11" → Y_i+1= píxel (luma impar)
                     -- 4 bytes por cada par de píxeles → g_H_RES*4 bytes por línea
                     -----------------------------------------------------------
-                    when ST_ACTIVE =>
+                    WHEN ST_ACTIVE =>
                         fvalid_r <= '1';
                         lvalid_r <= '1';
 
-                        case s_col_cnt(1 downto 0) is
-                            when "00"   => data_r <= x"80";  -- Cb
-                            when "10"   => data_r <= x"80";  -- Cr
-                            when others =>                   -- "01" Y_i, "11" Y_{i+1}
-                                data_r <= std_logic_vector(s_pix_num(7 downto 0));
-                        end case;
+                        CASE s_col_cnt(1 DOWNTO 0) IS
+                            WHEN "00"   => data_r <= x"80";  -- Cb
+                            WHEN "10"   => data_r <= x"80";  -- Cr
+                            WHEN OTHERS =>                   -- "01" Y_i, "11" Y_{i+1}
+                                data_r <= std_logic_vector(s_pix_num(7 DOWNTO 0));
+                        END CASE;
 
-                        if s_col_cnt = to_unsigned(g_H_RES * 2 - 1, 12) then
-                            s_col_cnt <= (others => '0');
-                            if s_row_cnt = g_V_RES - 1 then
+                        IF s_col_cnt = to_unsigned(g_H_RES * 2 - 1, 12) THEN
+                            s_col_cnt <= (OTHERS => '0');
+                            IF s_row_cnt = g_V_RES - 1 THEN
                                 s_row_cnt <= 0;
                                 s_state   <= ST_FRAME_END;
-                            else
+                            ELSE
                                 s_row_cnt <= s_row_cnt + 1;
                                 s_state   <= ST_HBLANK;
-                            end if;
-                        else
+                            END IF;
+                        ELSE
                             s_col_cnt <= s_col_cnt + 1;
-                        end if;
+                        END IF;
 
-                    when ST_FRAME_END =>
+                    WHEN ST_FRAME_END =>
                         fvalid_r <= '1';   -- FVALID todavía alto durante P2
                         lvalid_r <= '0';
-                        data_r   <= (others => '0');
-                        if s_blank_cnt = c_P2 - 1 then
+                        data_r   <= (OTHERS => '0');
+                        IF s_blank_cnt = c_P2 - 1 THEN
                             s_blank_cnt <= 0;
                             fvalid_r    <= '0';   -- FVALID baja al final de P2
                             s_state     <= ST_VBLANK;
-                        else
+                        ELSE
                             s_blank_cnt <= s_blank_cnt + 1;
-                        end if;
+                        END IF;
 
-                    when others =>
+                    WHEN OTHERS =>
                         s_state <= ST_VBLANK;
                     
-                end case;
-            end if;
-        end if;
-    end process p_sim;
+                END CASE;
+            END IF;
+        END IF;
+    END PROCESS p_sim;
 
-end architecture rtl;
+END ARCHITECTURE rtl;

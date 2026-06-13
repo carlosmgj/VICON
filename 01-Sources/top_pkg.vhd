@@ -4,15 +4,15 @@
 --! Separado de config_pkg para no mezclar constantes de sistema
 --! con tipos de FSM especificos del TOP.
 
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
 
-package top_pkg is
+PACKAGE top_pkg IS
 
     ---------------------------------------------------------------------------
     --! \brief Estados de la FSM principal del TOP.
     ---------------------------------------------------------------------------
-    type main_state_t is (
+    TYPE main_state_t IS (
         ST_CAM_RESET_ASSERT,    --! RESET# bajo durante RESET_HOLD_CYCLES
         ST_CAM_RESET_WAIT,      --! Espera RESET_WAIT_CYCLES para estabilizacion del PLL
         -- Lectura Chip ID
@@ -38,4 +38,4 @@ package top_pkg is
         ST_ERROR                --! Error I2C, Chip ID o verify fallido
     );
 
-end package top_pkg;
+END PACKAGE top_pkg;

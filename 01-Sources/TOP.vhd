@@ -1,282 +1,282 @@
 --! \file TOP.vhd
 --! \brief VICON: Top Level.
 
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.NUMERIC_STD.ALL;
 
-library UNISIM;
-use UNISIM.VComponents.all;
+LIBRARY UNISIM;
+USE UNISIM.VComponents.ALL;
 
-library work;
-use work.config_pkg.all;
-use work.top_pkg.all;
+LIBRARY work;
+USE work.config_pkg.ALL;
+USE work.top_pkg.ALL;
 
 --! \brief Entidad de Sistema de Visión.
 --! \fsm_show_actions
-entity TOP is
-    generic (
-        g_USE_ILA                   : boolean                      := c_USE_ILA;
-        g_SYSTEM_CLK_FREQ_HZ        : integer                      := c_SYSTEM_CLK_FREQ_HZ;
-        g_MT9V111_MCLK_DIV          : integer                      := c_MT9V111_MCLK_DIV;
-        g_MT9V111_I2C_FREQ_HZ       : integer                      := c_MT9V111_I2C_FREQ_HZ;
-        g_MT9V111_I2C_FIFO_DEPTH    : integer                      := c_MT9V111_I2C_FIFO_DEPTH;
-        g_MT9V111_I2C_SENSOR_ADDR   : std_logic_vector(6 downto 0) := c_MT9V111_I2C_SENSOR_ADDR;
-        g_MT9V111_H_RES             : integer                      := c_MT9V111_H_RES;
-        g_MT9V111_V_RES             : integer                      := c_MT9V111_V_RES;
-        g_MT9V111_RESET_HOLD_US     : integer                      := c_MT9V111_RESET_HOLD_US;
-        g_MT9V111_RESET_WAIT_US     : integer                      := c_MT9V111_RESET_WAIT_US;
-        g_MT9V111_FPS               : integer                      := c_MT9V111_FPS;
-        g_MT9V111_TARGET_FPS        : integer                      := c_MT9V111_TARGET_FPS;
-        g_USE_CAM_SIM               : boolean                      := c_USE_CAM_SIM;
-        g_CAM_SIM_HBLANK            : integer                      := c_CAM_SIM_HBLANK;
-        g_CAM_SIM_VBLANK            : integer                      := c_CAM_SIM_VBLANK;
-        g_CAM_SIM_H_RES             : integer                      := c_CAM_SIM_H_RES;
-        g_CAM_SIM_V_RES             : integer                      := c_CAM_SIM_V_RES
+ENTITY TOP IS
+    GENERIC (
+        g_USE_ILA                   : BOOLEAN                      := c_USE_ILA;
+        g_SYSTEM_CLK_FREQ_HZ        : INTEGER                      := c_SYSTEM_CLK_FREQ_HZ;
+        g_MT9V111_MCLK_DIV          : INTEGER                      := c_MT9V111_MCLK_DIV;
+        g_MT9V111_I2C_FREQ_HZ       : INTEGER                      := c_MT9V111_I2C_FREQ_HZ;
+        g_MT9V111_I2C_FIFO_DEPTH    : INTEGER                      := c_MT9V111_I2C_FIFO_DEPTH;
+        g_MT9V111_I2C_SENSOR_ADDR   : STD_LOGIC_VECTOR(6 DOWNTO 0) := c_MT9V111_I2C_SENSOR_ADDR;
+        g_MT9V111_H_RES             : INTEGER                      := c_MT9V111_H_RES;
+        g_MT9V111_V_RES             : INTEGER                      := c_MT9V111_V_RES;
+        g_MT9V111_RESET_HOLD_US     : INTEGER                      := c_MT9V111_RESET_HOLD_US;
+        g_MT9V111_RESET_WAIT_US     : INTEGER                      := c_MT9V111_RESET_WAIT_US;
+        g_MT9V111_FPS               : INTEGER                      := c_MT9V111_FPS;
+        g_MT9V111_TARGET_FPS        : INTEGER                      := c_MT9V111_TARGET_FPS;
+        g_USE_CAM_SIM               : BOOLEAN                      := c_USE_CAM_SIM;
+        g_CAM_SIM_HBLANK            : INTEGER                      := c_CAM_SIM_HBLANK;
+        g_CAM_SIM_VBLANK            : INTEGER                      := c_CAM_SIM_VBLANK;
+        g_CAM_SIM_H_RES             : INTEGER                      := c_CAM_SIM_H_RES;
+        g_CAM_SIM_V_RES             : INTEGER                      := c_CAM_SIM_V_RES
     );
-    port (
-        basys3_clk_i   : in    std_logic;
-        basys3_sw_i    : in    std_logic_vector(c_BASYS3_SW_QTY-1         downto 0);
-        basys3_led_o   : out   std_logic_vector(c_BASYS3_LED_QTY-1        downto 0);
-        basys3_cat_o   : out   std_logic_vector(c_BASYS3_7SEG_BAR_QTY-1   downto 0);
-        basys3_dp_o    : out   std_logic;
-        basys3_an_o    : out   std_logic_vector(c_BASYS3_7SEG_DIGIT_QTY-1 downto 0);
-        basys3_btn_i   : in    std_logic_vector(c_BASYS3_BTN_QTY-1        downto 0);
-        mt_data_i      : in    std_logic_vector(c_MT9V111_DATA_BITS-1     downto 0);
-        mt_lvalid_i    : in    std_logic;
-        mt_pixclk_i    : in    std_logic;
-        mt_fvalid_i    : in    std_logic;
-        mt_reset_n_o   : out   std_logic;
-        mt_clk_o       : out   std_logic;
-        i2c_sclk_io    : inout std_logic;
-        i2c_sdata_io   : inout std_logic;
-        ftdi_adbus_io  : inout std_logic_vector(c_FTDI_DATABUS_W-1        downto 0);  --! ADBUS bidireccional: TX imagen / RX comandos
-        ftdi_acbus_io  : inout std_logic_vector(c_FTDI_CONTROLBUS_W-1     downto 0)
+    PORT (
+        basys3_clk_i   : IN    STD_LOGIC;
+        basys3_sw_i    : IN    STD_LOGIC_VECTOR(c_BASYS3_SW_QTY-1         DOWNTO 0);
+        basys3_led_o   : OUT   STD_LOGIC_VECTOR(c_BASYS3_LED_QTY-1        DOWNTO 0);
+        basys3_cat_o   : OUT   STD_LOGIC_VECTOR(c_BASYS3_7SEG_BAR_QTY-1   DOWNTO 0);
+        basys3_dp_o    : OUT   STD_LOGIC;
+        basys3_an_o    : OUT   STD_LOGIC_VECTOR(c_BASYS3_7SEG_DIGIT_QTY-1 DOWNTO 0);
+        basys3_btn_i   : IN    STD_LOGIC_VECTOR(c_BASYS3_BTN_QTY-1        DOWNTO 0);
+        mt_data_i      : IN    STD_LOGIC_VECTOR(c_MT9V111_DATA_BITS-1     DOWNTO 0);
+        mt_lvalid_i    : IN    STD_LOGIC;
+        mt_pixclk_i    : IN    STD_LOGIC;
+        mt_fvalid_i    : IN    STD_LOGIC;
+        mt_reset_n_o   : OUT   STD_LOGIC;
+        mt_clk_o       : OUT   STD_LOGIC;
+        i2c_sclk_io    : INOUT STD_LOGIC;
+        i2c_sdata_io   : INOUT STD_LOGIC;
+        ftdi_adbus_io  : INOUT STD_LOGIC_VECTOR(c_FTDI_DATABUS_W-1        DOWNTO 0);  --! ADBUS bidireccional: TX imagen / RX comandos
+        ftdi_acbus_io  : INOUT STD_LOGIC_VECTOR(c_FTDI_CONTROLBUS_W-1     DOWNTO 0)
     );
-end entity TOP;
+END ENTITY TOP;
 
-architecture rtl of TOP is
+ARCHITECTURE rtl OF TOP IS
 
     ---------------------------------------------------------------------------
     -- Constantes de temporización
     ---------------------------------------------------------------------------
-    constant c_MT9V111_RESET_HOLD_CYCLES : integer :=
+    CONSTANT c_MT9V111_RESET_HOLD_CYCLES : INTEGER :=
         (g_SYSTEM_CLK_FREQ_HZ / 1_000_000) * g_MT9V111_RESET_HOLD_US;
-    constant c_MT9V111_RESET_WAIT_CYCLES : integer :=
+    CONSTANT c_MT9V111_RESET_WAIT_CYCLES : INTEGER :=
         (g_SYSTEM_CLK_FREQ_HZ / 1_000_000) * g_MT9V111_RESET_WAIT_US;
-    constant c_CAP_H_RES : integer :=
-        g_CAM_SIM_H_RES * boolean'pos(g_USE_CAM_SIM) +
-        g_MT9V111_H_RES * boolean'pos(not g_USE_CAM_SIM);
-    constant c_CAP_V_RES : integer :=
-        g_CAM_SIM_V_RES * boolean'pos(g_USE_CAM_SIM) +
-        g_MT9V111_V_RES * boolean'pos(not g_USE_CAM_SIM);
+    CONSTANT c_CAP_H_RES : INTEGER :=
+        g_CAM_SIM_H_RES * BOOLEAN'pos(g_USE_CAM_SIM) +
+        g_MT9V111_H_RES * BOOLEAN'pos(NOT g_USE_CAM_SIM);
+    CONSTANT c_CAP_V_RES : INTEGER :=
+        g_CAM_SIM_V_RES * BOOLEAN'pos(g_USE_CAM_SIM) +
+        g_MT9V111_V_RES * BOOLEAN'pos(NOT g_USE_CAM_SIM);
 
     ---------------------------------------------------------------------------
     -- Tabla de registros a configurar (Tabla 15 datasheet, MCLK=27 MHz → 30 fps)
     -- Formato: (page, addr, value)
     --   page 0 = Core, page 1 = IFP
     ---------------------------------------------------------------------------
-    type t_reg_entry is record
-        page : std_logic;                      --! '0'=Core, '1'=IFP
-        addr : std_logic_vector(7 downto 0);
-        data : std_logic_vector(15 downto 0);
-    end record;
+    TYPE t_reg_entry IS RECORD
+        page : STD_LOGIC;                      --! '0'=Core, '1'=IFP
+        addr : STD_LOGIC_VECTOR(7 DOWNTO 0);
+        data : STD_LOGIC_VECTOR(15 DOWNTO 0);
+    END RECORD;
 
-    type t_reg_table is array (natural range <>) of t_reg_entry;
+    TYPE t_reg_table IS ARRAY (natural RANGE <>) OF t_reg_entry;
 
-    constant c_CFG_TABLE : t_reg_table := (
+    CONSTANT c_CFG_TABLE : t_reg_table := (
         -- Core page (page 0)
-        ('0', x"05", std_logic_vector(to_unsigned(132,   16))),  --! R5  HBLANK
-        ('0', x"06", std_logic_vector(to_unsigned(10,    16))),  --! R6  VBLANK
+        ('0', x"05", STD_LOGIC_VECTOR(to_unsigned(132,   16))),  --! R5  HBLANK
+        ('0', x"06", STD_LOGIC_VECTOR(to_unsigned(10,    16))),  --! R6  VBLANK
         ('0', x"07", x"0000"),                                   --! R7  output format
-        ('0', x"21", std_logic_vector(to_unsigned(58369, 16))),  --! R33 shutter width
+        ('0', x"21", STD_LOGIC_VECTOR(to_unsigned(58369, 16))),  --! R33 shutter width
         -- IFP page (page 1)
-        ('1', x"33", std_logic_vector(to_unsigned(5137,  16))),  --! R51
-        ('1', x"39", std_logic_vector(to_unsigned(290,   16))),  --! R57
-        ('1', x"3B", std_logic_vector(to_unsigned(1068,  16))),  --! R59
-        ('1', x"3E", std_logic_vector(to_unsigned(4095,  16))),  --! R62
-        ('1', x"59", std_logic_vector(to_unsigned(504,   16))),  --! R89
-        ('1', x"5A", std_logic_vector(to_unsigned(605,   16))),  --! R90
-        ('1', x"5C", std_logic_vector(to_unsigned(8222,  16))),  --! R92
-        ('1', x"5D", std_logic_vector(to_unsigned(10021, 16))),  --! R93
-        ('1', x"64", std_logic_vector(to_unsigned(4477,  16)))   --! R100
+        ('1', x"33", STD_LOGIC_VECTOR(to_unsigned(5137,  16))),  --! R51
+        ('1', x"39", STD_LOGIC_VECTOR(to_unsigned(290,   16))),  --! R57
+        ('1', x"3B", STD_LOGIC_VECTOR(to_unsigned(1068,  16))),  --! R59
+        ('1', x"3E", STD_LOGIC_VECTOR(to_unsigned(4095,  16))),  --! R62
+        ('1', x"59", STD_LOGIC_VECTOR(to_unsigned(504,   16))),  --! R89
+        ('1', x"5A", STD_LOGIC_VECTOR(to_unsigned(605,   16))),  --! R90
+        ('1', x"5C", STD_LOGIC_VECTOR(to_unsigned(8222,  16))),  --! R92
+        ('1', x"5D", STD_LOGIC_VECTOR(to_unsigned(10021, 16))),  --! R93
+        ('1', x"64", STD_LOGIC_VECTOR(to_unsigned(4477,  16)))   --! R100
         --('1', x"37", x"0080")  --! R55 [9:5]=4 → frame rate mínimo 30fps
     );
 
-    constant c_CFG_TABLE_LEN : integer := c_CFG_TABLE'length;  --! 13 entradas
+    CONSTANT c_CFG_TABLE_LEN : INTEGER := c_CFG_TABLE'length;  --! 13 entradas
 
     ---------------------------------------------------------------------------
     -- Relojes y reset
     ---------------------------------------------------------------------------
-    signal s_mclk         : std_logic;
-    signal s_locked       : std_logic;
-    signal s_rst_final    : std_logic;
-    signal s_mclk_div_cnt : integer range 0 to g_MT9V111_MCLK_DIV - 1 := 0;
-    signal cam_mclk_r     : std_logic := '0';  
-    signal cam_mclk_r1    : std_logic := '0';  --! clk_out2 del MMCM = 12 MHz
-    signal cam_mclk_r2    : std_logic := '0';  --! clk_out3 del MMCM = 27 MHz
-    signal s_cam_clk_sel  : std_logic := '1';
+    SIGNAL s_mclk         : STD_LOGIC;
+    SIGNAL s_locked       : STD_LOGIC;
+    SIGNAL s_rst_final    : STD_LOGIC;
+    SIGNAL s_mclk_div_cnt : INTEGER RANGE 0 TO g_MT9V111_MCLK_DIV - 1 := 0;
+    SIGNAL cam_mclk_r     : STD_LOGIC := '0';  
+    SIGNAL cam_mclk_r1    : STD_LOGIC := '0';  --! clk_out2 del MMCM = 12 MHz
+    SIGNAL cam_mclk_r2    : STD_LOGIC := '0';  --! clk_out3 del MMCM = 27 MHz
+    SIGNAL s_cam_clk_sel  : STD_LOGIC := '1';
     ---------------------------------------------------------------------------
     -- Interfaz FSM <-> controlador I2C
     ---------------------------------------------------------------------------
-    signal s_i2c_rw_fsm       : std_logic                                   := '0';
-    signal s_i2c_start_fsm    : std_logic                                   := '0';
-    signal s_i2c_num_regs_fsm : integer range 1 to g_MT9V111_I2C_FIFO_DEPTH := 1;
-    signal s_i2c_addr_reg_fsm : std_logic_vector(7 downto 0)                := (others => '0');
-    signal s_i2c_wr_push_fsm  : std_logic                                   := '0';
-    signal s_i2c_wr_data_fsm  : std_logic_vector(15 downto 0)               := (others => '0');
-    signal s_i2c_rd_pop_fsm   : std_logic                                   := '0';
-    signal s_i2c_wr_full  : std_logic;
-    signal s_i2c_wr_empty : std_logic;
-    signal s_i2c_rd_data  : std_logic_vector(15 downto 0);
-    signal s_i2c_rd_full  : std_logic;
-    signal s_i2c_rd_empty : std_logic;
-    signal s_i2c_busy     : std_logic;
-    signal s_i2c_done     : std_logic;
-    signal s_i2c_error    : std_logic;
-    signal s_scl_out      : std_logic;
-    signal s_sda_out      : std_logic;
-    signal s_sda_oe       : std_logic;
-    signal s_sda_in       : std_logic;
+    SIGNAL s_i2c_rw_fsm       : STD_LOGIC                                   := '0';
+    SIGNAL s_i2c_start_fsm    : STD_LOGIC                                   := '0';
+    SIGNAL s_i2c_num_regs_fsm : INTEGER RANGE 1 TO g_MT9V111_I2C_FIFO_DEPTH := 1;
+    SIGNAL s_i2c_addr_reg_fsm : STD_LOGIC_VECTOR(7 DOWNTO 0)                := (OTHERS => '0');
+    SIGNAL s_i2c_wr_push_fsm  : STD_LOGIC                                   := '0';
+    SIGNAL s_i2c_wr_data_fsm  : STD_LOGIC_VECTOR(15 DOWNTO 0)               := (OTHERS => '0');
+    SIGNAL s_i2c_rd_pop_fsm   : STD_LOGIC                                   := '0';
+    SIGNAL s_i2c_wr_full  : STD_LOGIC;
+    SIGNAL s_i2c_wr_empty : STD_LOGIC;
+    SIGNAL s_i2c_rd_data  : STD_LOGIC_VECTOR(15 DOWNTO 0);
+    SIGNAL s_i2c_rd_full  : STD_LOGIC;
+    SIGNAL s_i2c_rd_empty : STD_LOGIC;
+    SIGNAL s_i2c_busy     : STD_LOGIC;
+    SIGNAL s_i2c_done     : STD_LOGIC;
+    SIGNAL s_i2c_error    : STD_LOGIC;
+    SIGNAL s_scl_out      : STD_LOGIC;
+    SIGNAL s_sda_out      : STD_LOGIC;
+    SIGNAL s_sda_oe       : STD_LOGIC;
+    SIGNAL s_sda_in       : STD_LOGIC;
 
     ---------------------------------------------------------------------------
     -- FTDI
     ---------------------------------------------------------------------------
-    signal s_ftdi_clk       : std_logic;
-    signal s_ftdi_txe_n     : std_logic;
-    signal s_ftdi_rxf_n     : std_logic;                    --! RXF# — dato disponible del PC
-    signal s_ftdi_wr_n      : std_logic;
-    signal s_ftdi_rd_n      : std_logic;                    --! RD#  — strobe de lectura
-    signal s_ftdi_oe_n      : std_logic;                    --! OE#  — habilita salida FTDI en ADBUS
-    signal s_ftdi_adbus_out : std_logic_vector(7 downto 0); --! ADBUS hacia el FTDI (TX imagen)
-    signal s_ftdi_adbus_in  : std_logic_vector(7 downto 0); --! ADBUS desde el FTDI (RX comandos)
-    signal s_ftdi_adbus_oe  : std_logic;                    --! '1'=FPGA conduce ADBUS, '0'=tristate
-    signal s_ftdi_tx_active : std_logic;
+    SIGNAL s_ftdi_clk       : STD_LOGIC;
+    SIGNAL s_ftdi_txe_n     : STD_LOGIC;
+    SIGNAL s_ftdi_rxf_n     : STD_LOGIC;                    --! RXF# — dato disponible del PC
+    SIGNAL s_ftdi_wr_n      : STD_LOGIC;
+    SIGNAL s_ftdi_rd_n      : STD_LOGIC;                    --! RD#  — strobe de lectura
+    SIGNAL s_ftdi_oe_n      : STD_LOGIC;                    --! OE#  — habilita salida FTDI en ADBUS
+    SIGNAL s_ftdi_adbus_out : STD_LOGIC_VECTOR(7 DOWNTO 0); --! ADBUS hacia el FTDI (TX imagen)
+    SIGNAL s_ftdi_adbus_in  : STD_LOGIC_VECTOR(7 DOWNTO 0); --! ADBUS desde el FTDI (RX comandos)
+    SIGNAL s_ftdi_adbus_oe  : STD_LOGIC;                    --! '1'=FPGA conduce ADBUS, '0'=tristate
+    SIGNAL s_ftdi_tx_active : STD_LOGIC;
 
     -- Comandos decodificados — dominio ftdi_clk
-    signal s_cmd_valid_ftdi : std_logic;
-    signal s_cmd_type_ftdi  : std_logic_vector(7 downto 0);
-    signal s_cmd_data_ftdi  : std_logic_vector(15 downto 0);
-    signal s_cmd_page_ftdi  : std_logic;
-    signal s_cmd_addr_ftdi  : std_logic_vector(7 downto 0);
+    SIGNAL s_cmd_valid_ftdi : STD_LOGIC;
+    SIGNAL s_cmd_type_ftdi  : STD_LOGIC_VECTOR(7 DOWNTO 0);
+    SIGNAL s_cmd_data_ftdi  : STD_LOGIC_VECTOR(15 DOWNTO 0);
+    SIGNAL s_cmd_page_ftdi  : STD_LOGIC;
+    SIGNAL s_cmd_addr_ftdi  : STD_LOGIC_VECTOR(7 DOWNTO 0);
 
     ---------------------------------------------------------------------------
     -- CDC: ftdi_clk → s_mclk (sincronizadores 2FF para cmd_valid y payload)
     ---------------------------------------------------------------------------
-    signal s_cmd_valid_sync0 : std_logic := '0';
-    signal s_cmd_valid_sync1 : std_logic := '0';
-    signal s_cmd_valid_sync2 : std_logic := '0';
-    signal s_cmd_type_sync0  : std_logic_vector(7 downto 0)  := (others => '0');
-    signal s_cmd_type_sync1  : std_logic_vector(7 downto 0)  := (others => '0');
-    signal s_cmd_data_sync0  : std_logic_vector(15 downto 0) := (others => '0');
-    signal s_cmd_data_sync1  : std_logic_vector(15 downto 0) := (others => '0');
+    SIGNAL s_cmd_valid_sync0 : STD_LOGIC := '0';
+    SIGNAL s_cmd_valid_sync1 : STD_LOGIC := '0';
+    SIGNAL s_cmd_valid_sync2 : STD_LOGIC := '0';
+    SIGNAL s_cmd_type_sync0  : STD_LOGIC_VECTOR(7 DOWNTO 0)  := (OTHERS => '0');
+    SIGNAL s_cmd_type_sync1  : STD_LOGIC_VECTOR(7 DOWNTO 0)  := (OTHERS => '0');
+    SIGNAL s_cmd_data_sync0  : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
+    SIGNAL s_cmd_data_sync1  : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
 
-    attribute ASYNC_REG : string;
-    attribute ASYNC_REG of s_cmd_valid_sync0 : signal is "TRUE";
-    attribute ASYNC_REG of s_cmd_valid_sync1 : signal is "TRUE";
+    ATTRIBUTE ASYNC_REG : string;
+    ATTRIBUTE ASYNC_REG OF s_cmd_valid_sync0 : SIGNAL IS "TRUE";
+    ATTRIBUTE ASYNC_REG OF s_cmd_valid_sync1 : SIGNAL IS "TRUE";
 
     ---------------------------------------------------------------------------
     -- FIFO de captura (pixclk → ftdi_clk)
     ---------------------------------------------------------------------------
-    signal s_cap_fifo_data  : std_logic_vector(7 downto 0);
-    signal s_cap_fifo_wr    : std_logic;
-    signal s_cap_fifo_full  : std_logic;
-    signal s_cap_fifo_empty : std_logic;
-    signal s_cap_fifo_dout  : std_logic_vector(7 downto 0);
-    signal s_cap_fifo_rd_en : std_logic;
-    signal s_cap_frame_done : std_logic;
-    signal s_cap_overflow   : std_logic;
-    signal s_cap_en         : std_logic;
+    SIGNAL s_cap_fifo_data  : STD_LOGIC_VECTOR(7 DOWNTO 0);
+    SIGNAL s_cap_fifo_wr    : STD_LOGIC;
+    SIGNAL s_cap_fifo_full  : STD_LOGIC;
+    SIGNAL s_cap_fifo_empty : STD_LOGIC;
+    SIGNAL s_cap_fifo_dout  : STD_LOGIC_VECTOR(7 DOWNTO 0);
+    SIGNAL s_cap_fifo_rd_en : STD_LOGIC;
+    SIGNAL s_cap_frame_done : STD_LOGIC;
+    SIGNAL s_cap_overflow   : STD_LOGIC;
+    SIGNAL s_cap_en         : STD_LOGIC;
 
     ---------------------------------------------------------------------------
     -- FSM principal
     ---------------------------------------------------------------------------
 
-    signal s_state      : main_state_t                                   := ST_CAM_RESET_ASSERT;
-    signal s_init_cnt   : integer range 0 to c_MT9V111_RESET_WAIT_CYCLES := 0;
-    signal s_fill_cnt   : integer range 0 to g_MT9V111_I2C_FIFO_DEPTH    := 0;
-    signal cam_reset_r  : std_logic                                      := '0';
-    signal s_chip_id    : std_logic_vector(15 downto 0)                  := (others => '0');
-    signal s_led15_r    : std_logic                                      := '0';  --! Registro del LED 15 controlado por comando
+    SIGNAL s_state      : main_state_t                                   := ST_CAM_RESET_ASSERT;
+    SIGNAL s_init_cnt   : INTEGER RANGE 0 TO c_MT9V111_RESET_WAIT_CYCLES := 0;
+    SIGNAL s_fill_cnt   : INTEGER RANGE 0 TO g_MT9V111_I2C_FIFO_DEPTH    := 0;
+    SIGNAL cam_reset_r  : STD_LOGIC                                      := '0';
+    SIGNAL s_chip_id    : STD_LOGIC_VECTOR(15 DOWNTO 0)                  := (OTHERS => '0');
+    SIGNAL s_led15_r    : STD_LOGIC                                      := '0';  --! Registro del LED 15 controlado por comando
 
     --! Índice en c_CFG_TABLE del registro que se está configurando
-    signal s_cfg_idx    : integer range 0 to c_CFG_TABLE_LEN - 1        := 0;
-    --! Page del último Page Map enviado (evita reenviar si el siguiente es igual)
-    signal s_cur_page   : std_logic                                      := '1';  --! Inicializado a IFP (viene de la lectura del Chip ID)
+    SIGNAL s_cfg_idx    : INTEGER RANGE 0 TO c_CFG_TABLE_LEN - 1        := 0;
+    --! Page del último Page MAP enviado (evita reenviar si el siguiente es igual)
+    SIGNAL s_cur_page   : STD_LOGIC                                      := '1';  --! Inicializado a IFP (viene de la lectura del Chip ID)
 
     ---------------------------------------------------------------------------
     -- Imagen multiplexada (sensor real / cam_sim)
     ---------------------------------------------------------------------------
-    signal s_mt_fvalid_int : std_logic;
-    signal s_mt_lvalid_int : std_logic;
-    signal s_mt_data_int   : std_logic_vector(c_MT9V111_DATA_BITS-1 downto 0);
-    signal s_mt_pixclk_int : std_logic;
+    SIGNAL s_mt_fvalid_int : STD_LOGIC;
+    SIGNAL s_mt_lvalid_int : STD_LOGIC;
+    SIGNAL s_mt_data_int   : STD_LOGIC_VECTOR(c_MT9V111_DATA_BITS-1 DOWNTO 0);
+    SIGNAL s_mt_pixclk_int : STD_LOGIC;
 
-    signal s_cmdproc_led_toggle  : std_logic;
-    signal s_cmdproc_bcd         : std_logic_vector(15 downto 0);
-    signal s_cmdproc_cap_en      : std_logic;
-    signal s_cmdproc_i2c_start   : std_logic;
-    signal s_cmdproc_i2c_rw      : std_logic;
-    signal s_cmdproc_i2c_num     : integer range 1 to g_MT9V111_I2C_FIFO_DEPTH;
-    signal s_cmdproc_i2c_addr    : std_logic_vector(7 downto 0);
-    signal s_cmdproc_i2c_wr_push : std_logic;
-    signal s_cmdproc_i2c_wr_data : std_logic_vector(15 downto 0);
-    signal s_cmdproc_i2c_page    : std_logic;
-    signal s_cmdproc_i2c_grant : std_logic;
+    SIGNAL s_cmdproc_led_toggle  : STD_LOGIC;
+    SIGNAL s_cmdproc_bcd         : STD_LOGIC_VECTOR(15 DOWNTO 0);
+    SIGNAL s_cmdproc_cap_en      : STD_LOGIC;
+    SIGNAL s_cmdproc_i2c_start   : STD_LOGIC;
+    SIGNAL s_cmdproc_i2c_rw      : STD_LOGIC;
+    SIGNAL s_cmdproc_i2c_num     : INTEGER RANGE 1 TO g_MT9V111_I2C_FIFO_DEPTH;
+    SIGNAL s_cmdproc_i2c_addr    : STD_LOGIC_VECTOR(7 DOWNTO 0);
+    SIGNAL s_cmdproc_i2c_wr_push : STD_LOGIC;
+    SIGNAL s_cmdproc_i2c_wr_data : STD_LOGIC_VECTOR(15 DOWNTO 0);
+    SIGNAL s_cmdproc_i2c_page    : STD_LOGIC;
+    SIGNAL s_cmdproc_i2c_grant : STD_LOGIC;
 
-    signal s_i2c_mux_rw       : std_logic;
-    signal s_i2c_mux_start    : std_logic;
-    signal s_i2c_mux_num_regs : integer range 1 to g_MT9V111_I2C_FIFO_DEPTH;
-    signal s_i2c_mux_addr_reg : std_logic_vector(7 downto 0);
-    signal s_i2c_mux_wr_push  : std_logic;
-    signal s_i2c_mux_wr_data  : std_logic_vector(15 downto 0);
+    SIGNAL s_i2c_mux_rw       : STD_LOGIC;
+    SIGNAL s_i2c_mux_start    : STD_LOGIC;
+    SIGNAL s_i2c_mux_num_regs : INTEGER RANGE 1 TO g_MT9V111_I2C_FIFO_DEPTH;
+    SIGNAL s_i2c_mux_addr_reg : STD_LOGIC_VECTOR(7 DOWNTO 0);
+    SIGNAL s_i2c_mux_wr_push  : STD_LOGIC;
+    SIGNAL s_i2c_mux_wr_data  : STD_LOGIC_VECTOR(15 DOWNTO 0);
 
     ---------------------------------------------------------------------------
     -- Debug (capturado en s_mclk para ILA)
     ---------------------------------------------------------------------------
-    signal debug_sclk     : std_logic;
-    signal debug_sdata    : std_logic;
-    signal debug_dout     : std_logic_vector(7 downto 0);
-    signal debug_pixclk   : std_logic;
-    signal debug_fval     : std_logic;
-    signal debug_lval     : std_logic;
-    signal debug_txe_n    : std_logic;
-    signal debug_wr_n     : std_logic;
-    signal debug_overflow : std_logic;
-    signal debug_fifo_wr  : std_logic;
+    SIGNAL debug_sclk     : STD_LOGIC;
+    SIGNAL debug_sdata    : STD_LOGIC;
+    SIGNAL debug_dout     : STD_LOGIC_VECTOR(7 DOWNTO 0);
+    SIGNAL debug_pixclk   : STD_LOGIC;
+    SIGNAL debug_fval     : STD_LOGIC;
+    SIGNAL debug_lval     : STD_LOGIC;
+    SIGNAL debug_txe_n    : STD_LOGIC;
+    SIGNAL debug_wr_n     : STD_LOGIC;
+    SIGNAL debug_overflow : STD_LOGIC;
+    SIGNAL debug_fifo_wr  : STD_LOGIC;
 
-begin
+BEGIN
 
-    s_rst_final <= not s_locked;
+    s_rst_final <= NOT s_locked;
 
-    i2c_sclk_io  <= '0'       when s_scl_out = '0' else 'Z';
-    i2c_sdata_io <= s_sda_out when s_sda_oe  = '1' else 'Z';
+    i2c_sclk_io  <= '0'       WHEN s_scl_out = '0' ELSE 'Z';
+    i2c_sdata_io <= s_sda_out WHEN s_sda_oe  = '1' ELSE 'Z';
     s_sda_in     <= i2c_sdata_io;
 
     mt_reset_n_o <= cam_reset_r;
     mt_clk_o     <= cam_mclk_r;
 
-    s_cap_en <= '1' when s_state = ST_FINISH else '0';
+    s_cap_en <= '1' WHEN s_state = ST_FINISH ELSE '0';
     
-    s_i2c_mux_rw       <= s_cmdproc_i2c_rw       when s_state = ST_FINISH else s_i2c_rw_fsm;
-    s_i2c_mux_start    <= s_cmdproc_i2c_start    when s_state = ST_FINISH else s_i2c_start_fsm;
-    s_i2c_mux_num_regs <= s_cmdproc_i2c_num      when s_state = ST_FINISH else s_i2c_num_regs_fsm;
-    s_i2c_mux_addr_reg <= s_cmdproc_i2c_addr     when s_state = ST_FINISH else s_i2c_addr_reg_fsm;
-    s_i2c_mux_wr_push  <= s_cmdproc_i2c_wr_push  when s_state = ST_FINISH else s_i2c_wr_push_fsm;
-    s_i2c_mux_wr_data  <= s_cmdproc_i2c_wr_data  when s_state = ST_FINISH else s_i2c_wr_data_fsm;
+    s_i2c_mux_rw       <= s_cmdproc_i2c_rw       WHEN s_state = ST_FINISH ELSE s_i2c_rw_fsm;
+    s_i2c_mux_start    <= s_cmdproc_i2c_start    WHEN s_state = ST_FINISH ELSE s_i2c_start_fsm;
+    s_i2c_mux_num_regs <= s_cmdproc_i2c_num      WHEN s_state = ST_FINISH ELSE s_i2c_num_regs_fsm;
+    s_i2c_mux_addr_reg <= s_cmdproc_i2c_addr     WHEN s_state = ST_FINISH ELSE s_i2c_addr_reg_fsm;
+    s_i2c_mux_wr_push  <= s_cmdproc_i2c_wr_push  WHEN s_state = ST_FINISH ELSE s_i2c_wr_push_fsm;
+    s_i2c_mux_wr_data  <= s_cmdproc_i2c_wr_data  WHEN s_state = ST_FINISH ELSE s_i2c_wr_data_fsm;
 
-    s_cmdproc_i2c_grant <= '1' when s_state = ST_FINISH else '0';
+    s_cmdproc_i2c_grant <= '1' WHEN s_state = ST_FINISH ELSE '0';
     ---------------------------------------------------------------------------
     -- FTDI — ADBUS tristate: FPGA conduce cuando adbus_oe='1', tristate cuando '0'
     ---------------------------------------------------------------------------
-    ftdi_adbus_io   <= s_ftdi_adbus_out when s_ftdi_adbus_oe = '1' else (others => 'Z');
+    ftdi_adbus_io   <= s_ftdi_adbus_out WHEN s_ftdi_adbus_oe = '1' ELSE (OTHERS => 'Z');
     s_ftdi_adbus_in <= ftdi_adbus_io;
 
     ---------------------------------------------------------------------------
     -- FTDI — CLKOUT via BUFG
     ---------------------------------------------------------------------------
     ftdi_clk_buf : BUFG
-        port map (I => ftdi_acbus_io(c_FTDI_ACBUS_CLKOUT), O => s_ftdi_clk);
+        PORT MAP (I => ftdi_acbus_io(c_FTDI_ACBUS_CLKOUT), O => s_ftdi_clk);
 
     -- Entradas de control del FTDI
     s_ftdi_rxf_n <= ftdi_acbus_io(c_FTDI_ACBUS_RXF_N);
@@ -295,14 +295,14 @@ begin
     -- CDC: ftdi_clk → s_mclk
     -- Solo sincronizamos cmd_valid, cmd_type y cmd_data (suficiente para el toggle)
     ---------------------------------------------------------------------------
-    p_cdc : process(s_mclk)
-    begin
-        if rising_edge(s_mclk) then
-            if s_rst_final = '1' then
+    p_cdc : PROCESS(s_mclk)
+    BEGIN
+        IF rising_edge(s_mclk) THEN
+            IF s_rst_final = '1' THEN
                 s_cmd_valid_sync0 <= '0'; s_cmd_valid_sync1 <= '0'; s_cmd_valid_sync2 <= '0';
-                s_cmd_type_sync0  <= (others => '0'); s_cmd_type_sync1  <= (others => '0');
-                s_cmd_data_sync0  <= (others => '0'); s_cmd_data_sync1  <= (others => '0');
-            else
+                s_cmd_type_sync0  <= (OTHERS => '0'); s_cmd_type_sync1  <= (OTHERS => '0');
+                s_cmd_data_sync0  <= (OTHERS => '0'); s_cmd_data_sync1  <= (OTHERS => '0');
+            ELSE
                 s_cmd_valid_sync0 <= s_cmd_valid_ftdi;
                 s_cmd_valid_sync1 <= s_cmd_valid_sync0;
                 s_cmd_valid_sync2 <= s_cmd_valid_sync1;
@@ -310,20 +310,20 @@ begin
                 s_cmd_type_sync1  <= s_cmd_type_sync0;
                 s_cmd_data_sync0  <= s_cmd_data_ftdi;
                 s_cmd_data_sync1  <= s_cmd_data_sync0;
-            end if;
-        end if;
-    end process p_cdc;
+            END IF;
+        END IF;
+    END PROCESS p_cdc;
 
-    basys3_cat_o <= (others => '0');
+    basys3_cat_o <= (OTHERS => '0');
     basys3_dp_o  <= '0';
-    basys3_an_o  <= (others => '1');
+    basys3_an_o  <= (OTHERS => '1');
 
     ---------------------------------------------------------------------------
     -- Debug
     ---------------------------------------------------------------------------
-    p_debug : process(s_mclk)
-    begin
-        if rising_edge(s_mclk) then
+    p_debug : PROCESS(s_mclk)
+    BEGIN
+        IF rising_edge(s_mclk) THEN
             debug_sclk     <= s_scl_out;
             debug_sdata    <= s_sda_in;
             debug_dout     <= s_mt_data_int;
@@ -334,8 +334,8 @@ begin
             debug_wr_n     <= s_ftdi_wr_n;
             debug_overflow <= s_cap_overflow;
             debug_fifo_wr  <= s_cap_fifo_wr;
-        end if;
-    end process p_debug;
+        END IF;
+    END PROCESS p_debug;
 
     ---------------------------------------------------------------------------
     --! \brief FSM principal de VICON
@@ -345,16 +345,16 @@ begin
     --!
     --! SubFSM write+verify (estados ST_CFG_*):
     --!   Para cada entrada de c_CFG_TABLE:
-    --!     1. Si la page cambia respecto a s_cur_page → escribir Page Map (reg 0x01)
+    --!     1. Si la page cambia respecto a s_cur_page → escribir Page MAP (reg 0x01)
     --!     2. Escribir el registro
     --!     3. Leer el registro (readback)
     --!     4. Comparar readback con valor esperado → error si no coincide
     --!     5. Avanzar índice o ir a ST_FINISH
     ---------------------------------------------------------------------------
-    p_fsm : process(s_mclk)
-    begin
-        if rising_edge(s_mclk) then
-            if s_rst_final = '1' then
+    p_fsm : PROCESS(s_mclk)
+    BEGIN
+        IF rising_edge(s_mclk) THEN
+            IF s_rst_final = '1' THEN
                 s_state         <= ST_CAM_RESET_ASSERT;
                 cam_reset_r     <= '0';
                 s_init_cnt      <= 0;
@@ -363,226 +363,226 @@ begin
                 s_i2c_wr_push_fsm   <= '0';
                 s_i2c_rd_pop_fsm    <= '0';
                 s_i2c_num_regs_fsm  <= 1;
-                s_i2c_addr_reg_fsm  <= (others => '0');
-                s_i2c_wr_data_fsm   <= (others => '0');
+                s_i2c_addr_reg_fsm  <= (OTHERS => '0');
+                s_i2c_wr_data_fsm   <= (OTHERS => '0');
                 s_fill_cnt      <= 0;
-                s_chip_id       <= (others => '0');
+                s_chip_id       <= (OTHERS => '0');
                 s_cfg_idx       <= 0;
                 s_cur_page      <= '1';  -- tras Chip ID quedamos en IFP
                 basys3_led_o(0) <= '0';
                 basys3_led_o(1) <= '0';
                 s_led15_r       <= '0';  --! LED 15 apagado en reset
-            else
+            ELSE
                 s_i2c_start_fsm   <= '0';
                 s_i2c_wr_push_fsm <= '0';
                 s_i2c_rd_pop_fsm  <= '0';
 
-                case s_state is
+                CASE s_state IS
 
                     -- ── Reset del sensor ─────────────────────────────────────
-                    when ST_CAM_RESET_ASSERT =>
+                    WHEN ST_CAM_RESET_ASSERT =>
                         cam_reset_r <= '0';
-                        if s_init_cnt = c_MT9V111_RESET_HOLD_CYCLES - 1 then
+                        IF s_init_cnt = c_MT9V111_RESET_HOLD_CYCLES - 1 THEN
                             s_init_cnt <= 0;
                             s_state    <= ST_CAM_RESET_WAIT;
-                        else
+                        ELSE
                             s_init_cnt <= s_init_cnt + 1;
-                        end if;
+                        END IF;
 
-                    when ST_CAM_RESET_WAIT =>
+                    WHEN ST_CAM_RESET_WAIT =>
                         cam_reset_r <= '1';
-                        if s_init_cnt = c_MT9V111_RESET_WAIT_CYCLES - 1 then
+                        IF s_init_cnt = c_MT9V111_RESET_WAIT_CYCLES - 1 THEN
                             s_init_cnt <= 0;
                             s_state    <= ST_PAGE_SEL_FILL;
-                        else
+                        ELSE
                             s_init_cnt <= s_init_cnt + 1;
-                        end if;
+                        END IF;
 
                     -- ── Seleccionar IFP page para leer Chip ID ────────────────
-                    when ST_PAGE_SEL_FILL =>
-                        if s_i2c_wr_full = '0' then
+                    WHEN ST_PAGE_SEL_FILL =>
+                        IF s_i2c_wr_full = '0' THEN
                             s_i2c_wr_data_fsm <= x"0004";
                             s_i2c_wr_push_fsm <= '1';
                             s_state       <= ST_PAGE_SEL_START;
-                        end if;
+                        END IF;
 
-                    when ST_PAGE_SEL_START =>
-                        if s_i2c_busy = '0' then
+                    WHEN ST_PAGE_SEL_START =>
+                        IF s_i2c_busy = '0' THEN
                             s_i2c_rw_fsm       <= '0';
                             s_i2c_addr_reg_fsm <= x"01";
                             s_i2c_num_regs_fsm <= 1;
                             s_i2c_start_fsm    <= '1';
                             s_state        <= ST_PAGE_SEL_WAIT;
-                        end if;
+                        END IF;
 
-                    when ST_PAGE_SEL_WAIT =>
-                        if s_i2c_error = '1' then
+                    WHEN ST_PAGE_SEL_WAIT =>
+                        IF s_i2c_error = '1' THEN
                             s_state <= ST_ERROR;
-                        elsif s_i2c_done = '1' then
+                        elsif s_i2c_done = '1' THEN
                             s_state <= ST_CHIPID_RD_START;
-                        end if;
+                        END IF;
 
                     -- ── Lectura Chip ID ───────────────────────────────────────
-                    when ST_CHIPID_RD_START =>
-                        if s_i2c_busy = '0' and s_i2c_rd_empty = '1' then
+                    WHEN ST_CHIPID_RD_START =>
+                        IF s_i2c_busy = '0' and s_i2c_rd_empty = '1' THEN
                             s_i2c_rw_fsm       <= '1';
                             s_i2c_addr_reg_fsm <= x"FF";
                             s_i2c_num_regs_fsm <= 1;
                             s_i2c_start_fsm    <= '1';
                             s_state        <= ST_CHIPID_RD_WAIT;
-                        end if;
+                        END IF;
 
-                    when ST_CHIPID_RD_WAIT =>
-                        if s_i2c_error = '1' then
+                    WHEN ST_CHIPID_RD_WAIT =>
+                        IF s_i2c_error = '1' THEN
                             s_state <= ST_ERROR;
-                        elsif s_i2c_done = '1' then
+                        elsif s_i2c_done = '1' THEN
                             s_state <= ST_CHIPID_RD_DRAIN;
-                        end if;
+                        END IF;
 
-                    when ST_CHIPID_RD_DRAIN =>
-                        if s_i2c_rd_empty = '0' then
+                    WHEN ST_CHIPID_RD_DRAIN =>
+                        IF s_i2c_rd_empty = '0' THEN
                             s_i2c_rd_pop_fsm <= '1';
                             s_chip_id    <= s_i2c_rd_data;
-                            if s_i2c_rd_data = c_MT9V111_CHIP_ID_EXPECTED then
+                            IF s_i2c_rd_data = c_MT9V111_CHIP_ID_EXPECTED THEN
                                 s_cfg_idx  <= 0;
                                 s_cur_page <= '1';  -- Chip ID estaba en IFP
                                 s_state    <= ST_CFG_PAGE_FILL;
-                            else
+                            ELSE
                                 s_state <= ST_ERROR;
-                            end if;
-                        end if;
+                            END IF;
+                        END IF;
 
                     -- ════════════════════════════════════════════════════════
                     -- SubFSM write+verify — itera sobre c_CFG_TABLE
                     -- ════════════════════════════════════════════════════════
 
                     -- ── 1. Cambiar page si es necesario ───────────────────────
-                    when ST_CFG_PAGE_FILL =>
+                    WHEN ST_CFG_PAGE_FILL =>
                         -- Si la page del registro actual coincide con la actual, saltar
-                        if c_CFG_TABLE(s_cfg_idx).page = s_cur_page then
+                        IF c_CFG_TABLE(s_cfg_idx).page = s_cur_page THEN
                             s_state <= ST_CFG_WR_FILL;
-                        elsif s_i2c_wr_full = '0' then
+                        elsif s_i2c_wr_full = '0' THEN
                             -- Encolar valor de page: '0'→0x0000, '1'→0x0001
-                            if c_CFG_TABLE(s_cfg_idx).page = '0' then
+                            IF c_CFG_TABLE(s_cfg_idx).page = '0' THEN
                                 s_i2c_wr_data_fsm <= x"0000";
-                            else
+                            ELSE
                                 s_i2c_wr_data_fsm <= x"0001";
-                            end if;
+                            END IF;
                             s_i2c_wr_push_fsm <= '1';
                             s_state       <= ST_CFG_PAGE_START;
-                        end if;
+                        END IF;
 
-                    when ST_CFG_PAGE_START =>
-                        if s_i2c_busy = '0' and s_i2c_rd_empty = '1' then
+                    WHEN ST_CFG_PAGE_START =>
+                        IF s_i2c_busy = '0' and s_i2c_rd_empty = '1' THEN
                             s_i2c_rw_fsm       <= '0';
-                            s_i2c_addr_reg_fsm <= x"01";  --! Page Map register
+                            s_i2c_addr_reg_fsm <= x"01";  --! Page MAP register
                             s_i2c_num_regs_fsm <= 1;
                             s_i2c_start_fsm    <= '1';
                             s_state        <= ST_CFG_PAGE_WAIT;
-                        end if;
+                        END IF;
 
-                    when ST_CFG_PAGE_WAIT =>
-                        if s_i2c_error = '1' then
+                    WHEN ST_CFG_PAGE_WAIT =>
+                        IF s_i2c_error = '1' THEN
                             s_state <= ST_ERROR;
-                        elsif s_i2c_done = '1' then
+                        elsif s_i2c_done = '1' THEN
                             s_cur_page <= c_CFG_TABLE(s_cfg_idx).page;
                             s_state    <= ST_CFG_WR_FILL;
-                        end if;
+                        END IF;
 
                     -- ── 2. Escribir registro ──────────────────────────────────
-                    when ST_CFG_WR_FILL =>
-                        if s_i2c_wr_full = '0' then
+                    WHEN ST_CFG_WR_FILL =>
+                        IF s_i2c_wr_full = '0' THEN
                             s_i2c_wr_data_fsm <= c_CFG_TABLE(s_cfg_idx).data;
                             s_i2c_wr_push_fsm <= '1';
                             s_state       <= ST_CFG_WR_START;
-                        end if;
+                        END IF;
 
-                    when ST_CFG_WR_START =>
-                        if s_i2c_busy = '0' and s_i2c_rd_empty = '1' then
+                    WHEN ST_CFG_WR_START =>
+                        IF s_i2c_busy = '0' and s_i2c_rd_empty = '1' THEN
                             s_i2c_rw_fsm       <= '0';
                             s_i2c_addr_reg_fsm <= c_CFG_TABLE(s_cfg_idx).addr;
                             s_i2c_num_regs_fsm <= 1;
                             s_i2c_start_fsm    <= '1';
                             s_state        <= ST_CFG_WR_WAIT;
-                        end if;
+                        END IF;
 
-                    when ST_CFG_WR_WAIT =>
-                        if s_i2c_error = '1' then
+                    WHEN ST_CFG_WR_WAIT =>
+                        IF s_i2c_error = '1' THEN
                             s_state <= ST_ERROR;
-                        elsif s_i2c_done = '1' then
+                        elsif s_i2c_done = '1' THEN
                             s_state <= ST_CFG_RD_START;
-                        end if;
+                        END IF;
 
                     -- ── 3. Readback (verify) ──────────────────────────────────
-                    when ST_CFG_RD_START =>
-                        if s_i2c_busy = '0' and s_i2c_rd_empty = '1' then
+                    WHEN ST_CFG_RD_START =>
+                        IF s_i2c_busy = '0' and s_i2c_rd_empty = '1' THEN
                             s_i2c_rw_fsm       <= '1';
                             s_i2c_addr_reg_fsm <= c_CFG_TABLE(s_cfg_idx).addr;
                             s_i2c_num_regs_fsm <= 1;
                             s_i2c_start_fsm    <= '1';
                             s_state        <= ST_CFG_RD_WAIT;
-                        end if;
+                        END IF;
 
-                    when ST_CFG_RD_WAIT =>
-                        if s_i2c_error = '1' then
+                    WHEN ST_CFG_RD_WAIT =>
+                        IF s_i2c_error = '1' THEN
                             s_state <= ST_ERROR;
-                        elsif s_i2c_done = '1' then
+                        elsif s_i2c_done = '1' THEN
                             s_state <= ST_CFG_RD_DRAIN;
-                        end if;
+                        END IF;
 
                     -- ── 4. Verificar readback ─────────────────────────────────
-                    when ST_CFG_RD_DRAIN =>
-                        if s_i2c_rd_empty = '0' then
+                    WHEN ST_CFG_RD_DRAIN =>
+                        IF s_i2c_rd_empty = '0' THEN
                             s_i2c_rd_pop_fsm <= '1';
-                            if s_i2c_rd_data = c_CFG_TABLE(s_cfg_idx).data then
+                            IF s_i2c_rd_data = c_CFG_TABLE(s_cfg_idx).data THEN
                                 s_state <= ST_CFG_NEXT;
-                            else
+                            ELSE
                                 s_state <= ST_ERROR;  --! Verify fallido
-                            end if;
-                        end if;
+                            END IF;
+                        END IF;
 
                     -- ── 5. Avanzar o terminar ─────────────────────────────────
-                    when ST_CFG_NEXT =>
-                        if s_cfg_idx = c_CFG_TABLE_LEN - 1 then
+                    WHEN ST_CFG_NEXT =>
+                        IF s_cfg_idx = c_CFG_TABLE_LEN - 1 THEN
                             s_state <= ST_FINISH;
-                        else
+                        ELSE
                             s_cfg_idx <= s_cfg_idx + 1;
                             s_state   <= ST_CFG_PAGE_FILL;
-                        end if;
+                        END IF;
 
                     -- ── Estados finales ───────────────────────────────────────
-                    when ST_FINISH =>
+                    WHEN ST_FINISH =>
                         basys3_led_o(0) <= '1';
                         basys3_led_o(1) <= '0';
                         -- Procesar comandos recibidos del PC
                         -- CMD 0x01 (LED): toggle LED 15 -- detectar flanco de subida
                         -- de s_cmd_valid_sync1 para evitar doble toggle
-                        if s_cmdproc_led_toggle = '1' then
-                                s_led15_r <= not s_led15_r;
-                            end if;
+                        IF s_cmdproc_led_toggle = '1' THEN
+                                s_led15_r <= NOT s_led15_r;
+                            END IF;
                         s_state <= ST_FINISH;
 
-                    when ST_ERROR =>
+                    WHEN ST_ERROR =>
                         basys3_led_o(0) <= '0';
                         basys3_led_o(1) <= '1';
                         s_state <= ST_ERROR;
 
-                    when others =>
+                    WHEN OTHERS =>
                         s_state <= ST_CAM_RESET_ASSERT;
 
-                end case;
-            end if;
-        end if;
-    end process p_fsm;
+                END CASE;
+            END IF;
+        END IF;
+    END PROCESS p_fsm;
 
-    basys3_led_o(14 downto 2) <= basys3_sw_i(14 downto 2);  --! LEDs 14:2 reflejan switches
+    basys3_led_o(14 DOWNTO 2) <= basys3_sw_i(14 DOWNTO 2);  --! LEDs 14:2 reflejan switches
     basys3_led_o(15)          <= s_led15_r;                  --! LED 15 controlado por comando toggle desde PC
 
     ---------------------------------------------------------------------------
     -- IPs Xilinx
     ---------------------------------------------------------------------------
-    u_MMCM : entity work.clk_wiz_0
-        port map (
+    u_MMCM : ENTITY work.clk_wiz_0
+        PORT MAP (
             clk_in1  => basys3_clk_i,
             reset    => basys3_btn_i(c_BASYS3_BTN_CENTER),
             clk_out1 => s_mclk,
@@ -592,15 +592,15 @@ begin
         );
     
     u_cam_clk_mux : BUFGMUX_CTRL
-    port map (
+    PORT MAP (
         I0 => cam_mclk_r1,
         I1 => cam_mclk_r2,
         S  => s_cam_clk_sel,  -- '0'=12MHz, '1'=30MHz
         O  => cam_mclk_r
     );
 
-    u_async_fifo : entity work.fifo_generator_0
-        port map (
+    u_async_fifo : ENTITY work.fifo_generator_0
+        PORT MAP (
             wr_clk => s_mt_pixclk_int,
             din    => s_cap_fifo_data,
             wr_en  => s_cap_fifo_wr,
@@ -612,9 +612,9 @@ begin
             rst    => s_rst_final
         );
 
-    g_ila_on : if g_USE_ILA generate
-        u_ila : entity work.ila_0
-            port map (
+    g_ila_on : IF g_USE_ILA GENERATE
+        u_ila : ENTITY work.ila_0
+            PORT MAP (
                 clk       => s_ftdi_clk,
                 probe0    => s_cap_fifo_dout,
                 probe1(0) => s_ftdi_rxf_n,   --! RXF# — '0' cuando hay dato del PC disponible
@@ -622,8 +622,8 @@ begin
                 probe3(0) => s_ftdi_wr_n,
                 probe4(0) => s_ftdi_txe_n
             );
-        u_ila_1 : entity work.ila_0
-            port map (
+        u_ila_1 : ENTITY work.ila_0
+            PORT MAP (
                 clk       => s_mclk,
                 probe0    => debug_dout,
                 probe1(0) => debug_overflow,
@@ -631,11 +631,11 @@ begin
                 probe3(0) => debug_lval,
                 probe4(0) => s_cap_fifo_wr
             );
-    end generate;
+    END GENERATE;
 
 
-    u_ila_ftdi : entity work.ila_2
-    port map (
+    u_ila_ftdi : ENTITY work.ila_2
+    PORT MAP (
         clk       => s_ftdi_clk,
         probe0(0) => s_ftdi_rxf_n,
         probe1(0) => s_ftdi_txe_n,
@@ -652,14 +652,14 @@ begin
     ---------------------------------------------------------------------------
     -- Módulos propios
     ---------------------------------------------------------------------------
-    u_frame_capture : entity work.frame_capture
-        generic map (
+    u_frame_capture : ENTITY work.frame_capture
+        GENERIC MAP (
             g_H_RES      => c_CAP_H_RES,
             g_V_RES      => c_CAP_V_RES,
             g_CAM_FPS    => g_MT9V111_FPS,
             g_TARGET_FPS => g_MT9V111_TARGET_FPS
         )
-        port map (
+        PORT MAP (
             pixclk_i     => s_mt_pixclk_int,
             reset_i      => s_rst_final,
             fvalid_i     => s_mt_fvalid_int,
@@ -673,8 +673,8 @@ begin
             overflow_o   => s_cap_overflow
         );
 
-    u_ftdi_ctrl : entity work.ftdi_controller
-        port map (
+    u_ftdi_ctrl : ENTITY work.ftdi_controller
+        PORT MAP (
             clk_i        => s_ftdi_clk,
             reset_i      => s_rst_final,
             fifo_data_i  => s_cap_fifo_dout,
@@ -696,13 +696,13 @@ begin
             cmd_addr_o   => s_cmd_addr_ftdi      --! Addr  (solo CMD I2C)
         );
 
-    u_i2c : entity work.i2c_master
-        generic map (
+    u_i2c : ENTITY work.i2c_master
+        GENERIC MAP (
             g_CLK_FREQ_HZ => g_SYSTEM_CLK_FREQ_HZ,
             g_I2C_FREQ_HZ => g_MT9V111_I2C_FREQ_HZ,
             g_FIFO_DEPTH  => g_MT9V111_I2C_FIFO_DEPTH
         )
-        port map (
+        PORT MAP (
             clk_i           => s_mclk,
             reset_i         => s_rst_final,
             rw_i            => s_i2c_mux_rw,
@@ -730,22 +730,22 @@ begin
     ---------------------------------------------------------------------------
     -- Selección de fuente de imagen
     ---------------------------------------------------------------------------
-    g_real_image : if not g_USE_CAM_SIM generate
+    g_real_image : IF NOT g_USE_CAM_SIM GENERATE
         s_mt_fvalid_int <= mt_fvalid_i;
         s_mt_lvalid_int <= mt_lvalid_i;
         s_mt_data_int   <= mt_data_i;
         s_mt_pixclk_int <= mt_pixclk_i;
-    end generate;
+    END GENERATE;
 
-    g_cam_sim_on : if g_USE_CAM_SIM generate
-        u_cam_sim : entity work.mt9v111_image
-            generic map (
+    g_cam_sim_on : IF g_USE_CAM_SIM GENERATE
+        u_cam_sim : ENTITY work.mt9v111_image
+            GENERIC MAP (
                 g_H_RES  => g_CAM_SIM_H_RES,
                 g_V_RES  => g_CAM_SIM_V_RES,
                 g_HBLANK => g_CAM_SIM_HBLANK,
                 g_VBLANK => g_CAM_SIM_VBLANK
             )
-            port map (
+            PORT MAP (
                 clkin_i  => cam_mclk_r,
                 pixclk_o => s_mt_pixclk_int,
                 reset_i  => s_rst_final,
@@ -753,13 +753,13 @@ begin
                 lvalid_o => s_mt_lvalid_int,
                 data_o   => s_mt_data_int
             );
-    end generate;
+    END GENERATE;
     
-    u_cmd_processor : entity work.cmd_processor
-        generic map (
+    u_cmd_processor : ENTITY work.cmd_processor
+        GENERIC MAP (
             g_I2C_FIFO_DEPTH => g_MT9V111_I2C_FIFO_DEPTH
         )
-        port map (
+        PORT MAP (
             ftdi_clk_i   => s_ftdi_clk,
             ftdi_reset_i => s_rst_final,
             cmd_valid_i  => s_cmd_valid_ftdi,
@@ -788,4 +788,4 @@ begin
             i2c_wr_data_o  => s_cmdproc_i2c_wr_data,
             i2c_page_o     => s_cmdproc_i2c_page
         );
-end architecture rtl;
+END ARCHITECTURE rtl;
