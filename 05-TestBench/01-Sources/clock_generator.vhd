@@ -1,51 +1,51 @@
 --! \file clock_generator.vhd
 --! \brief Generador de reloj y reset para simulación.
+--! \author Carlos Manuel Gomez Jimenez
 
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
 
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
+LIBRARY work;
+USE work.sim_utils_pkg.ALL;
 
-library work;
-use work.sim_utils_pkg.all;
-
-entity clk_reset_gen is
-    generic (
-        g_RESET_DURATION : time := 100 ns  --! Duración del reset activo al inicio de la simulación
+ENTITY clk_reset_gen IS
+    GENERIC (
+        g_RESET_DURATION : TIME := 100 ns  --! Duración del reset activo al inicio de la simulación
     );
-    port (
-        clk_out   : out std_logic;  --! Reloj 100 MHz generado
-        reset_out : out std_logic   --! Reset activo alto; se desactiva tras g_RESET_DURATION
+    PORT (
+        clk_out   : OUT STD_LOGIC;  --! Reloj 100 MHz generado
+        reset_out : OUT STD_LOGIC   --! Reset activo alto; se desactiva tras g_RESET_DURATION
     );
-end entity clk_reset_gen;
+END ENTITY clk_reset_gen;
 
-architecture sim of clk_reset_gen is
+ARCHITECTURE sim OF clk_reset_gen IS
 
-    signal s_clk   : std_logic := '0';  --! Registro interno del reloj
-    signal s_reset : std_logic := '1';  --! Registro interno del reset (arranca activo)
+    SIGNAL s_clk   : STD_LOGIC := '0';  --! Registro interno del reloj
+    SIGNAL s_reset : STD_LOGIC := '1';  --! Registro interno del reset (arranca activo)
 
-begin
+BEGIN
 
     clk_out   <= s_clk;
     reset_out <= s_reset;
 
     --! \brief Generador de reloj — periodo definido por c_CLK_PERIOD de sim_utils_pkg
-    p_clk : process
-    begin
-        loop
+    p_clk : PROCESS
+    BEGIN
+        LOOP
             s_clk <= '0';
-            wait for c_CLK_PERIOD / 2;
+            WAIT FOR c_CLK_PERIOD / 2;
             s_clk <= '1';
-            wait for c_CLK_PERIOD / 2;
-        end loop;
-    end process p_clk;
+            WAIT FOR c_CLK_PERIOD / 2;
+        END LOOP;
+    END PROCESS p_clk;
 
     --! \brief Generador de reset — activo alto durante g_RESET_DURATION
-    p_reset : process
-    begin
+    p_reset : PROCESS
+    BEGIN
         s_reset <= '1';
-        wait for g_RESET_DURATION;
+        WAIT FOR g_RESET_DURATION;
         s_reset <= '0';
-        wait;
-    end process p_reset;
+        WAIT;
+    END PROCESS p_reset;
 
-end architecture sim;
+END ARCHITECTURE sim;

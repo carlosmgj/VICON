@@ -24,69 +24,71 @@
 --!   s_rx_dest guarda el estado al que debe ir ST_RX_RELEASE tras leer cada byte.
 --!   Cada ST_CMD_BYTEx procesa s_rx_byte (ya válido) y si necesita más bytes
 --!   establece s_rx_dest y lanza ST_RX_OE directamente.
+--! \author Carlos Manuel Gomez Jimenez
 
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
 
-entity ftdi_controller is
-    port (
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.NUMERIC_STD.ALL;
+
+ENTITY ftdi_controller IS
+    PORT (
         ---------------------------------------------------------------------------
         -- Dominio clk_i (60 MHz — generado por el FT232H vía BUFG)
         ---------------------------------------------------------------------------
-        clk_i   : in std_logic;
-        reset_i : in std_logic;
+        clk_i   : IN STD_LOGIC;
+        reset_i : IN STD_LOGIC;
 
         ---------------------------------------------------------------------------
         -- Interfaz con FIFO de imagen (lado lectura — dominio clk_i)
         ---------------------------------------------------------------------------
-        fifo_data_i  : in  std_logic_vector(7 downto 0);
-        fifo_empty_i : in  std_logic;
-        fifo_rd_en_o : out std_logic;
+        fifo_data_i  : IN  STD_LOGIC_VECTOR(7 DOWNTO 0);
+        fifo_empty_i : IN  STD_LOGIC;
+        fifo_rd_en_o : OUT STD_LOGIC;
 
         ---------------------------------------------------------------------------
         -- Interfaz física FT232H
         ---------------------------------------------------------------------------
-        rxf_n_i  : in    std_logic;                     --! RXF# '0'=dato disponible del PC
-        txe_n_i  : in    std_logic;                     --! TXE# '0'=FT232H listo para recibir
-        rd_n_o   : out   std_logic;                     --! RD#  '0'=leer byte de ADBUS
-        wr_n_o   : out   std_logic;                     --! WR#  '0'=escribir byte en ADBUS
-        oe_n_o   : out   std_logic;                     --! OE#  '0'=FTDI pone dato en ADBUS
-        adbus_i  : in    std_logic_vector(7 downto 0);  --! ADBUS entrada (cuando OE#='0')
-        adbus_o  : out   std_logic_vector(7 downto 0);  --! ADBUS salida  (cuando escribimos)
-        adbus_oe : out   std_logic;                     --! '1'=FPGA conduce ADBUS, '0'=tristate
+        rxf_n_i  : IN    STD_LOGIC;                     --! RXF# '0'=dato disponible del PC
+        txe_n_i  : IN    STD_LOGIC;                     --! TXE# '0'=FT232H listo para recibir
+        rd_n_o   : OUT   STD_LOGIC;                     --! RD#  '0'=leer byte de ADBUS
+        wr_n_o   : OUT   STD_LOGIC;                     --! WR#  '0'=escribir byte en ADBUS
+        oe_n_o   : OUT   STD_LOGIC;                     --! OE#  '0'=FTDI pone dato en ADBUS
+        adbus_i  : IN    STD_LOGIC_VECTOR(7 DOWNTO 0);  --! ADBUS entrada (cuando OE#='0')
+        adbus_o  : OUT   STD_LOGIC_VECTOR(7 DOWNTO 0);  --! ADBUS salida  (cuando escribimos)
+        adbus_oe : OUT   STD_LOGIC;                     --! '1'=FPGA conduce ADBUS, '0'=tristate
 
         ---------------------------------------------------------------------------
         -- Estado TX
         ---------------------------------------------------------------------------
-        tx_active_o : out std_logic;
+        tx_active_o : OUT STD_LOGIC;
 
         ---------------------------------------------------------------------------
         -- Comandos decodificados (dominio clk_i — sincronizar en TOP antes de usar)
         ---------------------------------------------------------------------------
-        cmd_valid_o : out std_logic;                     --! Pulso 1 ciclo: comando listo
-        cmd_type_o  : out std_logic_vector(7 downto 0); --! Tipo de comando
-        cmd_data_o  : out std_logic_vector(15 downto 0);--! Payload general
-        cmd_page_o  : out std_logic;                     --! Page (solo CMD 0x03)
-        cmd_addr_o  : out std_logic_vector(7 downto 0)  --! Addr (solo CMD 0x03)
+        cmd_valid_o : OUT STD_LOGIC;                     --! Pulso 1 ciclo: comando listo
+        cmd_type_o  : OUT STD_LOGIC_VECTOR(7 DOWNTO 0); --! Tipo de comando
+        cmd_data_o  : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);--! Payload general
+        cmd_page_o  : OUT STD_LOGIC;                     --! Page (solo CMD 0x03)
+        cmd_addr_o  : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)  --! Addr (solo CMD 0x03)
     );
-end entity ftdi_controller;
+END ENTITY ftdi_controller;
 
-architecture rtl of ftdi_controller is
+ARCHITECTURE rtl OF ftdi_controller IS
 
     ---------------------------------------------------------------------------
     -- Constantes de protocolo
     ---------------------------------------------------------------------------
-    constant c_CMD_SYNC : std_logic_vector(7 downto 0) := x"CC";
-    constant c_CMD_LED  : std_logic_vector(7 downto 0) := x"01";
-    constant c_CMD_BCD  : std_logic_vector(7 downto 0) := x"02";
-    constant c_CMD_I2C  : std_logic_vector(7 downto 0) := x"03";
-    constant c_CMD_CAP  : std_logic_vector(7 downto 0) := x"04";
+    CONSTANT c_CMD_SYNC : STD_LOGIC_VECTOR(7 DOWNTO 0) := x"CC";
+    CONSTANT c_CMD_LED  : STD_LOGIC_VECTOR(7 DOWNTO 0) := x"01";
+    CONSTANT c_CMD_BCD  : STD_LOGIC_VECTOR(7 DOWNTO 0) := x"02";
+    CONSTANT c_CMD_I2C  : STD_LOGIC_VECTOR(7 DOWNTO 0) := x"03";
+    CONSTANT c_CMD_CAP  : STD_LOGIC_VECTOR(7 DOWNTO 0) := x"04";
 
     ---------------------------------------------------------------------------
     -- FSM
     ---------------------------------------------------------------------------
-    type t_state is (
+    TYPE t_state IS (
         -- TX imagen
         ST_IDLE,
         ST_HOLD,
@@ -105,39 +107,39 @@ architecture rtl of ftdi_controller is
         ST_CMD_EXEC     --! Emitir cmd_valid_o
     );
 
-    signal s_state   : t_state := ST_IDLE;
-    signal s_rx_dest : t_state := ST_IDLE; --! Destino tras ST_RX_RELEASE
+    SIGNAL s_state   : t_state := ST_IDLE;
+    SIGNAL s_rx_dest : t_state := ST_IDLE; --! Destino tras ST_RX_RELEASE
 
     ---------------------------------------------------------------------------
     -- Registros TX
     ---------------------------------------------------------------------------
-    signal data_r    : std_logic_vector(7 downto 0) := (others => '0');
-    signal fifo_rd_r : std_logic                    := '0';
+    SIGNAL data_r    : STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0');
+    SIGNAL fifo_rd_r : STD_LOGIC                    := '0';
 
     ---------------------------------------------------------------------------
     -- Registros de control bus — internos para poder conectarlos a la ILA
     ---------------------------------------------------------------------------
-    signal s_rd_n         : std_logic := '1';  --! Registro interno RD#
-    signal s_wr_n         : std_logic := '1';  --! Registro interno WR#
-    signal s_oe_n         : std_logic := '1';  --! Registro interno OE#
-    signal s_cmd_valid_r  : std_logic := '0';  --! Registro interno cmd_valid
+    SIGNAL s_rd_n         : STD_LOGIC := '1';  --! Registro interno RD#
+    SIGNAL s_wr_n         : STD_LOGIC := '1';  --! Registro interno WR#
+    SIGNAL s_oe_n         : STD_LOGIC := '1';  --! Registro interno OE#
+    SIGNAL s_cmd_valid_r  : STD_LOGIC := '0';  --! Registro interno cmd_valid
 
     ---------------------------------------------------------------------------
     -- Registros RX
     ---------------------------------------------------------------------------
-    signal s_rx_byte  : std_logic_vector(7 downto 0) := (others => '0');
-    signal s_cmd_type : std_logic_vector(7 downto 0) := (others => '0');
-    signal s_cmd_page : std_logic                    := '0';
-    signal s_cmd_addr : std_logic_vector(7 downto 0) := (others => '0');
-    signal s_cmd_dh   : std_logic_vector(7 downto 0) := (others => '0');
-    signal s_cmd_dl   : std_logic_vector(7 downto 0) := (others => '0');
+    SIGNAL s_rx_byte  : STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0');
+    SIGNAL s_cmd_type : STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0');
+    SIGNAL s_cmd_page : STD_LOGIC                    := '0';
+    SIGNAL s_cmd_addr : STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0');
+    SIGNAL s_cmd_dh   : STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0');
+    SIGNAL s_cmd_dl   : STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0');
 
     ---------------------------------------------------------------------------
     -- Timeout espera RXF# (255 ciclos a 60MHz ≈ 4µs)
     ---------------------------------------------------------------------------
-    signal s_rx_timeout : integer range 0 to 255 := 0;
+    SIGNAL s_rx_timeout : integer range 0 to 255 := 0;
 
-begin
+BEGIN
 
     fifo_rd_en_o <= fifo_rd_r;
     adbus_o      <= data_r;
@@ -149,10 +151,10 @@ begin
     ---------------------------------------------------------------------------
     -- FSM — rising_edge (setup/hold del FT232H cubierto con medio periodo a 60 MHz)
     ---------------------------------------------------------------------------
-    p_fsm : process(clk_i)
-    begin
-        if falling_edge(clk_i) then
-            if reset_i = '1' then
+    p_fsm : PROCESS(clk_i)
+    BEGIN
+        IF falling_edge(clk_i) THEN
+            IF reset_i = '1' THEN
                 s_state      <= ST_IDLE;
                 s_wr_n <= '1';
                 s_rd_n <= '1';
@@ -161,73 +163,73 @@ begin
                 fifo_rd_r    <= '0';
                 tx_active_o  <= '0';
                 s_cmd_valid_r <= '0';
-                data_r       <= (others => '0');
+                data_r       <= (OTHERS => '0');
                 s_rx_dest    <= ST_IDLE;
-                s_rx_byte    <= (others => '0');
-                s_cmd_type   <= (others => '0');
+                s_rx_byte    <= (OTHERS => '0');
+                s_cmd_type   <= (OTHERS => '0');
                 s_cmd_page   <= '0';
-                s_cmd_addr   <= (others => '0');
-                s_cmd_dh     <= (others => '0');
-                s_cmd_dl     <= (others => '0');
-                cmd_type_o   <= (others => '0');
-                cmd_data_o   <= (others => '0');
+                s_cmd_addr   <= (OTHERS => '0');
+                s_cmd_dh     <= (OTHERS => '0');
+                s_cmd_dl     <= (OTHERS => '0');
+                cmd_type_o   <= (OTHERS => '0');
+                cmd_data_o   <= (OTHERS => '0');
                 cmd_page_o   <= '0';
-                cmd_addr_o   <= (others => '0');
+                cmd_addr_o   <= (OTHERS => '0');
                 s_rx_timeout <= 0;
-            else
+            ELSE
                 fifo_rd_r   <= '0';
                 s_cmd_valid_r <= '0';
 
-                case s_state is
+                CASE s_state IS
 
                     -----------------------------------------------------------
                     -- IDLE: prioridad comandos > imagen
                     -----------------------------------------------------------
-                    when ST_IDLE =>
+                    WHEN ST_IDLE =>
                         s_wr_n <= '1';
                         s_rd_n <= '1';
                         s_oe_n <= '1';
                         adbus_oe    <= '1';
                         tx_active_o <= '0';
-                        if rxf_n_i = '0' then
+                        IF rxf_n_i = '0' THEN
                             -- Comando entrante — leer primer byte (debe ser 0xCC)
                             s_rx_dest    <= ST_CMD_BYTE1;
                             s_rx_timeout <= 0;
                             s_state      <= ST_RX_OE;
-                        elsif fifo_empty_i = '0' and txe_n_i = '0' then
+                        ELSIF fifo_empty_i = '0' AND txe_n_i = '0' THEN
                             data_r      <= fifo_data_i;
                             s_wr_n <= '0';
                             fifo_rd_r   <= '1';
                             tx_active_o <= '1';
                             adbus_oe    <= '1';
                             s_state     <= ST_HOLD;
-                        end if;
+                        END IF;
 
                     -----------------------------------------------------------
                     -- ST_HOLD: burst TX imagen — prioridad comandos
                     -----------------------------------------------------------
-                    when ST_HOLD =>
+                    WHEN ST_HOLD =>
                         s_wr_n <= '1';
-                        if rxf_n_i = '0' then
+                        IF rxf_n_i = '0' THEN
                             tx_active_o  <= '0';
                             s_rx_dest    <= ST_CMD_BYTE1;
                             s_rx_timeout <= 0;
                             s_state      <= ST_RX_OE;
-                        elsif fifo_empty_i = '0' and txe_n_i = '0' then
+                        ELSIF fifo_empty_i = '0' AND txe_n_i = '0' THEN
                             data_r    <= fifo_data_i;
                             s_wr_n <= '0';
                             fifo_rd_r <= '1';
                             s_state   <= ST_HOLD;
-                        else
+                        ELSE
                             tx_active_o <= '0';
                             s_state     <= ST_IDLE;
-                        end if;
+                        END IF;
 
                     -----------------------------------------------------------
                     -- RX fase 1: OE_N='0' — FTDI empieza a conducir ADBUS
                     --            FPGA aún conduce (adbus_oe='1')
                     -----------------------------------------------------------
-                    when ST_RX_OE =>
+                    WHEN ST_RX_OE =>
                         s_wr_n   <= '1';
                         s_oe_n   <= '0';     --! FTDI empieza a preparar dato
                         s_rd_n   <= '1';
@@ -237,14 +239,14 @@ begin
                     -- RX fase 2: adbus_oe='0' — FPGA suelta bus
                     --            FTDI ya conduce, bus estable
                     -----------------------------------------------------------
-                    when ST_RX_OE2 =>
+                    WHEN ST_RX_OE2 =>
                         adbus_oe <= '0';     --! FPGA suelta un ciclo después
                         s_state  <= ST_RX_RD;
 
                     -----------------------------------------------------------
                     -- RX fase 2: RD_N='0' — dato estable en ADBUS, capturar
                     -----------------------------------------------------------
-                    when ST_RX_RD =>
+                    WHEN ST_RX_RD =>
                         s_rd_n    <= '0';
                         s_rx_byte <= adbus_i;  --! capturar mientras RD_N='0'
                         s_state   <= ST_RX_RELEASE;
@@ -252,7 +254,7 @@ begin
                     -----------------------------------------------------------
                     -- RX fase 3: RD_N='1', OE_N='1' — liberar bus, ir a destino
                     -----------------------------------------------------------
-                    when ST_RX_RELEASE =>
+                    WHEN ST_RX_RELEASE =>
                         s_rd_n   <= '1';
                         s_oe_n   <= '1';
                         adbus_oe <= '1';
@@ -261,20 +263,20 @@ begin
                     -----------------------------------------------------------
                     -- BYTE1: verifica que el byte recibido es 0xCC
                     -----------------------------------------------------------
-                    when ST_CMD_BYTE1 =>
-                        if s_rx_byte = c_CMD_SYNC then
+                    WHEN ST_CMD_BYTE1 =>
+                        IF s_rx_byte = c_CMD_SYNC THEN
                             -- Leer siguiente byte (CMD)
                             s_rx_dest    <= ST_CMD_BYTE2;
                             s_rx_timeout <= 0;
                             s_state      <= ST_RX_OE;
-                        else
+                        ELSE
                             s_state <= ST_IDLE;  -- no era sync, descartar
-                        end if;
+                        END IF;
 
                     -----------------------------------------------------------
                     -- BYTE2: guarda CMD, lanza lectura DATA_H
                     -----------------------------------------------------------
-                    when ST_CMD_BYTE2 =>
+                    WHEN ST_CMD_BYTE2 =>
                         s_cmd_type   <= s_rx_byte;
                         s_rx_dest    <= ST_CMD_BYTE3;
                         s_rx_timeout <= 0;
@@ -283,12 +285,12 @@ begin
                     -----------------------------------------------------------
                     -- BYTE3: guarda DATA_H (general) o PAGE (I2C)
                     -----------------------------------------------------------
-                    when ST_CMD_BYTE3 =>
-                        if s_cmd_type = c_CMD_I2C then
+                    WHEN ST_CMD_BYTE3 =>
+                        IF s_cmd_type = c_CMD_I2C THEN
                             s_cmd_page <= s_rx_byte(0);
-                        else
+                        ELSE
                             s_cmd_dh <= s_rx_byte;
-                        end if;
+                        END IF;
                         s_rx_dest    <= ST_CMD_BYTE4;
                         s_rx_timeout <= 0;
                         s_state      <= ST_RX_OE;
@@ -296,21 +298,21 @@ begin
                     -----------------------------------------------------------
                     -- BYTE4: guarda DATA_L (general) → EXEC, o ADDR (I2C) → BYTE5
                     -----------------------------------------------------------
-                    when ST_CMD_BYTE4 =>
-                        if s_cmd_type = c_CMD_I2C then
+                    WHEN ST_CMD_BYTE4 =>
+                        IF s_cmd_type = c_CMD_I2C THEN
                             s_cmd_addr   <= s_rx_byte;
                             s_rx_dest    <= ST_CMD_BYTE5;
                             s_rx_timeout <= 0;
                             s_state      <= ST_RX_OE;
-                        else
+                        ELSE
                             s_cmd_dl <= s_rx_byte;
                             s_state  <= ST_CMD_EXEC;
-                        end if;
+                        END IF;
 
                     -----------------------------------------------------------
                     -- BYTE5: guarda DATA_H (I2C), lanza lectura DATA_L
                     -----------------------------------------------------------
-                    when ST_CMD_BYTE5 =>
+                    WHEN ST_CMD_BYTE5 =>
                         s_cmd_dh     <= s_rx_byte;
                         s_rx_dest    <= ST_CMD_BYTE6;
                         s_rx_timeout <= 0;
@@ -319,14 +321,14 @@ begin
                     -----------------------------------------------------------
                     -- BYTE6: guarda DATA_L (I2C) → EXEC
                     -----------------------------------------------------------
-                    when ST_CMD_BYTE6 =>
+                    WHEN ST_CMD_BYTE6 =>
                         s_cmd_dl <= s_rx_byte;
                         s_state  <= ST_CMD_EXEC;
 
                     -----------------------------------------------------------
                     -- EXEC: emitir cmd_valid_o con el comando decodificado
                     -----------------------------------------------------------
-                    when ST_CMD_EXEC =>
+                    WHEN ST_CMD_EXEC =>
                         s_cmd_valid_r <= '1';
                         cmd_type_o  <= s_cmd_type;
                         cmd_data_o  <= s_cmd_dh & s_cmd_dl;
@@ -334,12 +336,12 @@ begin
                         cmd_addr_o  <= s_cmd_addr;
                         s_state     <= ST_IDLE;
 
-                    when others =>
+                    WHEN OTHERS =>
                         s_state <= ST_IDLE;
 
-                end case;
-            end if;
-        end if;
-    end process p_fsm;
+                END CASE;
+            END IF;
+        END IF;
+    END PROCESS p_fsm;
 
-end architecture rtl;
+END ARCHITECTURE rtl;
