@@ -78,20 +78,22 @@ add wave -noupdate -group i2c_agent /testbench/u_i2c_agent/s_reg_addr
 add wave -noupdate -group i2c_agent /testbench/u_i2c_agent/s_debug_state
 add wave -noupdate -divider -height 25 <NULL>
 add wave -noupdate -group image_agent -divider -height 25 <NULL>
-add wave -noupdate -group image_agent /testbench/u_dut/g_cam_sim_on/u_cam_sim/reset_i
-add wave -noupdate -group image_agent /testbench/u_dut/g_cam_sim_on/u_cam_sim/fvalid_o
-add wave -noupdate -group image_agent /testbench/u_dut/g_cam_sim_on/u_cam_sim/lvalid_o
-add wave -noupdate -group image_agent /testbench/u_dut/g_cam_sim_on/u_cam_sim/data_o
-add wave -noupdate -group image_agent /testbench/u_dut/g_cam_sim_on/u_cam_sim/s_state
-add wave -noupdate -group image_agent /testbench/u_dut/g_cam_sim_on/u_cam_sim/s_col_cnt
-add wave -noupdate -group image_agent /testbench/u_dut/g_cam_sim_on/u_cam_sim/s_row_cnt
-add wave -noupdate -group image_agent /testbench/u_dut/g_cam_sim_on/u_cam_sim/s_blank_cnt
-add wave -noupdate -group image_agent /testbench/u_dut/g_cam_sim_on/u_cam_sim/fvalid_r
-add wave -noupdate -group image_agent /testbench/u_dut/g_cam_sim_on/u_cam_sim/lvalid_r
-add wave -noupdate -group image_agent /testbench/u_dut/g_cam_sim_on/u_cam_sim/s_pix_num
-add wave -noupdate -group image_agent /testbench/u_dut/g_cam_sim_on/u_cam_sim/clkin_i
+add wave -noupdate -group image_agent /testbench/u_dut/u_cam_sim/reset_i
+add wave -noupdate -group image_agent /testbench/u_dut/u_cam_sim/fvalid_o
+add wave -noupdate -group image_agent /testbench/u_dut/u_cam_sim/lvalid_o
+add wave -noupdate -group image_agent /testbench/u_dut/u_cam_sim/data_o
+add wave -noupdate -group image_agent /testbench/u_dut/u_cam_sim/s_state
+add wave -noupdate -group image_agent /testbench/u_dut/u_cam_sim/s_col_cnt
+add wave -noupdate -group image_agent /testbench/u_dut/u_cam_sim/s_row_cnt
+add wave -noupdate -group image_agent /testbench/u_dut/u_cam_sim/s_blank_cnt
+add wave -noupdate -group image_agent /testbench/u_dut/u_cam_sim/fvalid_r
+add wave -noupdate -group image_agent /testbench/u_dut/u_cam_sim/lvalid_r
+add wave -noupdate -group image_agent /testbench/u_dut/u_cam_sim/s_pix_num
+add wave -noupdate -group image_agent /testbench/u_dut/u_cam_sim/clkin_i
 add wave -noupdate -group image_agent /testbench/u_dut/s_mclk_div_cnt
 add wave -noupdate -divider -height 25 <NULL>
+add wave -noupdate -expand -group {frame capture} /testbench/u_dut/s_cap_en
+add wave -noupdate -expand -group {frame capture} /testbench/u_dut/u_cmd_processor/cap_en_cmd_o
 add wave -noupdate -expand -group {frame capture} -label PIXLCLK /testbench/u_dut/u_frame_capture/pixclk_i
 add wave -noupdate -expand -group {frame capture} -label RESET /testbench/u_dut/u_frame_capture/reset_i
 add wave -noupdate -expand -group {frame capture} -label {FRAME VALID} /testbench/u_dut/u_frame_capture/fvalid_i
@@ -144,6 +146,10 @@ add wave -noupdate -divider -height 25 <NULL>
 add wave -noupdate -expand -group CMD /testbench/u_dut/s_cmd_valid_sync1
 add wave -noupdate -expand -group CMD /testbench/u_dut/s_cmd_type_sync1
 add wave -noupdate -expand -group CMD /testbench/u_dut/s_cmd_data_sync1
+add wave -noupdate /testbench/u_dut/s_cmdproc_src_sel
+add wave -noupdate /testbench/u_dut/u_cmd_processor/src_sel_o
+add wave -noupdate /testbench/u_dut/u_cmd_processor/s_src_sel_r
+add wave -noupdate /testbench/u_dut/u_cmd_processor/s_data_sync1
 add wave -noupdate -divider -height 25 <NULL>
 add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/acbus_io
 add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/adbus_io
@@ -153,7 +159,7 @@ add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/s_rxf_n
 add wave -noupdate -expand -group ftdi_agent -radix unsigned /testbench/u_ftdi_agent/s_rx_fifo_level
 add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/s_tx_fifo_dout
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {369310000 ps} 0} {{Cursor 2} {2342194721 ps} 0}
+WaveRestoreCursors {{Cursor 1} {1152053500 ps} 0} {{Cursor 2} {1359561180 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 553
 configure wave -valuecolwidth 100

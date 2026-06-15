@@ -237,11 +237,16 @@ set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {ftdi_acbus_io_IBUF[5]}]
 create_clock -period 16.667 -name ftdi_clk [get_ports {ftdi_acbus_io[5]}]
 
 ###########################################################
-# CDC False Paths — sincronizadores 2FF ftdi_clk → s_mclk
+# CDC False Path - ftdi_clk -> s_mclk
 ###########################################################
-set_false_path -from [get_cells u_ftdi_ctrl/s_cmd_valid_r_reg*] \
-               -to   [get_cells s_cmd_valid_sync0_reg*]
-set_false_path -from [get_cells u_ftdi_ctrl/cmd_type_o_reg*] \
-               -to   [get_cells s_cmd_type_sync0_reg*]
-set_false_path -from [get_cells u_ftdi_ctrl/cmd_data_o_reg*] \
-               -to   [get_cells s_cmd_data_sync0_reg*]
+# Primera etapa de los sincronizadores 2FF en cmd_processor
+# (s_valid_sync0, s_type_sync0, s_data_sync0, s_addr_sync0).
+# La metaestabilidad la resuelve la cadena de sincronizacion;
+# se excluye del analisis setup/hold normal entre ftdi_clk y s_mclk.
+#
+# (Sustituye a los 3 set_false_path antiguos que apuntaban a las
+#  senales del proceso p_cdc en TOP.vhd, eliminado por ser codigo
+#  muerto: esos destinos (s_cmd_*_sync0_reg*) ya no existen en la
+#  netlist.)
+set_false_path -from [get_clocks ftdi_clk] \
+    -to [get_cells -hierarchical -filter {NAME =~ "*u_cmd_processor/s_*_sync0_reg*"}]

@@ -112,10 +112,8 @@ ARCHITECTURE rtl OF TOP IS
     SIGNAL s_locked       : STD_LOGIC;
     SIGNAL s_rst_final    : STD_LOGIC;
     SIGNAL s_mclk_div_cnt : INTEGER RANGE 0 TO g_MT9V111_MCLK_DIV - 1 := 0;
-    SIGNAL cam_mclk_r     : STD_LOGIC := '0';  
-    SIGNAL cam_mclk_r1    : STD_LOGIC := '0';  --! clk_out2 del MMCM = 12 MHz
-    SIGNAL cam_mclk_r2    : STD_LOGIC := '0';  --! clk_out3 del MMCM = 27 MHz
-    SIGNAL s_cam_clk_sel  : STD_LOGIC := '1';
+    SIGNAL cam_mclk_r     : STD_LOGIC := '0';  --! clk_out3 del MMCM (30 MHz) -> mt_clk_o
+
     ---------------------------------------------------------------------------
     -- Interfaz FSM <-> controlador I2C
     ---------------------------------------------------------------------------
@@ -161,21 +159,6 @@ ARCHITECTURE rtl OF TOP IS
     SIGNAL s_cmd_addr_ftdi  : STD_LOGIC_VECTOR(7 DOWNTO 0);
 
     ---------------------------------------------------------------------------
-    -- CDC: ftdi_clk → s_mclk (sincronizadores 2FF para cmd_valid y payload)
-    ---------------------------------------------------------------------------
-    SIGNAL s_cmd_valid_sync0 : STD_LOGIC := '0';
-    SIGNAL s_cmd_valid_sync1 : STD_LOGIC := '0';
-    SIGNAL s_cmd_valid_sync2 : STD_LOGIC := '0';
-    SIGNAL s_cmd_type_sync0  : STD_LOGIC_VECTOR(7 DOWNTO 0)  := (OTHERS => '0');
-    SIGNAL s_cmd_type_sync1  : STD_LOGIC_VECTOR(7 DOWNTO 0)  := (OTHERS => '0');
-    SIGNAL s_cmd_data_sync0  : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
-    SIGNAL s_cmd_data_sync1  : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
-
-    ATTRIBUTE ASYNC_REG : string;
-    ATTRIBUTE ASYNC_REG OF s_cmd_valid_sync0 : SIGNAL IS "TRUE";
-    ATTRIBUTE ASYNC_REG OF s_cmd_valid_sync1 : SIGNAL IS "TRUE";
-
-    ---------------------------------------------------------------------------
     -- FIFO de captura (pixclk → ftdi_clk)
     ---------------------------------------------------------------------------
     SIGNAL s_cap_fifo_data  : STD_LOGIC_VECTOR(7 DOWNTO 0);
@@ -212,6 +195,24 @@ ARCHITECTURE rtl OF TOP IS
     SIGNAL s_mt_data_int   : STD_LOGIC_VECTOR(c_MT9V111_DATA_BITS-1 DOWNTO 0);
     SIGNAL s_mt_pixclk_int : STD_LOGIC;
 
+    ---------------------------------------------------------------------------
+    -- cam_sim: imagen sintética (mismo dominio mt_pixclk_i, sin reloj nuevo)
+    ---------------------------------------------------------------------------
+    SIGNAL s_sim_fvalid : STD_LOGIC;
+    SIGNAL s_sim_lvalid : STD_LOGIC;
+    SIGNAL s_sim_data   : STD_LOGIC_VECTOR(7 DOWNTO 0);
+    SIGNAL s_sim_pixclk : STD_LOGIC;  --! = mt_pixclk_i (pass-through), sin conectar
+
+    -- CMD 0x05: habilitación de imagen sintética — dominio s_mclk
+    SIGNAL s_use_sim_image       : STD_LOGIC := '0';
+    -- Sincronizador 2FF s_mclk -> mt_pixclk_i
+    SIGNAL s_use_sim_image_sync0 : STD_LOGIC := '0';
+    SIGNAL s_use_sim_image_pix   : STD_LOGIC := '0';
+
+    ATTRIBUTE ASYNC_REG : string;
+    ATTRIBUTE ASYNC_REG OF s_use_sim_image_sync0 : SIGNAL IS "TRUE";
+    ATTRIBUTE ASYNC_REG OF s_use_sim_image_pix   : SIGNAL IS "TRUE";
+
     SIGNAL s_cmdproc_led_toggle  : STD_LOGIC;
     SIGNAL s_cmdproc_bcd         : STD_LOGIC_VECTOR(15 DOWNTO 0);
     SIGNAL s_cmdproc_cap_en      : STD_LOGIC;
@@ -231,19 +232,6 @@ ARCHITECTURE rtl OF TOP IS
     SIGNAL s_i2c_mux_wr_push  : STD_LOGIC;
     SIGNAL s_i2c_mux_wr_data  : STD_LOGIC_VECTOR(15 DOWNTO 0);
 
-    ---------------------------------------------------------------------------
-    -- Debug (capturado en s_mclk para ILA)
-    ---------------------------------------------------------------------------
-    SIGNAL debug_sclk     : STD_LOGIC;
-    SIGNAL debug_sdata    : STD_LOGIC;
-    SIGNAL debug_dout     : STD_LOGIC_VECTOR(7 DOWNTO 0);
-    SIGNAL debug_pixclk   : STD_LOGIC;
-    SIGNAL debug_fval     : STD_LOGIC;
-    SIGNAL debug_lval     : STD_LOGIC;
-    SIGNAL debug_txe_n    : STD_LOGIC;
-    SIGNAL debug_wr_n     : STD_LOGIC;
-    SIGNAL debug_overflow : STD_LOGIC;
-    SIGNAL debug_fifo_wr  : STD_LOGIC;
 
 BEGIN
 
@@ -256,8 +244,8 @@ BEGIN
     mt_reset_n_o <= cam_reset_r;
     mt_clk_o     <= cam_mclk_r;
 
-    s_cap_en <= '1' WHEN s_state = ST_FINISH ELSE '0';
-    
+    s_cap_en <= s_cmdproc_cap_en WHEN s_state = ST_FINISH ELSE '0';
+
     s_i2c_mux_rw       <= s_cmdproc_i2c_rw       WHEN s_state = ST_FINISH ELSE s_i2c_rw_fsm;
     s_i2c_mux_start    <= s_cmdproc_i2c_start    WHEN s_state = ST_FINISH ELSE s_i2c_start_fsm;
     s_i2c_mux_num_regs <= s_cmdproc_i2c_num      WHEN s_state = ST_FINISH ELSE s_i2c_num_regs_fsm;
@@ -291,51 +279,10 @@ BEGIN
     ftdi_acbus_io(c_FTDI_ACBUS_OE_N)   <= s_ftdi_oe_n;   --! Output enable FTDI (controlado por ftdi_controller)
     ftdi_acbus_io(c_FTDI_ACBUS_PWRSAV) <= '1';           --! Power save — inactivo
 
-    ---------------------------------------------------------------------------
-    -- CDC: ftdi_clk → s_mclk
-    -- Solo sincronizamos cmd_valid, cmd_type y cmd_data (suficiente para el toggle)
-    ---------------------------------------------------------------------------
-    p_cdc : PROCESS(s_mclk)
-    BEGIN
-        IF rising_edge(s_mclk) THEN
-            IF s_rst_final = '1' THEN
-                s_cmd_valid_sync0 <= '0'; s_cmd_valid_sync1 <= '0'; s_cmd_valid_sync2 <= '0';
-                s_cmd_type_sync0  <= (OTHERS => '0'); s_cmd_type_sync1  <= (OTHERS => '0');
-                s_cmd_data_sync0  <= (OTHERS => '0'); s_cmd_data_sync1  <= (OTHERS => '0');
-            ELSE
-                s_cmd_valid_sync0 <= s_cmd_valid_ftdi;
-                s_cmd_valid_sync1 <= s_cmd_valid_sync0;
-                s_cmd_valid_sync2 <= s_cmd_valid_sync1;
-                s_cmd_type_sync0  <= s_cmd_type_ftdi;
-                s_cmd_type_sync1  <= s_cmd_type_sync0;
-                s_cmd_data_sync0  <= s_cmd_data_ftdi;
-                s_cmd_data_sync1  <= s_cmd_data_sync0;
-            END IF;
-        END IF;
-    END PROCESS p_cdc;
-
     basys3_cat_o <= (OTHERS => '0');
     basys3_dp_o  <= '0';
     basys3_an_o  <= (OTHERS => '1');
 
-    ---------------------------------------------------------------------------
-    -- Debug
-    ---------------------------------------------------------------------------
-    p_debug : PROCESS(s_mclk)
-    BEGIN
-        IF rising_edge(s_mclk) THEN
-            debug_sclk     <= s_scl_out;
-            debug_sdata    <= s_sda_in;
-            debug_dout     <= s_mt_data_int;
-            debug_pixclk   <= s_mt_pixclk_int;
-            debug_fval     <= s_mt_fvalid_int;
-            debug_lval     <= s_mt_lvalid_int;
-            debug_txe_n    <= s_ftdi_txe_n;
-            debug_wr_n     <= s_ftdi_wr_n;
-            debug_overflow <= s_cap_overflow;
-            debug_fifo_wr  <= s_cap_fifo_wr;
-        END IF;
-    END PROCESS p_debug;
 
     ---------------------------------------------------------------------------
     --! \brief FSM principal de VICON
@@ -586,18 +533,10 @@ BEGIN
             clk_in1  => basys3_clk_i,
             reset    => basys3_btn_i(c_BASYS3_BTN_CENTER),
             clk_out1 => s_mclk,
-            clk_out2 => cam_mclk_r1,
-            clk_out3 => cam_mclk_r2,
+            clk_out2 => open,
+            clk_out3 => cam_mclk_r,
             locked   => s_locked
         );
-    
-    u_cam_clk_mux : BUFGMUX_CTRL
-    PORT MAP (
-        I0 => cam_mclk_r1,
-        I1 => cam_mclk_r2,
-        S  => s_cam_clk_sel,  -- '0'=12MHz, '1'=30MHz
-        O  => cam_mclk_r
-    );
 
     u_async_fifo : ENTITY work.fifo_generator_0
         PORT MAP (
@@ -611,43 +550,6 @@ BEGIN
             empty  => s_cap_fifo_empty,
             rst    => s_rst_final
         );
-
-    g_ila_on : IF g_USE_ILA GENERATE
-        u_ila : ENTITY work.ila_0
-            PORT MAP (
-                clk       => s_ftdi_clk,
-                probe0    => s_cap_fifo_dout,
-                probe1(0) => s_ftdi_rxf_n,   --! RXF# — '0' cuando hay dato del PC disponible
-                probe2(0) => s_ftdi_rd_n,    --! RD#  — '0' cuando la FPGA está leyendo
-                probe3(0) => s_ftdi_wr_n,
-                probe4(0) => s_ftdi_txe_n
-            );
-        u_ila_1 : ENTITY work.ila_0
-            PORT MAP (
-                clk       => s_mclk,
-                probe0    => debug_dout,
-                probe1(0) => debug_overflow,
-                probe2(0) => debug_fval,
-                probe3(0) => debug_lval,
-                probe4(0) => s_cap_fifo_wr
-            );
-    END GENERATE;
-
-
-    u_ila_ftdi : ENTITY work.ila_2
-    PORT MAP (
-        clk       => s_ftdi_clk,
-        probe0(0) => s_ftdi_rxf_n,
-        probe1(0) => s_ftdi_txe_n,
-        probe2(0) => s_ftdi_rd_n,
-        probe3    => s_ftdi_adbus_in,   -- 8 bits
-        probe4(0) => s_ftdi_wr_n,
-        probe5(0) => s_ftdi_oe_n,
-        probe6(0) => s_ftdi_adbus_oe,
-        probe7(0) => s_ftdi_tx_active,
-        probe8(0) => s_cmd_valid_ftdi,
-        probe9    => s_cmd_type_ftdi    -- 8 bits
-    );
 
     ---------------------------------------------------------------------------
     -- Módulos propios
@@ -727,17 +629,9 @@ BEGIN
             sda_i           => s_sda_in
         );
 
-    ---------------------------------------------------------------------------
-    -- Selección de fuente de imagen
-    ---------------------------------------------------------------------------
-    g_real_image : IF NOT g_USE_CAM_SIM GENERATE
-        s_mt_fvalid_int <= mt_fvalid_i;
-        s_mt_lvalid_int <= mt_lvalid_i;
-        s_mt_data_int   <= mt_data_i;
-        s_mt_pixclk_int <= mt_pixclk_i;
-    END GENERATE;
-
-    g_cam_sim_on : IF g_USE_CAM_SIM GENERATE
+        ---------------------------------------------------------------------------
+        -- cam_sim: generador de imagen sintética (mismo dominio mt_pixclk_i)
+        ---------------------------------------------------------------------------
         u_cam_sim : ENTITY work.mt9v111_image
             GENERIC MAP (
                 g_H_RES  => g_CAM_SIM_H_RES,
@@ -746,16 +640,32 @@ BEGIN
                 g_VBLANK => g_CAM_SIM_VBLANK
             )
             PORT MAP (
-                clkin_i  => cam_mclk_r,
-                pixclk_o => s_mt_pixclk_int,
+                clkin_i  => mt_pixclk_i,
+                pixclk_o => s_sim_pixclk,
                 reset_i  => s_rst_final,
-                fvalid_o => s_mt_fvalid_int,
-                lvalid_o => s_mt_lvalid_int,
-                data_o   => s_mt_data_int
+                fvalid_o => s_sim_fvalid,
+                lvalid_o => s_sim_lvalid,
+                data_o   => s_sim_data
             );
-    END GENERATE;
+
+        --! \brief Sincronizador 2FF s_mclk -> mt_pixclk_i para s_use_sim_image
+        --! (mismo patrón que el sincronizador de s_cap_en)
+        p_sync_use_sim_image : PROCESS(mt_pixclk_i)
+        BEGIN
+            IF rising_edge(mt_pixclk_i) THEN
+                s_use_sim_image_sync0 <= s_use_sim_image;
+                s_use_sim_image_pix   <= s_use_sim_image_sync0;
+            END IF;
+        END PROCESS p_sync_use_sim_image;
+
+        -- Mux combinacional, dominio mt_pixclk_i — sensor real / cam_sim
+        s_mt_fvalid_int <= s_sim_fvalid WHEN s_use_sim_image_pix = '1' ELSE mt_fvalid_i;
+        s_mt_lvalid_int <= s_sim_lvalid WHEN s_use_sim_image_pix = '1' ELSE mt_lvalid_i;
+        s_mt_data_int   <= s_sim_data   WHEN s_use_sim_image_pix = '1' ELSE mt_data_i;
+        s_mt_pixclk_int <= mt_pixclk_i;
     
-    u_cmd_processor : ENTITY work.cmd_processor
+
+        u_cmd_processor : ENTITY work.cmd_processor
         GENERIC MAP (
             g_I2C_FIFO_DEPTH => g_MT9V111_I2C_FIFO_DEPTH
         )
@@ -774,6 +684,7 @@ BEGIN
             led_toggle_o => s_cmdproc_led_toggle,
             bcd_o        => s_cmdproc_bcd,
             cap_en_cmd_o => s_cmdproc_cap_en,
+            sim_img_en_o => s_use_sim_image,
 
             i2c_grant_i    => s_cmdproc_i2c_grant,
             i2c_busy_i     => s_i2c_busy,
