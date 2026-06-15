@@ -6,6 +6,7 @@
 //!   bcd <4digitos>     → ej: bcd 1234
 //!   i2c <page> <addr> <data>  → ej: i2c 1 0x37 0x0080
 //!   cap on|off         → habilitar/deshabilitar captura
+//!   raw <b0> <b1> ...  → ej: raw 0xCC 0x05 0x00 0x01
 //!   help               → mostrar ayuda
 //!   quit               → salir
 
@@ -75,6 +76,15 @@ static bool send_cmd_i2c(uint8_t page, uint8_t addr, uint16_t data)
     return (st == FT_OK && written == 6);
 }
 
+//! Envía una secuencia arbitraria de bytes sin formatear (comando "raw")
+static bool send_raw(const std::vector<uint8_t>& bytes, DWORD& written)
+{
+    written = 0;
+    std::lock_guard<std::mutex> lk(g_ftdi_mtx);
+    FT_STATUS st = FT_Write(g_handle, (void*)bytes.data(), (DWORD)bytes.size(), &written);
+    return (st == FT_OK && written == bytes.size());
+}
+
 // ─── Búsqueda de marcador ─────────────────────────────────────────────────────
 static int find_marker(const uint8_t* buf, int len)
 {
@@ -99,6 +109,7 @@ static void parse_and_send(const std::string& line)
         printf("  bcd <4digitos>          -> ej: bcd 1234\n");
         printf("  i2c <page> <addr> <data>-> ej: i2c 1 0x37 0x0080\n");
         printf("  cap on|off              -> habilitar/deshabilitar captura\n");
+        printf("  raw <b0> <b1> ...       -> ej: raw 0xCC 0x05 0x00 0x01\n");
         printf("  quit                    -> salir\n");
         return;
     }
@@ -169,6 +180,37 @@ static void parse_and_send(const std::string& line)
                 printf("[OK] Captura desactivada\n");
         } else {
             printf("[ERR] Uso: cap on|off\n");
+        }
+        return;
+    }
+
+    if (cmd == "raw") {
+        // Uso: raw <byte0> <byte1> ... <byteN>
+        // Cada byte puede ir en hexadecimal (0x..) o decimal.
+        std::vector<uint8_t> bytes;
+        std::string tok;
+        while (iss >> tok) {
+            unsigned long v = strtoul(tok.c_str(), nullptr, 0);
+            if (v > 0xFF) {
+                printf("[ERR] Byte fuera de rango: '%s' (debe ser 0x00-0xFF)\n", tok.c_str());
+                return;
+            }
+            bytes.push_back((uint8_t)v);
+        }
+
+        if (bytes.empty()) {
+            printf("[ERR] Uso: raw <byte0> <byte1> ... (hex con 0x o decimal)\n");
+            return;
+        }
+
+        DWORD written = 0;
+        if (send_raw(bytes, written)) {
+            printf("[OK] Enviados %lu bytes:", written);
+            for (auto b : bytes) printf(" %02X", b);
+            printf("\n");
+        } else {
+            printf("[ERR] Fallo enviando bytes raw (escritos %lu/%zu)\n",
+                   written, bytes.size());
         }
         return;
     }
