@@ -15,10 +15,10 @@
 --!   0x04 → Control cap DATA[0] = capture_en
 --!
 --! Secuencia lectura Sync FIFO (4 fases):
---!   ST_RX_OE      OE_N='0', setup 1 ciclo
---!   ST_RX_RD      RD_N='0', esperar 1 ciclo
---!   ST_RX_CAPTURE capturar ADBUS
---!   ST_RX_RELEASE RD_N='1', OE_N='1', ir al estado destino guardado en s_rx_dest
+--!   ST_RX_OE      OE_N='0' y adbus_oe='0' a la vez (sin contencion), FTDI empieza a conducir
+--!   ST_RX_OE2     margen — bus ya estable en manos del FT232H
+--!   ST_RX_CAPTURE capturar ADBUS (RD_N='0')
+--!   ST_RX_RELEASE RD_N='1', OE_N='1', adbus_oe='1' → ir al estado destino guardado en s_rx_dest
 --!
 --! Diseño RX:
 --!   s_rx_dest guarda el estado al que debe ir ST_RX_RELEASE tras leer cada byte.
@@ -226,21 +226,21 @@ BEGIN
                         END IF;
 
                     -----------------------------------------------------------
-                    -- RX fase 1: OE_N='0' — FTDI empieza a conducir ADBUS
-                    --            FPGA aún conduce (adbus_oe='1')
+                    -- RX fase 1: OE_N='0' + adbus_oe='0' — la FPGA suelta el bus
+                    --            en el MISMO ciclo en que pide al FT232H que lo
+                    --            conduzca (evita contencion de 1 ciclo completo)
                     -----------------------------------------------------------
                     WHEN ST_RX_OE =>
                         s_wr_n   <= '1';
                         s_oe_n   <= '0';     --! FTDI empieza a preparar dato
+                        adbus_oe <= '0';     --! FPGA suelta el bus a la vez
                         s_rd_n   <= '1';
                         s_state  <= ST_RX_OE2;
 
                     -----------------------------------------------------------
-                    -- RX fase 2: adbus_oe='0' — FPGA suelta bus
-                    --            FTDI ya conduce, bus estable
+                    -- RX fase 2: margen — bus ya en manos del FT232H, estable
                     -----------------------------------------------------------
                     WHEN ST_RX_OE2 =>
-                        adbus_oe <= '0';     --! FPGA suelta un ciclo después
                         s_state  <= ST_RX_RD;
 
                     -----------------------------------------------------------

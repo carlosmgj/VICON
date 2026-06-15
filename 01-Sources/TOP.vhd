@@ -170,6 +170,9 @@ ARCHITECTURE rtl OF TOP IS
     SIGNAL s_cap_frame_done : STD_LOGIC;
     SIGNAL s_cap_overflow   : STD_LOGIC;
     SIGNAL s_cap_en         : STD_LOGIC;
+    -- Sincronizador 2FF s_mclk -> mt_pixclk_i para s_cap_en
+    SIGNAL s_cap_en_sync0   : STD_LOGIC := '0';
+    SIGNAL s_cap_en_pix     : STD_LOGIC := '0';
 
     ---------------------------------------------------------------------------
     -- FSM principal
@@ -212,6 +215,8 @@ ARCHITECTURE rtl OF TOP IS
     ATTRIBUTE ASYNC_REG : string;
     ATTRIBUTE ASYNC_REG OF s_use_sim_image_sync0 : SIGNAL IS "TRUE";
     ATTRIBUTE ASYNC_REG OF s_use_sim_image_pix   : SIGNAL IS "TRUE";
+    ATTRIBUTE ASYNC_REG OF s_cap_en_sync0        : SIGNAL IS "TRUE";
+    ATTRIBUTE ASYNC_REG OF s_cap_en_pix          : SIGNAL IS "TRUE";
 
     SIGNAL s_cmdproc_led_toggle  : STD_LOGIC;
     SIGNAL s_cmdproc_bcd         : STD_LOGIC_VECTOR(15 DOWNTO 0);
@@ -567,7 +572,7 @@ BEGIN
             fvalid_i     => s_mt_fvalid_int,
             lvalid_i     => s_mt_lvalid_int,
             data_i       => s_mt_data_int,
-            capture_en_i => s_cap_en,
+            capture_en_i => s_cap_en_pix,
             fifo_data_o  => s_cap_fifo_data,
             fifo_wr_o    => s_cap_fifo_wr,
             fifo_full_i  => s_cap_fifo_full,
@@ -657,6 +662,15 @@ BEGIN
                 s_use_sim_image_pix   <= s_use_sim_image_sync0;
             END IF;
         END PROCESS p_sync_use_sim_image;
+
+        --! \brief Sincronizador 2FF s_mclk -> mt_pixclk_i para s_cap_en
+        p_sync_cap_en : PROCESS(mt_pixclk_i)
+        BEGIN
+            IF rising_edge(mt_pixclk_i) THEN
+                s_cap_en_sync0 <= s_cap_en;
+                s_cap_en_pix   <= s_cap_en_sync0;
+            END IF;
+        END PROCESS p_sync_cap_en;
 
         -- Mux combinacional, dominio mt_pixclk_i — sensor real / cam_sim
         s_mt_fvalid_int <= s_sim_fvalid WHEN s_use_sim_image_pix = '1' ELSE mt_fvalid_i;
