@@ -1,0 +1,112 @@
+UVVM: 
+UVVM: 
+UVVM: ID_LOG_HDR                         0.0 ns  TB AXI BRAM                    Iniciando Simulacion: Sistema Mixto AXI (32 bits) a BRAM (1 bit)
+UVVM: -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+UVVM: ID_CONSTRUCTOR                     0.0 ns  AXILITE_VVC,1                  VVC instantiated.
+UVVM: ID_CONSTRUCTOR_SUB                 0.0 ns  AXILITE_VVC,1                  Command queue instantiated and will give a warning when reaching 1000 elements in queue.
+UVVM: ID_CONSTRUCTOR_SUB                 0.0 ns  AXILITE_VVC,1                  Result queue instantiated and will give a warning when reaching 1000 elements in queue.
+UVVM: ID_CMD_INTERPRETER_WAIT            0.0 ns  AXILITE_VVC,1                    ..Interpreter: Waiting for command
+UVVM: ID_CTRL                            0.0 ns  AXILITE_VVC_SB,1               enable() => SB enabled. 'AXILITE VVC SB Enabled'
+UVVM: ID_CTRL                            0.0 ns  AXILITE_VVC_SB,1               config() => config applied to SB.
+UVVM: ID_CTRL                            0.0 ns  AXILITE_VVC_SB,1               enable_log_msg() => message id id_data enabled.
+UVVM: ID_CMD_EXECUTOR_WAIT               0.0 ns  AXILITE_VVC,1                    ..Executor: Waiting for command
+UVVM: ID_SEQUENCER                      55.0 ns  TB AXI BRAM                    PASO 0: Verificando precarga inicial de la BRAM via AXI...
+UVVM: ID_UVVM_SEND_CMD                  55.0 ns  TB seq.(uvvm)                  ->axilite_check(AXILITE_VVC,1, x"000", x"00000000"): 'Precarga: word 0 = 0x00000000'. [1]
+UVVM: ID_CMD_INTERPRETER                55.0 ns  AXILITE_VVC,1                    axilite_check(AXILITE_VVC,1, x"000", x"00000000"). Command received  [1]
+UVVM: ID_CMD_EXECUTOR                   55.0 ns  AXILITE_VVC,1                    axilite_check(AXILITE_VVC,1, x"000", x"00000000") - Will be executed  [1]
+UVVM: ID_UVVM_CMD_ACK                   55.0 ns  TB seq.(uvvm)                      ACK received.   [1]
+UVVM: ID_CMD_INTERPRETER_WAIT           55.0 ns  AXILITE_VVC,1                    ..Interpreter: Waiting for command
+UVVM: ID_UVVM_SEND_CMD                  55.0 ns  TB seq.(uvvm)                  ->axilite_check(AXILITE_VVC,1, x"004", x"00000001"): 'Precarga: word 1 = 0x00000001'. [2]
+UVVM: ID_CMD_INTERPRETER                55.0 ns  AXILITE_VVC,1                    axilite_check(AXILITE_VVC,1, x"004", x"00000001"). Command received  [2]
+UVVM: ID_UVVM_CMD_ACK                   55.0 ns  TB seq.(uvvm)                      ACK received.   [2]
+UVVM: ID_CMD_INTERPRETER_WAIT           55.0 ns  AXILITE_VVC,1                    ..Interpreter: Waiting for command
+UVVM: ID_UVVM_SEND_CMD                  55.0 ns  TB seq.(uvvm)                  ->axilite_check(AXILITE_VVC,1, x"008", x"00000002"): 'Precarga: word 2 = 0x00000002'. [3]
+UVVM: ID_CMD_EXECUTOR                   55.0 ns  AXILITE_VVC,1                    axilite_check(AXILITE_VVC,1, x"004", x"00000001") - Will be executed  [2]
+UVVM: ID_CMD_INTERPRETER                55.0 ns  AXILITE_VVC,1                    axilite_check(AXILITE_VVC,1, x"008", x"00000002"). Command received  [3]
+UVVM: ID_UVVM_CMD_ACK                   55.0 ns  TB seq.(uvvm)                      ACK received.   [3]
+UVVM: ID_CMD_INTERPRETER_WAIT           55.0 ns  AXILITE_VVC,1                    ..Interpreter: Waiting for command
+UVVM: ID_UVVM_SEND_CMD                  55.0 ns  TB seq.(uvvm)                  ->axilite_check(AXILITE_VVC,1, x"00C", x"00000003"): 'Precarga: word 3 = 0x00000003'. [4]
+UVVM: ID_CMD_INTERPRETER                55.0 ns  AXILITE_VVC,1                    axilite_check(AXILITE_VVC,1, x"00C", x"00000003"). Command received  [4]
+UVVM: ID_UVVM_CMD_ACK                   55.0 ns  TB seq.(uvvm)                      ACK received.   [4]
+UVVM: ID_CMD_EXECUTOR                   55.0 ns  AXILITE_VVC,1                    axilite_check(AXILITE_VVC,1, x"008", x"00000002") - Will be executed  [3]
+UVVM: ID_AWAIT_COMPLETION               55.0 ns  TB seq.(uvvm)                  await_completion(AXILITE_VVC,1, 20000 ns):. [5]
+UVVM: ID_AWAIT_COMPLETION_WAIT          55.0 ns  TB seq.(uvvm)                  ..await_completion(AXILITE_VVC,1, 20000 ns) - Pending completion. [5]
+UVVM: ID_CMD_INTERPRETER_WAIT           55.0 ns  AXILITE_VVC,1                    ..Interpreter: Waiting for command
+UVVM: ID_CMD_EXECUTOR                   55.0 ns  AXILITE_VVC,1                    axilite_check(AXILITE_VVC,1, x"00C", x"00000003") - Will be executed  [4]
+UVVM: ID_CMD_EXECUTOR_WAIT              55.0 ns  AXILITE_VVC,1                    ..Executor: Waiting for command
+UVVM: ID_BFM                           117.5 ns  AXILITE_VVC_R,1                read_data_channel_check(x"00000000")=> OK, received data = x"00000000". ' 'Precarga: word 0 =
+UVVM:                                                                           0x00000000'  [1]'
+UVVM: ID_BFM                           157.5 ns  AXILITE_VVC_R,1                read_data_channel_check(x"00000001")=> OK, received data = x"1". ' 'Precarga: word 1 =
+UVVM:                                                                           0x00000001'  [2]'
+UVVM: ID_BFM                           197.5 ns  AXILITE_VVC_R,1                read_data_channel_check(x"00000002")=> OK, received data = x"2". ' 'Precarga: word 2 =
+UVVM:                                                                           0x00000002'  [3]'
+UVVM: ID_BFM                           237.5 ns  AXILITE_VVC_R,1                read_data_channel_check(x"00000003")=> OK, received data = x"3". ' 'Precarga: word 3 =
+UVVM:                                                                           0x00000003'  [4]'
+UVVM: ID_AWAIT_COMPLETION_END          237.5 ns  TB seq.(uvvm)                    await_completion(AXILITE_VVC,1, 20000 ns)=> AXILITE_VVC,1 finished. [5]
+UVVM: ID_SEQUENCER                     237.5 ns  TB AXI BRAM                    PASO 1: Escribiendo palabras de 32 bits via AXI...
+UVVM: ID_UVVM_SEND_CMD                 237.5 ns  TB seq.(uvvm)                  ->axilite_write(AXILITE_VVC,1, x"000", x"00000005"): 'Guardando el valor 5 en la primera
+UVVM:                                                                             palabra'. [6]
+UVVM: ID_CMD_INTERPRETER               237.5 ns  AXILITE_VVC,1                    axilite_write(AXILITE_VVC,1, x"000", x"00000005"). Command received  [6]
+UVVM: ID_CMD_EXECUTOR                  237.5 ns  AXILITE_VVC,1                    axilite_write(AXILITE_VVC,1, x"000", x"00000005") - Will be executed  [6]
+UVVM: ID_UVVM_CMD_ACK                  237.5 ns  TB seq.(uvvm)                      ACK received.   [6]
+UVVM: ID_CMD_INTERPRETER_WAIT          237.5 ns  AXILITE_VVC,1                    ..Interpreter: Waiting for command
+UVVM: ID_UVVM_SEND_CMD                 237.5 ns  TB seq.(uvvm)                  ->axilite_write(AXILITE_VVC,1, x"004", x"00000002"): 'Guardando el valor 2 en la segunda
+UVVM:                                                                             palabra'. [7]
+UVVM: ID_CMD_INTERPRETER               237.5 ns  AXILITE_VVC,1                    axilite_write(AXILITE_VVC,1, x"004", x"00000002"). Command received  [7]
+UVVM: ID_UVVM_CMD_ACK                  237.5 ns  TB seq.(uvvm)                      ACK received.   [7]
+UVVM: ID_AWAIT_COMPLETION              237.5 ns  TB seq.(uvvm)                  await_completion(AXILITE_VVC,1, 20000 ns):. [8]
+UVVM: ID_AWAIT_COMPLETION_WAIT         237.5 ns  TB seq.(uvvm)                  ..await_completion(AXILITE_VVC,1, 20000 ns) - Pending completion. [8]
+UVVM: ID_CMD_INTERPRETER_WAIT          237.5 ns  AXILITE_VVC,1                    ..Interpreter: Waiting for command
+UVVM: ID_CMD_EXECUTOR                  237.5 ns  AXILITE_VVC,1                    axilite_write(AXILITE_VVC,1, x"004", x"00000002") - Will be executed  [7]
+UVVM: ID_CMD_EXECUTOR_WAIT             237.5 ns  AXILITE_VVC,1                    ..Executor: Waiting for command
+UVVM: ID_BFM                           277.5 ns  AXILITE_VVC_B,1                write_response_channel_check()=> OK. ' 'Guardando el valor 5 en la primera palabra'  [6]'
+UVVM: ID_BFM                           307.5 ns  AXILITE_VVC_B,1                write_response_channel_check()=> OK. ' 'Guardando el valor 2 en la segunda palabra'  [7]'
+UVVM: ID_AWAIT_COMPLETION_END          307.5 ns  TB seq.(uvvm)                    await_completion(AXILITE_VVC,1, 20000 ns)=> AXILITE_VVC,1 finished. [8]
+UVVM: ID_SEQUENCER                     307.5 ns  TB AXI BRAM                    PASO 2: Confirmando que el bus AXI lee los valores correctos...
+UVVM: ID_UVVM_SEND_CMD                 307.5 ns  TB seq.(uvvm)                  ->axilite_check(AXILITE_VVC,1, x"000", x"00000005"): 'Verificando dato 5 por bus'. [9]
+UVVM: ID_CMD_INTERPRETER               307.5 ns  AXILITE_VVC,1                    axilite_check(AXILITE_VVC,1, x"000", x"00000005"). Command received  [9]
+UVVM: ID_CMD_EXECUTOR                  307.5 ns  AXILITE_VVC,1                    axilite_check(AXILITE_VVC,1, x"000", x"00000005") - Will be executed  [9]
+UVVM: ID_UVVM_CMD_ACK                  307.5 ns  TB seq.(uvvm)                      ACK received.   [9]
+UVVM: ID_CMD_INTERPRETER_WAIT          307.5 ns  AXILITE_VVC,1                    ..Interpreter: Waiting for command
+UVVM: ID_UVVM_SEND_CMD                 307.5 ns  TB seq.(uvvm)                  ->axilite_check(AXILITE_VVC,1, x"004", x"00000002"): 'Verificando dato 2 por bus'. [10]
+UVVM: ID_CMD_INTERPRETER               307.5 ns  AXILITE_VVC,1                    axilite_check(AXILITE_VVC,1, x"004", x"00000002"). Command received  [10]
+UVVM: ID_UVVM_CMD_ACK                  307.5 ns  TB seq.(uvvm)                      ACK received.   [10]
+UVVM: ID_AWAIT_COMPLETION              307.5 ns  TB seq.(uvvm)                  await_completion(AXILITE_VVC,1, 20000 ns):. [11]
+UVVM: ID_AWAIT_COMPLETION_WAIT         307.5 ns  TB seq.(uvvm)                  ..await_completion(AXILITE_VVC,1, 20000 ns) - Pending completion. [11]
+UVVM: ID_CMD_INTERPRETER_WAIT          307.5 ns  AXILITE_VVC,1                    ..Interpreter: Waiting for command
+UVVM: ID_CMD_EXECUTOR                  307.5 ns  AXILITE_VVC,1                    axilite_check(AXILITE_VVC,1, x"004", x"00000002") - Will be executed  [10]
+UVVM: ID_CMD_EXECUTOR_WAIT             307.5 ns  AXILITE_VVC,1                    ..Executor: Waiting for command
+UVVM: ID_BFM                           367.5 ns  AXILITE_VVC_R,1                read_data_channel_check(x"00000005")=> OK, received data = x"5". ' 'Verificando dato 5 por bus'
+UVVM:                                                                           [9]'
+UVVM: ID_BFM                           407.5 ns  AXILITE_VVC_R,1                read_data_channel_check(x"00000002")=> OK, received data = x"2". ' 'Verificando dato 2 por bus'
+UVVM:                                                                           [10]'
+UVVM: ID_AWAIT_COMPLETION_END          407.5 ns  TB seq.(uvvm)                    await_completion(AXILITE_VVC,1, 20000 ns)=> AXILITE_VVC,1 finished. [11]
+UVVM: ID_SEQUENCER                     407.5 ns  TB AXI BRAM                    PASO 3: Iniciando la lectura bit a bit desde el Puerto B (1 bit)...
+UVVM: ID_POS_ACK                       427.5 ns  TB seq.                        check_value(sl, 1) => OK. Value was 1. 'Verificacion Puerto B: Bit 0 debe ser '1''
+UVVM: ID_POS_ACK                       447.5 ns  TB seq.                        check_value(sl, 0) => OK. Value was 0. 'Verificacion Puerto B: Bit 1 debe ser '0''
+UVVM: ID_POS_ACK                       467.5 ns  TB seq.                        check_value(sl, 1) => OK. Value was 1. 'Verificacion Puerto B: Bit 2 debe ser '1''
+UVVM: ID_POS_ACK                       487.5 ns  TB seq.                        check_value(sl, 0) => OK. Value was 0. 'Segunda palabra - Bit 0 debe ser '0''
+UVVM: ID_POS_ACK                       507.5 ns  TB seq.                        check_value(sl, 1) => OK. Value was 1. 'Segunda palabra - Bit 1 debe ser '1''
+UVVM: 
+UVVM: 
+UVVM: ID_LOG_HDR                       507.5 ns  TB AXI BRAM                    EJECUCION DE PRUEBAS COMPLETADA
+UVVM: -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+UVVM:      
+UVVM:      ====================================================================================================================================================================
+UVVM:      *** FINAL SUMMARY OF ALL ALERTS ***
+UVVM:      ====================================================================================================================================================================
+UVVM:                                REGARDED   EXPECTED  IGNORED      Comment?
+UVVM:                NOTE         :      0         0         0         ok
+UVVM:                TB_NOTE      :      0         0         0         ok
+UVVM:                WARNING      :      0         0         0         ok
+UVVM:                TB_WARNING   :      0         0         0         ok
+UVVM:                MANUAL_CHECK :      0         0         0         ok
+UVVM:                ERROR        :      0         0         0         ok
+UVVM:                TB_ERROR     :      0         0         0         ok
+UVVM:                FAILURE      :      0         0         0         ok
+UVVM:                TB_FAILURE   :      0         0         0         ok
+UVVM:      ====================================================================================================================================================================
+UVVM:      >> Simulation SUCCESS: No mismatch between counted and expected serious alerts
+UVVM:      ====================================================================================================================================================================
+UVVM:      
+UVVM:      
