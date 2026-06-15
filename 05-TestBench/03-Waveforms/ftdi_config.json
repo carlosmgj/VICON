@@ -1,0 +1,32 @@
+{
+    "signal": {
+        "dut.debug_adbus[7:0]": {
+            "name": "ADBUS"
+        },
+        "dut.debug_state[1:0]": {
+            "name": "FSM"
+        },
+        "dut.debug_wr": {
+            "name": "WR"
+        },
+        "dut.debug_txe": {
+            "name": "TXE"
+        },
+        "dut.debug_rxf": {
+            "name": "RXF"
+        }
+    },
+    "filter": [
+        "dut.debug_adbus[7:0]",
+        "dut.debug_state[1:0]",
+        "dut.debug_rxf",
+        "dut.debug_txe",
+        "dut.debug_wr"
+    ],
+    "replace": {
+    },
+    "offset": 0,
+    "samplerate": 1,
+    "clocks": [],
+    "maxtime": 20
+}
