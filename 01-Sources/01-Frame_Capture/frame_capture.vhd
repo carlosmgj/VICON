@@ -190,6 +190,7 @@ BEGIN
                             IF s_byte_cnt(0) = '0' THEN
                                 IF fifo_full_i = '0' THEN
                                     IF    data_i = c_PROTO_RESERVED_FF THEN fifo_data_o <= c_PROTO_REPLACE_FF;
+                                    ELSIF data_i = c_PROTO_RESERVED_00 THEN fifo_data_o <= c_PROTO_REPLACE_00;
                                     ELSIF data_i = c_PROTO_RESERVED_AA THEN fifo_data_o <= c_PROTO_REPLACE_AA;
                                     ELSIF data_i = c_PROTO_RESERVED_55 THEN fifo_data_o <= c_PROTO_REPLACE_55;
                                     ELSE                                     fifo_data_o <= data_i;
