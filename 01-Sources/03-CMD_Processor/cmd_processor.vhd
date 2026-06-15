@@ -9,6 +9,7 @@
 --!   CMD 0x02 (BCD)  -> bcd_o = cmd_data (registrado)
 --!   CMD 0x03 (I2C)  -> lanza una transaccion de escritura en i2c_master
 --!   CMD 0x04 (CAP)  -> cap_en_o = cmd_data(0) (registrado)
+--!   CMD 0x05 (SIM)  -> sim_img_en_o = cmd_data(0) (registrado, 1=imagen sintetica)
 --!
 --! El acceso al bus I2C solo se activa cuando i2c_grant_i='1' (tipicamente
 --! s_state = ST_FINISH en el TOP). Si llega un comando I2C antes, se descarta.
@@ -54,6 +55,9 @@ ENTITY cmd_processor IS
         -- CMD 0x04 (CAP): valor registrado (capture enable)
         cap_en_cmd_o : OUT STD_LOGIC;
 
+        -- CMD 0x05 (SIM): valor registrado (1 = usar imagen sintética cam_sim)
+        sim_img_en_o : OUT STD_LOGIC;
+
         -- Interfaz con i2c_master (solo activa cuando i2c_grant_i='1')
         i2c_grant_i    : IN  STD_LOGIC;
         i2c_busy_i     : IN  STD_LOGIC;
@@ -76,6 +80,7 @@ ARCHITECTURE rtl OF cmd_processor IS
     CONSTANT c_CMD_BCD : STD_LOGIC_VECTOR(7 DOWNTO 0) := x"02";
     CONSTANT c_CMD_I2C : STD_LOGIC_VECTOR(7 DOWNTO 0) := x"03";
     CONSTANT c_CMD_CAP : STD_LOGIC_VECTOR(7 DOWNTO 0) := x"04";
+    CONSTANT c_CMD_SIM : STD_LOGIC_VECTOR(7 DOWNTO 0) := x"05";
 
     ---------------------------------------------------------------------------
     -- CDC: ftdi_clk -> clk_o
@@ -119,13 +124,15 @@ ARCHITECTURE rtl OF cmd_processor IS
     -- Registros de salida
     SIGNAL s_led_toggle_r : STD_LOGIC := '0';
     SIGNAL s_bcd_r        : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
-    SIGNAL s_cap_en_r     : STD_LOGIC := '0';
+    SIGNAL s_cap_en_r     : STD_LOGIC := '1';
+    SIGNAL s_sim_en_r     : STD_LOGIC := '1';
 
 BEGIN
 
     led_toggle_o <= s_led_toggle_r;
     bcd_o        <= s_bcd_r;
     cap_en_cmd_o <= s_cap_en_r;
+    sim_img_en_o <= s_sim_en_r;
     i2c_page_o   <= s_i2c_page_r;
 
     s_cmd_pulse <= s_valid_sync1 AND NOT s_valid_sync2;
@@ -168,7 +175,8 @@ BEGIN
             IF reset_o = '1' THEN
                 s_led_toggle_r <= '0';
                 s_bcd_r        <= (OTHERS => '0');
-                s_cap_en_r     <= '0';
+                s_cap_en_r     <= '1';
+                s_sim_en_r     <= '1';
                 s_i2c_pending  <= '0';
                 s_i2c_page_r   <= '0';
                 s_i2c_addr_r   <= (OTHERS => '0');
@@ -187,6 +195,9 @@ BEGIN
 
                         WHEN c_CMD_CAP =>
                             s_cap_en_r <= s_data_sync1(0);
+
+                        WHEN c_CMD_SIM =>
+                            s_sim_en_r <= s_data_sync1(0);
 
                         WHEN c_CMD_I2C =>
                             IF i2c_grant_i = '1' AND s_i2c_pending = '0' THEN

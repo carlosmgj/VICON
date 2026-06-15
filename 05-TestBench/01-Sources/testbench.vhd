@@ -37,6 +37,13 @@ ARCHITECTURE sim OF testbench IS
     SIGNAL s_clk_base : STD_LOGIC;
     SIGNAL s_rst_raw  : STD_LOGIC;
 
+    --! Reloj de pixel del sensor MT9V111 (25 MHz, igual que create_clock en el XDC).
+    --! En la arquitectura actual, u_cam_sim/frame_capture/u_async_fifo.wr_clk
+    --! se clockean con mt_pixclk_i, asi que necesita un generador propio aqui
+    --! (en hardware lo proporciona siempre el sensor, este o no seleccionado).
+    CONSTANT c_MT_PIXCLK_PERIOD : TIME := 40 ns;  --! 25 MHz
+    SIGNAL s_mt_pixclk : STD_LOGIC := '0';
+
     SIGNAL s_scl_bus : STD_LOGIC := 'H';
     SIGNAL s_sda_bus : STD_LOGIC := 'H';
 
@@ -74,6 +81,18 @@ BEGIN
     u_clk_rst : ENTITY work.clk_reset_gen
         PORT MAP (clk_out => s_clk_base, reset_out => s_rst_raw);
 
+    --! \brief Generador de mt_pixclk_i (25 MHz) — dominio de pixel independiente
+    --! de s_clk_base/s_mclk. Necesario para que u_cam_sim/frame_capture avancen.
+    p_mt_pixclk : PROCESS
+    BEGIN
+        LOOP
+            s_mt_pixclk <= '0';
+            WAIT FOR c_MT_PIXCLK_PERIOD / 2;
+            s_mt_pixclk <= '1';
+            WAIT FOR c_MT_PIXCLK_PERIOD / 2;
+        END LOOP;
+    END PROCESS p_mt_pixclk;
+
     u_dut : ENTITY work.TOP
         GENERIC MAP (
             g_USE_ILA               => FALSE,
@@ -100,7 +119,7 @@ BEGIN
             basys3_btn_i  => s_basys3_btn,
             mt_data_i     => (OTHERS => '0'),
             mt_lvalid_i   => '0',
-            mt_pixclk_i   => '0',
+            mt_pixclk_i   => s_mt_pixclk,
             mt_fvalid_i   => '0',
             mt_reset_n_o  => s_mt_reset_n,
             mt_clk_o      => OPEN,
