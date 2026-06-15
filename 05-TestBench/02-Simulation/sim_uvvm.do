@@ -147,7 +147,7 @@ when {/testbench/u_dut/u_frame_capture/frame_done_o'event and /testbench/u_dut/u
     global frame_cnt
     incr frame_cnt
     echo "Frame $frame_cnt completado en $now"
-    if {$frame_cnt >= 9} {
+    if {$frame_cnt >= 50} {
         run 100 us
         stop
     }
