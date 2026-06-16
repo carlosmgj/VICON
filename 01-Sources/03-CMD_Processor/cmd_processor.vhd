@@ -165,6 +165,24 @@ BEGIN
         END IF;
     END PROCESS p_cdc;
 
+
+    u_ila: ENTITY work.ila_0
+        PORT MAP (
+        clk        => clk_o,
+        probe0(0)  => s_led_toggle_r,
+        probe1     => s_bcd_r,
+        probe2(0)  => s_cap_en_r,
+        probe3(0)  => s_sim_en_r,
+        probe4(0)  => s_i2c_pending,
+        probe5(0)  => s_i2c_page_r,
+        probe6     => s_i2c_addr_r,
+        probe7     => s_data_sync1 ,
+        probe8(0)  => s_valid_sync1,
+        probe9(0)  => s_valid_sync2,
+        probe10(0) => s_cmd_pulse,
+        probe11    => s_type_sync1
+    );
+
     ---------------------------------------------------------------------------
     -- p_dispatch: en el flanco de un comando nuevo, actualizar salidas simples
     -- (LED toggle, BCD, CAP) y latchear el comando I2C si corresponde

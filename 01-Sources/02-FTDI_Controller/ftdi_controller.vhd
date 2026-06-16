@@ -1,31 +1,30 @@
 --! \file ftdi_controller.vhd
---! \brief Controlador para el FT232H en modo Synchronous FIFO.
+--! \brief Controlador FT232H modo Synchronous FIFO.
 --!
---! Soporta transmisión de imagen (FPGA→PC) y recepción de comandos (PC→FPGA).
---! Los comandos tienen prioridad sobre la imagen.
+--! TX (FPGA->PC): falling_edge — WR#/D[7:0] estables en rising_edge del FT232H
+--! RX (PC->FPGA): rising_edge — adbus_i estable entre falling y siguiente rising
 --!
---! Protocolo PC→FPGA:
---!   Comando general (4 bytes): [0xCC] [CMD] [DATA_H] [DATA_L]
---!   Comando I2C   (6 bytes):   [0xCC] [0x03] [PAGE] [ADDR] [DATA_H] [DATA_L]
+--! Protocolo lectura (AN130):
+--!   OE# >= 1 ciclo antes de RD#.
+--!   RD# mantenido bajo durante toda la ráfaga.
+--!   Cada flanco de rising_edge con RD#='0' hace que el FT232H avance al
+--!   byte siguiente — el byte presentado es el que se colocó ANTES de ese
+--!   flanco (pipeline de 1 ciclo).
 --!
---! CMD:
---!   0x01 → LEDs        DATA[15:0] = máscara 16 LEDs
---!   0x02 → BCD 7seg    DATA[15:0] = 4 dígitos BCD (4 bits cada uno)
---!   0x03 → Reg I2C     PAGE, ADDR, DATA[15:0]
---!   0x04 → Control cap DATA[0] = capture_en
+--!   Secuencia para N bytes:
+--!     PRE  : adbus_oe='0'
+--!     OE   : oe_n='0'
+--!     OE2  : margen (oe_n='0' >= 1 ciclo antes de rd_n='0')
+--!     RD0  : rd_n='0' — FT232H presenta byte[0] — NO leer aún (pipeline)
+--!     RD1  : leer byte[0]=SYNC, FT232H presenta byte[1]
+--!     RD2  : leer byte[1]=CMD,  FT232H presenta byte[2]
+--!     RD3  : leer byte[2]=DH,   FT232H presenta byte[3]
+--!     RD4  : leer byte[3]=DL (general,último) → soltar bus → RELEASE
+--!         o  leer byte[3]=ADDR(I2C), FT232H presenta byte[4]
+--!     RD5  : leer byte[4]=DH(I2C), FT232H presenta byte[5]
+--!     RD6  : leer byte[5]=DL(I2C,último) → soltar bus → RELEASE
 --!
---! Secuencia lectura Sync FIFO (4 fases):
---!   ST_RX_OE      OE_N='0' y adbus_oe='0' a la vez (sin contencion), FTDI empieza a conducir
---!   ST_RX_OE2     margen — bus ya estable en manos del FT232H
---!   ST_RX_CAPTURE capturar ADBUS (RD_N='0')
---!   ST_RX_RELEASE RD_N='1', OE_N='1', adbus_oe='1' → ir al estado destino guardado en s_rx_dest
---!
---! Diseño RX:
---!   s_rx_dest guarda el estado al que debe ir ST_RX_RELEASE tras leer cada byte.
---!   Cada ST_CMD_BYTEx procesa s_rx_byte (ya válido) y si necesita más bytes
---!   establece s_rx_dest y lanza ST_RX_OE directamente.
 --! \author Carlos Manuel Gomez Jimenez
-
 
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
@@ -33,315 +32,276 @@ USE IEEE.NUMERIC_STD.ALL;
 
 ENTITY ftdi_controller IS
     PORT (
-        ---------------------------------------------------------------------------
-        -- Dominio clk_i (60 MHz — generado por el FT232H vía BUFG)
-        ---------------------------------------------------------------------------
         clk_i   : IN STD_LOGIC;
         reset_i : IN STD_LOGIC;
 
-        ---------------------------------------------------------------------------
-        -- Interfaz con FIFO de imagen (lado lectura — dominio clk_i)
-        ---------------------------------------------------------------------------
         fifo_data_i  : IN  STD_LOGIC_VECTOR(7 DOWNTO 0);
         fifo_empty_i : IN  STD_LOGIC;
         fifo_rd_en_o : OUT STD_LOGIC;
 
-        ---------------------------------------------------------------------------
-        -- Interfaz física FT232H
-        ---------------------------------------------------------------------------
-        rxf_n_i  : IN    STD_LOGIC;                     --! RXF# '0'=dato disponible del PC
-        txe_n_i  : IN    STD_LOGIC;                     --! TXE# '0'=FT232H listo para recibir
-        rd_n_o   : OUT   STD_LOGIC;                     --! RD#  '0'=leer byte de ADBUS
-        wr_n_o   : OUT   STD_LOGIC;                     --! WR#  '0'=escribir byte en ADBUS
-        oe_n_o   : OUT   STD_LOGIC;                     --! OE#  '0'=FTDI pone dato en ADBUS
-        adbus_i  : IN    STD_LOGIC_VECTOR(7 DOWNTO 0);  --! ADBUS entrada (cuando OE#='0')
-        adbus_o  : OUT   STD_LOGIC_VECTOR(7 DOWNTO 0);  --! ADBUS salida  (cuando escribimos)
-        adbus_oe : OUT   STD_LOGIC;                     --! '1'=FPGA conduce ADBUS, '0'=tristate
+        rxf_n_i  : IN    STD_LOGIC;
+        txe_n_i  : IN    STD_LOGIC;
+        rd_n_o   : OUT   STD_LOGIC;
+        wr_n_o   : OUT   STD_LOGIC;
+        oe_n_o   : OUT   STD_LOGIC;
+        adbus_i  : IN    STD_LOGIC_VECTOR(7 DOWNTO 0);
+        adbus_o  : OUT   STD_LOGIC_VECTOR(7 DOWNTO 0);
+        adbus_oe : OUT   STD_LOGIC;
 
-        ---------------------------------------------------------------------------
-        -- Estado TX
-        ---------------------------------------------------------------------------
         tx_active_o : OUT STD_LOGIC;
 
-        ---------------------------------------------------------------------------
-        -- Comandos decodificados (dominio clk_i — sincronizar en TOP antes de usar)
-        ---------------------------------------------------------------------------
-        cmd_valid_o : OUT STD_LOGIC;                     --! Pulso 1 ciclo: comando listo
-        cmd_type_o  : OUT STD_LOGIC_VECTOR(7 DOWNTO 0); --! Tipo de comando
-        cmd_data_o  : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);--! Payload general
-        cmd_page_o  : OUT STD_LOGIC;                     --! Page (solo CMD 0x03)
-        cmd_addr_o  : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)  --! Addr (solo CMD 0x03)
+        cmd_valid_o : OUT STD_LOGIC;
+        cmd_type_o  : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
+        cmd_data_o  : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+        cmd_page_o  : OUT STD_LOGIC;
+        cmd_addr_o  : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
     );
 END ENTITY ftdi_controller;
 
 ARCHITECTURE rtl OF ftdi_controller IS
 
-    ---------------------------------------------------------------------------
-    -- Constantes de protocolo
-    ---------------------------------------------------------------------------
     CONSTANT c_CMD_SYNC : STD_LOGIC_VECTOR(7 DOWNTO 0) := x"CC";
-    CONSTANT c_CMD_LED  : STD_LOGIC_VECTOR(7 DOWNTO 0) := x"01";
-    CONSTANT c_CMD_BCD  : STD_LOGIC_VECTOR(7 DOWNTO 0) := x"02";
     CONSTANT c_CMD_I2C  : STD_LOGIC_VECTOR(7 DOWNTO 0) := x"03";
-    CONSTANT c_CMD_CAP  : STD_LOGIC_VECTOR(7 DOWNTO 0) := x"04";
+
+    SIGNAL s_rx_active : STD_LOGIC := '0';
 
     ---------------------------------------------------------------------------
-    -- FSM
+    -- TX (falling_edge)
     ---------------------------------------------------------------------------
-    TYPE t_state IS (
-        -- TX imagen
-        ST_IDLE,
-        ST_HOLD,
-        -- RX bus — 4 fases para leer un byte del FTDI
-        ST_RX_OE,       --! OE_N='0', FTDI empieza a conducir, FPGA aún conduce
-        ST_RX_OE2,      --! adbus_oe='0', FPGA suelta bus — FTDI ya conduce
-        ST_RX_RD,       --! RD_N='0', capturar ADBUS en s_rx_byte
-        ST_RX_RELEASE,  --! RD_N='1', OE_N='1', adbus_oe='1' → ir a s_rx_dest
-        -- RX decodificación
-        ST_CMD_BYTE1,   --! Verifica 0xCC
-        ST_CMD_BYTE2,   --! Guarda CMD
-        ST_CMD_BYTE3,   --! Guarda DATA_H o PAGE(I2C)
-        ST_CMD_BYTE4,   --! Guarda DATA_L o ADDR(I2C)
-        ST_CMD_BYTE5,   --! Guarda DATA_H (solo I2C)
-        ST_CMD_BYTE6,   --! Guarda DATA_L (solo I2C) → EXEC
-        ST_CMD_EXEC     --! Emitir cmd_valid_o
+    SIGNAL s_wr_n      : STD_LOGIC := '1';
+    SIGNAL s_data_r    : STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0');
+    SIGNAL s_fifo_rd   : STD_LOGIC := '0';
+    SIGNAL s_tx_active : STD_LOGIC := '0';
+    SIGNAL s_adbus_oe  : STD_LOGIC := '1';
+
+    ---------------------------------------------------------------------------
+    -- RX (rising_edge)
+    -- Estados RDx: en cada rising_edge con RD#='0' el FT232H avanza al
+    -- siguiente byte. El byte LEÍDO en RDx es el que estaba presentado
+    -- ANTES de ese flanco (el FT232H lo cambia DESPUÉS del flanco).
+    -- Por tanto: RD0=pipeline vacío (no leer), RD1=byte[0], RD2=byte[1]...
+    ---------------------------------------------------------------------------
+    TYPE t_rx_state IS (
+        ST_RX_IDLE,
+        ST_RX_PRE,      --! adbus_oe='0', FPGA suelta bus
+        ST_RX_OE,       --! oe_n='0', FTDI conduce bus
+        ST_RX_OE2,      --! margen OE# antes de RD#
+        ST_RD0,         --! rd_n='0' — pipeline: FT232H presenta byte[0], no leer
+        ST_RD1,         --! leer byte[0]=SYNC, FT232H avanzando a byte[1]
+        ST_RD2,         --! leer byte[1]=CMD,  FT232H avanzando a byte[2]
+        ST_RD3,         --! leer byte[2]=DH/PAGE, FT232H avanzando a byte[3]
+        ST_RD4,         --! leer byte[3]=DL(último gral) o ADDR(I2C)
+        ST_RD5,         --! leer byte[4]=DH(I2C), FT232H avanzando a byte[5]
+        ST_RD6,         --! leer byte[5]=DL(I2C, último)
+        ST_RX_RELEASE,  --! rd_n='1', oe_n='1', adbus_oe='1'
+        ST_RX_RELEASE2, --! margen
+        ST_RX_EXEC      --! emitir cmd_valid_o
     );
 
-    SIGNAL s_state   : t_state := ST_IDLE;
-    SIGNAL s_rx_dest : t_state := ST_IDLE; --! Destino tras ST_RX_RELEASE
-
-    ---------------------------------------------------------------------------
-    -- Registros TX
-    ---------------------------------------------------------------------------
-    SIGNAL data_r    : STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0');
-    SIGNAL fifo_rd_r : STD_LOGIC                    := '0';
-
-    ---------------------------------------------------------------------------
-    -- Registros de control bus — internos para poder conectarlos a la ILA
-    ---------------------------------------------------------------------------
-    SIGNAL s_rd_n         : STD_LOGIC := '1';  --! Registro interno RD#
-    SIGNAL s_wr_n         : STD_LOGIC := '1';  --! Registro interno WR#
-    SIGNAL s_oe_n         : STD_LOGIC := '1';  --! Registro interno OE#
-    SIGNAL s_cmd_valid_r  : STD_LOGIC := '0';  --! Registro interno cmd_valid
-
-    ---------------------------------------------------------------------------
-    -- Registros RX
-    ---------------------------------------------------------------------------
-    SIGNAL s_rx_byte  : STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0');
-    SIGNAL s_cmd_type : STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0');
-    SIGNAL s_cmd_page : STD_LOGIC                    := '0';
-    SIGNAL s_cmd_addr : STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0');
-    SIGNAL s_cmd_dh   : STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0');
-    SIGNAL s_cmd_dl   : STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0');
-
-    ---------------------------------------------------------------------------
-    -- Timeout espera RXF# (255 ciclos a 60MHz ≈ 4µs)
-    ---------------------------------------------------------------------------
-    SIGNAL s_rx_timeout : integer range 0 to 255 := 0;
+    SIGNAL s_rx_state    : t_rx_state := ST_RX_IDLE;
+    SIGNAL s_oe_n        : STD_LOGIC := '1';
+    SIGNAL s_rd_n        : STD_LOGIC := '1';
+    SIGNAL s_adbus_oe_rx : STD_LOGIC := '1';
+    SIGNAL s_cmd_valid_r : STD_LOGIC := '0';
+    SIGNAL s_cmd_type    : STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0');
+    SIGNAL s_cmd_page    : STD_LOGIC := '0';
+    SIGNAL s_cmd_addr    : STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0');
+    SIGNAL s_cmd_dh      : STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0');
+    SIGNAL s_cmd_dl      : STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0');
+    SIGNAL s_is_i2c      : STD_LOGIC := '0'; --! latcheado en RD2 para evitar comparacion multi-ciclo
 
 BEGIN
 
-    fifo_rd_en_o <= fifo_rd_r;
-    adbus_o      <= data_r;
-    rd_n_o       <= s_rd_n;
+    fifo_rd_en_o <= s_fifo_rd;
+    adbus_o      <= s_data_r;
     wr_n_o       <= s_wr_n;
     oe_n_o       <= s_oe_n;
+    rd_n_o       <= s_rd_n;
+    adbus_oe     <= s_adbus_oe_rx WHEN s_rx_active = '1' ELSE s_adbus_oe;
+    tx_active_o  <= s_tx_active;
     cmd_valid_o  <= s_cmd_valid_r;
 
     ---------------------------------------------------------------------------
-    -- FSM — rising_edge (setup/hold del FT232H cubierto con medio periodo a 60 MHz)
+    -- p_tx: TX imagen — falling_edge
     ---------------------------------------------------------------------------
-    p_fsm : PROCESS(clk_i)
+    p_tx : PROCESS(clk_i)
     BEGIN
         IF falling_edge(clk_i) THEN
             IF reset_i = '1' THEN
-                s_state      <= ST_IDLE;
-                s_wr_n <= '1';
-                s_rd_n <= '1';
-                s_oe_n <= '1';
-                adbus_oe     <= '1';
-                fifo_rd_r    <= '0';
-                tx_active_o  <= '0';
-                s_cmd_valid_r <= '0';
-                data_r       <= (OTHERS => '0');
-                s_rx_dest    <= ST_IDLE;
-                s_rx_byte    <= (OTHERS => '0');
-                s_cmd_type   <= (OTHERS => '0');
-                s_cmd_page   <= '0';
-                s_cmd_addr   <= (OTHERS => '0');
-                s_cmd_dh     <= (OTHERS => '0');
-                s_cmd_dl     <= (OTHERS => '0');
-                cmd_type_o   <= (OTHERS => '0');
-                cmd_data_o   <= (OTHERS => '0');
-                cmd_page_o   <= '0';
-                cmd_addr_o   <= (OTHERS => '0');
-                s_rx_timeout <= 0;
+                s_wr_n      <= '1';
+                s_data_r    <= (OTHERS => '0');
+                s_fifo_rd   <= '0';
+                s_tx_active <= '0';
+                s_adbus_oe  <= '1';
             ELSE
-                fifo_rd_r   <= '0';
+                s_fifo_rd <= '0';
+                s_wr_n    <= '1';
+                IF s_rx_active = '0' THEN
+                    s_adbus_oe <= '1';
+                    IF fifo_empty_i = '0' AND txe_n_i = '0' THEN
+                        s_data_r    <= fifo_data_i;
+                        s_wr_n      <= '0';
+                        s_fifo_rd   <= '1';
+                        s_tx_active <= '1';
+                    ELSE
+                        s_tx_active <= '0';
+                    END IF;
+                ELSE
+                    s_adbus_oe  <= '0';
+                    s_tx_active <= '0';
+                END IF;
+            END IF;
+        END IF;
+    END PROCESS p_tx;
+
+    ---------------------------------------------------------------------------
+    -- p_rx: RX comandos — rising_edge
+    ---------------------------------------------------------------------------
+    p_rx : PROCESS(clk_i)
+    BEGIN
+        IF rising_edge(clk_i) THEN
+            IF reset_i = '1' THEN
+                s_rx_state    <= ST_RX_IDLE;
+                s_rx_active   <= '0';
+                s_oe_n        <= '1';
+                s_rd_n        <= '1';
+                s_adbus_oe_rx <= '1';
+                s_cmd_valid_r <= '0';
+                s_cmd_type    <= (OTHERS => '0');
+                s_cmd_page    <= '0';
+                s_cmd_addr    <= (OTHERS => '0');
+                s_cmd_dh      <= (OTHERS => '0');
+                s_cmd_dl      <= (OTHERS => '0');
+                s_is_i2c      <= '0';
+                cmd_type_o    <= (OTHERS => '0');
+                cmd_data_o    <= (OTHERS => '0');
+                cmd_page_o    <= '0';
+                cmd_addr_o    <= (OTHERS => '0');
+            ELSE
                 s_cmd_valid_r <= '0';
 
-                CASE s_state IS
+                CASE s_rx_state IS
 
-                    -----------------------------------------------------------
-                    -- IDLE: prioridad comandos > imagen
-                    -----------------------------------------------------------
-                    WHEN ST_IDLE =>
-                        s_wr_n <= '1';
-                        s_rd_n <= '1';
-                        s_oe_n <= '1';
-                        adbus_oe    <= '1';
-                        tx_active_o <= '0';
+                    WHEN ST_RX_IDLE =>
+                        s_rx_active   <= '0';
+                        s_oe_n        <= '1';
+                        s_rd_n        <= '1';
+                        s_adbus_oe_rx <= '1';
                         IF rxf_n_i = '0' THEN
-                            -- Comando entrante — leer primer byte (debe ser 0xCC)
-                            s_rx_dest    <= ST_CMD_BYTE1;
-                            s_rx_timeout <= 0;
-                            s_state      <= ST_RX_OE;
-                        ELSIF fifo_empty_i = '0' AND txe_n_i = '0' THEN
-                            data_r      <= fifo_data_i;
-                            s_wr_n <= '0';
-                            fifo_rd_r   <= '1';
-                            tx_active_o <= '1';
-                            adbus_oe    <= '1';
-                            s_state     <= ST_HOLD;
+                            s_rx_active <= '1';
+                            s_rx_state  <= ST_RX_PRE;
                         END IF;
 
-                    -----------------------------------------------------------
-                    -- ST_HOLD: burst TX imagen — prioridad comandos
-                    -----------------------------------------------------------
-                    WHEN ST_HOLD =>
-                        s_wr_n <= '1';
-                        IF rxf_n_i = '0' THEN
-                            tx_active_o  <= '0';
-                            s_rx_dest    <= ST_CMD_BYTE1;
-                            s_rx_timeout <= 0;
-                            s_state      <= ST_RX_OE;
-                        ELSIF fifo_empty_i = '0' AND txe_n_i = '0' THEN
-                            data_r    <= fifo_data_i;
-                            s_wr_n <= '0';
-                            fifo_rd_r <= '1';
-                            s_state   <= ST_HOLD;
-                        ELSE
-                            tx_active_o <= '0';
-                            s_state     <= ST_IDLE;
-                        END IF;
+                    WHEN ST_RX_PRE =>
+                        s_adbus_oe_rx <= '0';
+                        s_oe_n        <= '1';
+                        s_rd_n        <= '1';
+                        s_rx_state    <= ST_RX_OE;
 
-                    -----------------------------------------------------------
-                    -- RX fase 1: OE_N='0' + adbus_oe='0' — la FPGA suelta el bus
-                    --            en el MISMO ciclo en que pide al FT232H que lo
-                    --            conduzca (evita contencion de 1 ciclo completo)
-                    -----------------------------------------------------------
                     WHEN ST_RX_OE =>
-                        s_wr_n   <= '1';
-                        s_oe_n   <= '0';     --! FTDI empieza a preparar dato
-                        adbus_oe <= '0';     --! FPGA suelta el bus a la vez
-                        s_rd_n   <= '1';
-                        s_state  <= ST_RX_OE2;
+                        s_oe_n     <= '0';
+                        s_rx_state <= ST_RX_OE2;
 
-                    -----------------------------------------------------------
-                    -- RX fase 2: margen — bus ya en manos del FT232H, estable
-                    -----------------------------------------------------------
                     WHEN ST_RX_OE2 =>
-                        s_state  <= ST_RX_RD;
+                        s_rd_n     <= '0';
+                        s_rx_state <= ST_RD0;
 
-                    -----------------------------------------------------------
-                    -- RX fase 2: RD_N='0' — dato estable en ADBUS, capturar
-                    -----------------------------------------------------------
-                    WHEN ST_RX_RD =>
-                        s_rd_n    <= '0';
-                        s_rx_byte <= adbus_i;  --! capturar mientras RD_N='0'
-                        s_state   <= ST_RX_RELEASE;
+                    --! RD0: rd_n='0' recién activado.
+                    --! FT232H presenta byte[0]=SYNC pero aún puede no estar
+                    --! estable (pipeline): no leer, esperar 1 ciclo.
+                    WHEN ST_RD0 =>
+                        s_rx_state <= ST_RD1;
 
-                    -----------------------------------------------------------
-                    -- RX fase 3: RD_N='1', OE_N='1' — liberar bus, ir a destino
-                    -----------------------------------------------------------
+                    --! RD1: byte[0]=SYNC estable en adbus_i.
+                    --! Este rising_edge hace que el FT232H avance a byte[1].
+                    WHEN ST_RD1 =>
+                        IF adbus_i = c_CMD_SYNC THEN
+                            s_rx_state <= ST_RD2;
+                        ELSE
+                            -- No es SYNC: soltar bus y volver a IDLE
+                            s_rd_n        <= '1';
+                            s_oe_n        <= '1';
+                            s_adbus_oe_rx <= '1';
+                            s_rx_state    <= ST_RX_RELEASE;
+                        END IF;
+
+                    --! RD2: byte[1]=CMD estable. Latchear.
+                    --! FT232H avanza a byte[2].
+                    WHEN ST_RD2 =>
+                        s_cmd_type <= adbus_i;
+                        IF adbus_i = c_CMD_I2C THEN
+                            s_is_i2c <= '1';
+                        ELSE
+                            s_is_i2c <= '0';
+                        END IF;
+                        s_rx_state <= ST_RD3;
+
+                    --! RD3: byte[2]=DATA_H (general) o PAGE (I2C). Latchear.
+                    --! FT232H avanza a byte[3].
+                    WHEN ST_RD3 =>
+                        IF s_is_i2c = '1' THEN
+                            s_cmd_page <= adbus_i(0);
+                        ELSE
+                            s_cmd_dh <= adbus_i;
+                        END IF;
+                        s_rx_state <= ST_RD4;
+
+                    --! RD4: byte[3]=DATA_L (general, ÚLTIMO) o ADDR (I2C).
+                    WHEN ST_RD4 =>
+                        IF s_is_i2c = '1' THEN
+                            s_cmd_addr <= adbus_i;
+                            s_rx_state <= ST_RD5;  -- I2C: continuar
+                        ELSE
+                            s_cmd_dl      <= adbus_i;
+                            s_rd_n        <= '1';
+                            s_oe_n        <= '1';
+                            s_adbus_oe_rx <= '1';
+                            s_rx_state    <= ST_RX_RELEASE;
+                        END IF;
+
+                    --! RD5: byte[4]=DATA_H (I2C). Latchear.
+                    --! FT232H avanza a byte[5].
+                    WHEN ST_RD5 =>
+                        s_cmd_dh   <= adbus_i;
+                        s_rx_state <= ST_RD6;
+
+                    --! RD6: byte[5]=DATA_L (I2C, ÚLTIMO).
+                    WHEN ST_RD6 =>
+                        s_cmd_dl      <= adbus_i;
+                        s_rd_n        <= '1';
+                        s_oe_n        <= '1';
+                        s_adbus_oe_rx <= '1';
+                        s_rx_state    <= ST_RX_RELEASE;
+
                     WHEN ST_RX_RELEASE =>
-                        s_rd_n   <= '1';
-                        s_oe_n   <= '1';
-                        adbus_oe <= '1';
-                        s_state  <= s_rx_dest;
+                        s_rx_state <= ST_RX_RELEASE2;
 
-                    -----------------------------------------------------------
-                    -- BYTE1: verifica que el byte recibido es 0xCC
-                    -----------------------------------------------------------
-                    WHEN ST_CMD_BYTE1 =>
-                        IF s_rx_byte = c_CMD_SYNC THEN
-                            -- Leer siguiente byte (CMD)
-                            s_rx_dest    <= ST_CMD_BYTE2;
-                            s_rx_timeout <= 0;
-                            s_state      <= ST_RX_OE;
+                    WHEN ST_RX_RELEASE2 =>
+                        -- Si llegamos aquí con SYNC fallido (no I2C, no gral):
+                        -- s_cmd_type = 0 → ir a IDLE sin EXEC
+                        IF s_cmd_type = (s_cmd_type'RANGE => '0') AND s_is_i2c = '0' THEN
+                            s_rx_active <= '0';
+                            s_rx_state  <= ST_RX_IDLE;
                         ELSE
-                            s_state <= ST_IDLE;  -- no era sync, descartar
+                            s_rx_state  <= ST_RX_EXEC;
                         END IF;
 
-                    -----------------------------------------------------------
-                    -- BYTE2: guarda CMD, lanza lectura DATA_H
-                    -----------------------------------------------------------
-                    WHEN ST_CMD_BYTE2 =>
-                        s_cmd_type   <= s_rx_byte;
-                        s_rx_dest    <= ST_CMD_BYTE3;
-                        s_rx_timeout <= 0;
-                        s_state      <= ST_RX_OE;
-
-                    -----------------------------------------------------------
-                    -- BYTE3: guarda DATA_H (general) o PAGE (I2C)
-                    -----------------------------------------------------------
-                    WHEN ST_CMD_BYTE3 =>
-                        IF s_cmd_type = c_CMD_I2C THEN
-                            s_cmd_page <= s_rx_byte(0);
-                        ELSE
-                            s_cmd_dh <= s_rx_byte;
-                        END IF;
-                        s_rx_dest    <= ST_CMD_BYTE4;
-                        s_rx_timeout <= 0;
-                        s_state      <= ST_RX_OE;
-
-                    -----------------------------------------------------------
-                    -- BYTE4: guarda DATA_L (general) → EXEC, o ADDR (I2C) → BYTE5
-                    -----------------------------------------------------------
-                    WHEN ST_CMD_BYTE4 =>
-                        IF s_cmd_type = c_CMD_I2C THEN
-                            s_cmd_addr   <= s_rx_byte;
-                            s_rx_dest    <= ST_CMD_BYTE5;
-                            s_rx_timeout <= 0;
-                            s_state      <= ST_RX_OE;
-                        ELSE
-                            s_cmd_dl <= s_rx_byte;
-                            s_state  <= ST_CMD_EXEC;
-                        END IF;
-
-                    -----------------------------------------------------------
-                    -- BYTE5: guarda DATA_H (I2C), lanza lectura DATA_L
-                    -----------------------------------------------------------
-                    WHEN ST_CMD_BYTE5 =>
-                        s_cmd_dh     <= s_rx_byte;
-                        s_rx_dest    <= ST_CMD_BYTE6;
-                        s_rx_timeout <= 0;
-                        s_state      <= ST_RX_OE;
-
-                    -----------------------------------------------------------
-                    -- BYTE6: guarda DATA_L (I2C) → EXEC
-                    -----------------------------------------------------------
-                    WHEN ST_CMD_BYTE6 =>
-                        s_cmd_dl <= s_rx_byte;
-                        s_state  <= ST_CMD_EXEC;
-
-                    -----------------------------------------------------------
-                    -- EXEC: emitir cmd_valid_o con el comando decodificado
-                    -----------------------------------------------------------
-                    WHEN ST_CMD_EXEC =>
+                    WHEN ST_RX_EXEC =>
                         s_cmd_valid_r <= '1';
-                        cmd_type_o  <= s_cmd_type;
-                        cmd_data_o  <= s_cmd_dh & s_cmd_dl;
-                        cmd_page_o  <= s_cmd_page;
-                        cmd_addr_o  <= s_cmd_addr;
-                        s_state     <= ST_IDLE;
+                        cmd_type_o    <= s_cmd_type;
+                        cmd_data_o    <= s_cmd_dh & s_cmd_dl;
+                        cmd_page_o    <= s_cmd_page;
+                        cmd_addr_o    <= s_cmd_addr;
+                        s_rx_active   <= '0';
+                        s_rx_state    <= ST_RX_IDLE;
 
                     WHEN OTHERS =>
-                        s_state <= ST_IDLE;
+                        s_rx_active <= '0';
+                        s_rx_state  <= ST_RX_IDLE;
 
                 END CASE;
             END IF;
         END IF;
-    END PROCESS p_fsm;
+    END PROCESS p_rx;
 
 END ARCHITECTURE rtl;
