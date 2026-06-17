@@ -1,0 +1,31 @@
+% !TEX root = ../main.tex
+\documentclass[../main.tex]{subfiles}
+\begin{document}
+
+\chapter{Introducción}
+\label{chap:introduccion}
+
+\section{Motivación}
+
+La visión artificial embebida constituye uno de los campos de mayor crecimiento dentro de la ingeniería electrónica actual. La capacidad de adquirir, procesar y transmitir imágenes en tiempo real desde plataformas de bajo coste y reducidas dimensiones abre la puerta a multitud de aplicaciones industriales, médicas y de seguridad. Sin embargo, el diseño de estos sistemas presenta retos técnicos significativos: el ancho de banda necesario para transportar flujos de vídeo sin comprimir, la latencia introducida por las interfaces de comunicación y la correcta sincronización entre dominios de reloj heterogéneos son problemas que requieren soluciones cuidadosamente diseñadas a nivel de hardware.
+
+En este contexto, las FPGAs (\textit{Field Programmable Gate Arrays}) ofrecen ventajas únicas frente a los microcontroladores o los procesadores de propósito general: paralelismo inherente, latencia determinista y la posibilidad de implementar lógica de captura y transmisión de imagen sin necesidad de sistemas operativos ni \textit{drivers} complejos. La Basys~3, basada en la familia Artix-7 de Xilinx, es una plataforma accesible y ampliamente utilizada en entornos académicos que, combinada con los periféricos adecuados, permite demostrar un sistema de visión embebido completo.
+
+\section{Objetivos}
+
+El presente Trabajo Fin de Máster tiene como objetivo principal el diseño, implementación y verificación de \textbf{VICON} (\textit{VHDL Image Capture and Output Node}), un sistema de adquisición y transmisión de imagen configurable basado en FPGA. Los objetivos específicos son:
+
+\begin{itemize}
+    \item Diseñar en VHDL el hardware necesario para capturar imágenes del sensor CMOS MT9V111 de ON~Semiconductor, incluyendo la interfaz de configuración I2C y el módulo de captura de trama.
+    \item Implementar un controlador de alta velocidad para el chip FT232H de FTDI en modo \textit{Synchronous FIFO}, capaz de transmitir el flujo de imagen hacia un PC y recibir comandos en sentido contrario.
+    \item Gestionar correctamente los cruces de dominio de reloj (\textit{Clock Domain Crossing}, CDC) entre los distintos dominios presentes en el diseño (reloj del sistema, reloj de píxel y reloj del FT232H).
+    \item Verificar el diseño mediante simulación con metodología UVVM (\textit{Universal VHDL Verification Methodology}), incluyendo agentes de simulación para el sensor I2C y el FT232H.
+    \item Desarrollar una aplicación de visualización en PC con Qt y OpenCV que reciba el flujo de imagen y permita enviar comandos de control a la FPGA.
+    \item Demostrar el funcionamiento del sistema completo en hardware real sobre la plataforma Basys~3.
+\end{itemize}
+
+\section{Estructura del documento}
+
+El presente documento se organiza de la siguiente forma. El capítulo~\ref{chap:estado_del_arte} revisa el estado del arte en sistemas de visión embebida sobre FPGA, las interfaces de alta velocidad hacia PC y las metodologías de verificación de hardware. El capítulo~\ref{chap:descripcion_sistema} describe la arquitectura global del sistema VICON y el hardware utilizado. El capítulo~\ref{chap:desarrollo} detalla el diseño RTL de cada módulo, la estrategia de CDC y la verificación mediante UVVM. El capítulo~\ref{chap:implementacion} presenta los resultados de síntesis e implementación en Vivado, el análisis de timing y las pruebas sobre hardware real. El capítulo~\ref{chap:software} describe el software de visualización desarrollado en PC. Finalmente, el capítulo~\ref{chap:conclusiones} recoge las conclusiones del trabajo y las líneas de trabajo futuro.
+
+\end{document}

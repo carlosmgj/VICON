@@ -1,0 +1,193 @@
+% !TEX root = ../main.tex
+\documentclass[../main.tex]{subfiles}
+\begin{document}
+
+\chapter{Desarrollo}
+\label{chap:desarrollo}
+
+\section{Estructura del proyecto}
+
+El proyecto se organiza según la siguiente estructura de directorios:
+
+\begin{itemize}
+    \item \texttt{01-Sources/}: fuentes RTL del diseño (\texttt{TOP.vhd}, módulos, paquetes de constantes).
+    \item \texttt{05-TestBench/}: fuentes del banco de pruebas (agentes, generadores de reloj, testbench principal).
+    \item \texttt{06-Project/}: proyecto Vivado con las IPs generadas y los ficheros de constraints (\texttt{.xdc}).
+\end{itemize}
+
+Los paquetes de constantes \texttt{config\_pkg.vhd} y \texttt{top\_pkg.vhd} centralizan todos los parámetros configurables del diseño (resolución, frecuencias, protocolo de sustitución de bytes reservados, etc.), favoreciendo la mantenibilidad y la reutilización.
+
+\section{RTL Design}
+
+\subsection{TOP}
+
+El módulo \texttt{TOP.vhd} instancia y conecta todos los submódulos del diseño. Sus responsabilidades principales son:
+
+\begin{itemize}
+    \item Instanciar el MMCM (\texttt{clk\_wiz\_0}) para generar \texttt{s\_mclk} (100~MHz) y \texttt{mt\_clk\_o} (30~MHz hacia el sensor).
+    \item Gestionar la señal de reset global (\texttt{s\_rst\_final}), activa hasta que el MMCM bloquea (\texttt{locked='1'}).
+    \item Implementar la FSM de configuración del sensor (\texttt{p\_fsm}), que coordina la inicialización I2C del MT9V111 antes de habilitar la captura.
+    \item Implementar los sincronizadores 2FF para los cruces de dominio \texttt{s\_mclk}$\rightarrow$\texttt{mt\_pixclk\_i} de las señales \texttt{s\_use\_sim\_image} y \texttt{s\_cap\_en}.
+    \item Instanciar la FIFO asíncrona (\texttt{fifo\_generator\_0}) que desacopla el dominio de escritura (\texttt{mt\_pixclk\_i}) del dominio de lectura (\texttt{ftdi\_clk}).
+\end{itemize}
+
+La FSM de configuración (\texttt{p\_fsm}) sigue la secuencia de estados mostrada en la Figura~\ref{fig:fsm_top}:
+
+\begin{figure}[htbp]
+    \centering
+    \todohint[caption={FSM TOP}, inline]{Insertar diagrama de estados de la FSM de configuración del TOP.}
+    \caption{FSM de configuración del sensor en \texttt{TOP.vhd}.}
+    \label{fig:fsm_top}
+\end{figure}
+
+\subsection{I2C Controller}
+\label{sec:i2c_controller}
+
+El módulo \texttt{i2c\_controller.vhd} implementa un maestro I2C parametrizable que soporta escritura y lectura de registros de 16~bits. Opera en el dominio \texttt{s\_mclk} (100~MHz) y genera la frecuencia SCL mediante un divisor de reloj configurable a través del genérico \texttt{g\_I2C\_FREQ\_HZ}.
+
+\paragraph{Protocolo I2C MT9V111}
+
+El sensor MT9V111 utiliza un protocolo de lectura de registros que se desvía del estándar habitual: en vez de emplear \textit{Repeated START} entre la fase de escritura de la dirección del registro y la fase de lectura, el sensor exige \textbf{dos transacciones I2C separadas por una condición de STOP} (véase Figura~17 del datasheet~\cite{mt9v111_datasheet}):
+
+\begin{enumerate}
+    \item Primera transacción (escritura): START + dirección esclavo (W) + ACK + dirección registro + ACK + STOP.
+    \item Segunda transacción (lectura): START + dirección esclavo (R) + ACK + MSB dato + ACK + LSB dato + NACK + STOP.
+\end{enumerate}
+
+Esta particularidad fue identificada durante la depuración del diseño comparando la forma de onda del bus I2C capturada en simulación con la Figura~17 del datasheet, y obligó a reescribir el agente de simulación \texttt{mt9v111\_i2c.vhd} para reproducir exactamente este comportamiento.
+
+\subsection{Frame Capture}
+\label{sec:frame_capture}
+
+El módulo \texttt{frame\_capture.vhd} captura los datos de imagen procedentes del sensor MT9V111 y los escribe en la FIFO asíncrona. Opera en el dominio \texttt{mt\_pixclk\_i} (25~MHz). Sus funciones principales son:
+
+\begin{itemize}
+    \item Detectar el inicio y fin de trama mediante las señales \texttt{fvalid\_i} y \texttt{lvalid\_i}.
+    \item Extraer únicamente la componente de luminancia Y del flujo YCbCr~4:2:2 (los bytes de crominancia Cb y Cr se descartan), obteniendo una imagen en escala de grises.
+    \item Insertar los marcadores de trama \texttt{AA 55 AA 55} al inicio de cada frame para que el software de PC pueda sincronizar el flujo.
+    \item Aplicar el protocolo de sustitución de bytes reservados: los valores \texttt{0xFF}, \texttt{0x00}, \texttt{0xAA} y \texttt{0x55} que puedan aparecer en los datos de imagen se sustituyen por \texttt{0xFE}, \texttt{0x01}, \texttt{0xAB} y \texttt{0x56} respectivamente, para evitar falsos positivos en la detección del marcador de trama.
+    \item Controlar la tasa de captura mediante el genérico \texttt{g\_TARGET\_FPS}, descartando frames completos cuando la tasa real supera la tasa objetivo.
+\end{itemize}
+
+La FIFO asíncrona (\texttt{fifo\_generator\_0}) se configura en modo \textit{First Word Fall Through} (FWFT), lo que permite al módulo \texttt{ftdi\_controller} leer el primer dato disponible sin necesidad de activar previamente \texttt{rd\_en}: el dato ya está presente en \texttt{dout} en cuanto \texttt{empty='0'}, lo que simplifica la lógica de lectura y elimina un ciclo de latencia por transacción.
+
+\subsection{FTDI Controller}
+\label{sec:ftdi_controller}
+
+El módulo \texttt{ftdi\_controller.vhd} implementa el controlador del chip FT232H en modo \textit{Synchronous FIFO}. Opera en el dominio \texttt{ftdi\_clk} (60~MHz, \texttt{CLKOUT} del FT232H). Dado que TX e RX requieren flancos de muestreo distintos, el módulo se implementa con \textbf{dos procesos independientes}:
+
+\paragraph{Proceso TX (\texttt{p\_tx}, \texttt{falling\_edge})}
+
+El proceso \texttt{p\_tx} gestiona la transmisión de imagen FPGA$\rightarrow$PC. Opera en flanco de bajada de \texttt{ftdi\_clk}, de modo que \texttt{WR\#} y \texttt{ADBUS[7:0]} sean estables en el flanco de subida en que el FT232H los muestrea. El proceso está inhibido mientras \texttt{s\_rx\_active='1'} (el proceso RX está ocupando el bus).
+
+\paragraph{Proceso RX (\texttt{p\_rx}, \texttt{rising\_edge})}
+
+El proceso \texttt{p\_rx} gestiona la recepción de comandos PC$\rightarrow$FPGA. Opera en flanco de subida, ya que el FT232H presenta los datos en \texttt{ADBUS[7:0]} estables en el flanco de subida de \texttt{CLKOUT} (Figura~4.4 del datasheet~\cite{ft232h_datasheet}).
+
+La secuencia de lectura sigue el protocolo de ráfaga continua requerido por el FT232H (AN130~\cite{ft232h_an130}):
+
+\begin{enumerate}
+    \item \textbf{ST\_RX\_PRE}: La FPGA desactiva \texttt{adbus\_oe} (suelta el bus) con \texttt{OE\#='1'} aún activo, eliminando la posibilidad de contención de bus.
+    \item \textbf{ST\_RX\_OE}: Se activa \texttt{OE\#='0'}: el FT232H comienza a conducir \texttt{ADBUS}.
+    \item \textbf{ST\_RX\_OE2}: Ciclo de margen (\texttt{OE\#='0'} durante al menos un ciclo completo antes de \texttt{RD\#='0'}, como exige el datasheet).
+    \item \textbf{ST\_RD0}: Se activa \texttt{RD\#='0'} (inicio de ráfaga). Ciclo vacío de pipeline: \texttt{adbus\_i} puede no estar estable aún.
+    \item \textbf{ST\_RD1\ldots ST\_RD6}: \texttt{RD\#} permanece bajo. En cada \texttt{rising\_edge} el FT232H avanza al siguiente byte de su FIFO interna. El byte leído en el estado \texttt{RDx} es el que el FT232H presentó durante el estado \texttt{RD(x-1)}, lo que introduce un pipeline natural de un ciclo.
+    \item \textbf{ST\_RX\_RELEASE / ST\_RX\_RELEASE2}: Se desactivan \texttt{RD\#}, \texttt{OE\#} y \texttt{adbus\_oe}. Dos ciclos de margen para estabilización.
+    \item \textbf{ST\_RX\_EXEC}: Se emite el pulso \texttt{cmd\_valid\_o} (1 ciclo) con el comando decodificado.
+\end{enumerate}
+
+La señal \texttt{s\_rx\_active} actúa como handshake entre ambos procesos: se activa al inicio de la recepción y se desactiva en \texttt{ST\_RX\_EXEC}, asegurando que \texttt{p\_tx} no conduce el bus durante toda la secuencia de lectura.
+
+\subsection{CMD Processor}
+\label{sec:cmd_processor}
+
+El módulo \texttt{cmd\_processor.vhd} recibe los comandos decodificados por \texttt{ftdi\_controller} (dominio \texttt{ftdi\_clk}) y los sincroniza al dominio \texttt{s\_mclk} (100~MHz) mediante un sincronizador de doble flip-flop (\texttt{p\_cdc}):
+
+\begin{itemize}
+    \item \texttt{cmd\_valid\_i} se sincroniza con 3~FF (ASYNC\_REG) y se detecta el flanco de subida mediante \texttt{s\_cmd\_pulse <= s\_valid\_sync1 AND NOT s\_valid\_sync2}.
+    \item \texttt{cmd\_type\_i} y \texttt{cmd\_data\_i} se sincronizan con 2~FF cada uno.
+\end{itemize}
+
+El cruce CDC es de 60~MHz (origen) a 100~MHz (destino), es decir, el reloj destino es más rápido que el origen. El pulso \texttt{cmd\_valid\_o} de \texttt{ftdi\_controller} dura 1 ciclo de \texttt{ftdi\_clk} (16{,}67~ns), lo que garantiza al menos un flanco de \texttt{s\_mclk} dentro del pulso. El sincronizador de 3~FF y la detección de flanco eliminan cualquier riesgo de metaestabilidad y doble disparo.
+
+El proceso \texttt{p\_dispatch} ejecuta la acción correspondiente a cada comando:
+
+\begin{itemize}
+    \item \texttt{CMD 0x01}: conmuta \texttt{s\_led\_toggle\_r} (pulso de 1 ciclo que la lógica exterior usa para alternar los LEDs).
+    \item \texttt{CMD 0x02}: registra \texttt{s\_bcd\_r} con el valor de \texttt{DATA[15:0]}.
+    \item \texttt{CMD 0x03}: lanza una transacción de escritura I2C a través de \texttt{p\_exec}.
+    \item \texttt{CMD 0x04}: registra \texttt{s\_cap\_en\_r} con \texttt{DATA[0]}.
+    \item \texttt{CMD 0x05}: registra \texttt{s\_sim\_en\_r} con \texttt{DATA[0]}.
+\end{itemize}
+
+Todas las señales de salida del \texttt{cmd\_processor} (\texttt{cap\_en\_cmd\_o}, \texttt{sim\_img\_en\_o}) que cruzan al dominio \texttt{mt\_pixclk\_i} se resincronización en \texttt{TOP.vhd} mediante sincronizadores 2FF adicionales con atributo \texttt{ASYNC\_REG}.
+
+\subsection{Imagen sintética (cam\_sim)}
+\label{sec:cam_sim}
+
+El módulo \texttt{mt9v111\_image.vhd} genera un patrón de imagen sintético que emula el protocolo de salida del sensor MT9V111 (señales \texttt{fvalid}, \texttt{lvalid}, \texttt{data} y \texttt{pixclk}). Se instancia en \texttt{TOP.vhd} cuando el genérico \texttt{g\_USE\_CAM\_SIM=TRUE} y se clockea con \texttt{mt\_pixclk\_i} (mismo dominio que \texttt{frame\_capture}), eliminando cualquier necesidad de BUFGMUX adicional y manteniendo el CDC ya validado.
+
+La selección entre imagen real (sensor) e imagen sintética se realiza mediante un multiplexor combinacional en \texttt{TOP.vhd} gobernado por la señal \texttt{s\_use\_sim\_image\_pix} (sincronizada al dominio \texttt{mt\_pixclk\_i}). El valor por defecto tras reset es imagen sintética (\texttt{s\_sim\_en\_r := '1'}), lo que permite validar el sistema de transmisión sin necesidad del sensor físico.
+
+\section{Gestión de cruces de dominio de reloj (CDC)}
+\label{sec:cdc}
+
+El diseño presenta tres cruces de dominio de reloj que requieren tratamiento explícito:
+
+\begin{table}[h]
+\centering
+\caption{Cruces de dominio de reloj en el diseño VICON.}
+\label{tab:cdc}
+\begin{tabular}{llll}
+\rowcolor[HTML]{156082}
+{\color{white}\textbf{Señal}} & {\color{white}\textbf{Origen}} & {\color{white}\textbf{Destino}} & {\color{white}\textbf{Solución}} \\
+\rowcolor[HTML]{C0E6F5}
+\texttt{cmd\_valid}, \texttt{cmd\_type}, \texttt{cmd\_data} & \texttt{ftdi\_clk} (60~MHz) & \texttt{s\_mclk} (100~MHz) & 2--3 FF + ASYNC\_REG \\
+\texttt{s\_cap\_en} & \texttt{s\_mclk} (100~MHz) & \texttt{mt\_pixclk\_i} (25~MHz) & 2 FF + ASYNC\_REG \\
+\rowcolor[HTML]{C0E6F5}
+\texttt{s\_use\_sim\_image} & \texttt{s\_mclk} (100~MHz) & \texttt{mt\_pixclk\_i} (25~MHz) & 2 FF + ASYNC\_REG \\
+\end{tabular}
+\end{table}
+
+Los caminos \texttt{s\_mclk}$\rightarrow$\texttt{mt\_pixclk\_i} se declaran como \texttt{set\_false\_path} en el fichero XDC, ya que son señales de nivel que cambian infrecuentemente y cuyos sincronizadores garantizan la corrección del cruce sin necesidad de análisis de timing entre dominios. El cruce \texttt{ftdi\_clk}$\rightarrow$\texttt{s\_mclk} utiliza \texttt{set\_clock\_groups -asynchronous} para aislar los dos dominios asíncronos entre sí. El reloj \texttt{mt\_pixclk\_i} se entra en la FPGA a través de un \texttt{IBUF} con la propiedad \texttt{CLOCK\_DEDICATED\_ROUTE FALSE}, dado que el pin físico utilizado no es un pin de reloj dedicado (CCIO) de la Artix-7.
+
+\section{Verificación con UVVM}
+\label{sec:verificacion}
+
+\subsection{Estructura del banco de pruebas}
+
+El banco de pruebas se organiza en los siguientes componentes:
+
+\begin{itemize}
+    \item \textbf{\texttt{testbench.vhd}}: instancia el DUT (\texttt{TOP}), los agentes de verificación, los generadores de reloj y los monitores. Actúa como \textit{test harness}.
+    \item \textbf{\texttt{clk\_reset\_gen.vhd}}: genera el reloj base de 100~MHz y la señal de reset activo en alto.
+    \item \textbf{\texttt{mt9v111\_i2c.vhd}}: agente esclavo I2C que simula el comportamiento del sensor MT9V111, respondiendo a las transacciones de escritura (ACK) y de lectura (devuelve datos de registro predefinidos).
+    \item \textbf{\texttt{ftdi\_agent.vhd}}: agente que simula el chip FT232H, incluyendo el generador de \texttt{CLKOUT} (60~MHz), la FIFO de recepción de imagen y el inyector de comandos PC$\rightarrow$FPGA.
+    \item \textbf{\texttt{mt9v111\_image.vhd}}: generador de imagen sintética reutilizado directamente del diseño RTL.
+\end{itemize}
+
+Las librerías UVVM utilizadas son \texttt{uvvm\_util} (logging, alertas, \texttt{check\_value}) y \texttt{bitvis\_vip\_i2c} (mapeada pero no utilizada directamente, dado que el protocolo no estándar del MT9V111 requirió un agente propio).
+
+\subsection{Agente FTDI}
+
+El agente \texttt{ftdi\_agent.vhd} modela el comportamiento del FT232H en modo \textit{Synchronous FIFO} con especial atención al protocolo de ráfaga continua validado en hardware:
+
+\begin{itemize}
+    \item \textbf{Inyección de comandos}: la tabla \texttt{c\_CMD\_TABLE} define los comandos a inyectar con sus bytes serializados y su longitud (4 o 6 bytes). El proceso \texttt{p\_tx\_inject} activa \texttt{RXF\#='0'} y presenta los bytes en \texttt{adbus\_io} de forma combinacional cuando \texttt{OE\#='0'}. Cada \texttt{rising\_edge} con \texttt{OE\#='0'} y \texttt{RD\#='0'} consume un byte y el agente avanza al siguiente, sin subir \texttt{RD\#} entre bytes.
+    \item \textbf{Captura de imagen}: el proceso \texttt{p\_rx} registra cada byte presentado en \texttt{ADBUS} cuando \texttt{WR\#='0'} en \texttt{rising\_edge}, almacenándolo en una FIFO circular.
+    \item \textbf{Control de \texttt{TXE\#}}: el proceso \texttt{p\_txe} activa \texttt{TXE\#='1'} (buffer lleno) cuando el nivel de la FIFO supera \texttt{g\_TXE\_BUSY\_THRESHOLD}, modelando la contrapresión del chip real.
+\end{itemize}
+
+\subsection{Monitores}
+
+El testbench incluye tres monitores pasivos implementados como procesos VHDL:
+
+\begin{itemize}
+    \item \textbf{\texttt{p\_monitor}}: observa la señal \texttt{a\_fsm\_state} (alias externo VHDL-2008 hacia \texttt{u\_dut.s\_state}) y loguea cada transición de estado de la FSM de configuración, incluyendo el valor de \texttt{a\_rd\_data} en los estados de verificación de registros.
+    \item \textbf{\texttt{p\_frame\_monitor}}: cuenta los flancos de subida de \texttt{a\_frame\_done} y loguea el número de frame completado.
+    \item \textbf{\texttt{p\_i2c\_sniffer}}: decodifica bit a bit el tráfico del bus I2C, identificando condiciones START, STOP, RSTART, bytes de dirección y datos con sus ACK/NACK.
+\end{itemize}
+
+Los alias de señales externas (\texttt{<<SIGNAL u\_dut.s\_state : main\_state\_t>>}) se compilan con la opción \texttt{-suppress 1309} en ModelSim/QuestaSim para suprimir la advertencia de elaboración generada por señales de tipo enumerado accedidas desde fuera de la arquitectura.
+
+\end{document}

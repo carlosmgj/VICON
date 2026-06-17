@@ -189,3 +189,26 @@
 \usepackage{gensymb}
 \usepackage[margin=2.5cm,top=2.5cm,bottom=2.5cm]{geometry}
 \usepackage{makecell}
+
+\usepackage[most]{tcolorbox}
+
+\tcbuselibrary{skins, breakable}
+ 
+\definecolor{reqblue}{HTML}{156082}
+ 
+\newtcolorbox{requisito}[2]{
+    enhanced,
+    breakable,
+    colback       = white,
+    colframe      = reqblue,
+    colbacktitle  = reqblue,
+    coltitle      = white,
+    fonttitle     = \bfseries\small,
+    title         = {#1 \hfill #2},
+    left          = 4pt,
+    right         = 4pt,
+    top           = 2pt,
+    bottom        = 2pt,
+    boxrule       = 0.8pt,
+    arc           = 2pt,
+}

@@ -1,0 +1,291 @@
+% !TEX root = ../main.tex
+\documentclass[../main.tex]{subfiles}
+\begin{document}
+
+\chapter{Descripción del sistema}
+\label{chap:descripcion_sistema}
+
+\section{Arquitectura global}
+
+VICON es un sistema de adquisición y transmisión de imagen en tiempo real cuya arquitectura se divide en tres bloques principales: la FPGA Basys~3, el sensor de imagen MT9V111 y el PC de visualización. La Figura~\ref{fig:arquitectura_global} muestra el diagrama de bloques del sistema completo.
+
+\begin{figure}[htbp]
+    \centering
+    \todohint[caption={Diagrama de bloques global}, inline]{Insertar diagrama de bloques del sistema: Basys3 -- MT9V111 -- FT232H -- PC.}
+    \caption{Arquitectura global del sistema VICON.}
+    \label{fig:arquitectura_global}
+\end{figure}
+
+El flujo de datos de imagen sigue el camino: sensor MT9V111 $\rightarrow$ módulo \texttt{frame\_capture} (FPGA) $\rightarrow$ FIFO asíncrona $\rightarrow$ módulo \texttt{ftdi\_controller} $\rightarrow$ FT232H $\rightarrow$ PC. El flujo de comandos sigue el camino inverso: PC $\rightarrow$ FT232H $\rightarrow$ \texttt{ftdi\_controller} $\rightarrow$ \texttt{cmd\_processor} $\rightarrow$ lógica de control.
+
+\section{Requisitos del sistema}
+\label{sec:requisitos}
+
+Los requisitos del sistema se organizan en ocho grupos temáticos. Cada ficha incluye un identificador único compuesto por el grupo y el subíndice (\texttt{REQ-Gx.y}), una descripción, el tipo de requisito, su prioridad y el criterio de verificación.
+
+% ------------------------------------------------------------
+% GRUPO 1 — Planificación
+% ------------------------------------------------------------
+\subsection{Grupo 1 — Planificación}
+
+\begin{requisito}{REQ-G1.1}{FechaEntregaOrd}
+\begin{description}
+    \item[Descripción:]   La fecha de entrega final para la convocatoria ordinaria será la establecida por la universidad. \emph{(TBD)}
+    \item[Tipo:]          Organizativo
+    \item[Prioridad:]     Alta
+    \item[Verificación:]  Entrega del documento y defensa antes de la fecha límite de la convocatoria ordinaria.
+\end{description}
+\end{requisito}
+
+\begin{requisito}{REQ-G1.2}{FechaEntregaExt}
+\begin{description}
+    \item[Descripción:]   La fecha de entrega final para la convocatoria extraordinaria será la establecida por la universidad. \emph{(TBD)}
+    \item[Tipo:]          Organizativo
+    \item[Prioridad:]     Media
+    \item[Verificación:]  Entrega del documento y defensa antes de la fecha límite de la convocatoria extraordinaria.
+\end{description}
+\end{requisito}
+
+\begin{requisito}{REQ-G1.3}{FechaHito \emph{(TBC)}}
+\begin{description}
+    \item[Descripción:]   Se establecerá un hito previo a la entrega final con el objetivo de demostrar el correcto funcionamiento del sistema sobre hardware real.
+    \item[Tipo:]          Organizativo
+    \item[Prioridad:]     Alta
+    \item[Verificación:]  Demostración funcional del sistema ante el tutor en la fecha acordada.
+\end{description}
+\end{requisito}
+
+% ------------------------------------------------------------
+% GRUPO 2 — Hardware
+% ------------------------------------------------------------
+\subsection{Grupo 2 — Hardware}
+
+\begin{requisito}{REQ-G2.1}{SensorCamara}
+\begin{description}
+    \item[Descripción:]   El sensor de imagen utilizado es el modelo MT9V111 de ON~Semiconductor. Referencia en Lista de Materiales (LM): \emph{TBD}.
+    \item[Tipo:]          Hardware
+    \item[Prioridad:]     Alta
+    \item[Verificación:]  El sensor responde correctamente a las transacciones I2C de configuración y entrega flujo de imagen VGA.
+\end{description}
+\end{requisito}
+
+\begin{requisito}{REQ-G2.2}{HostCamara}
+\begin{description}
+    \item[Descripción:]   El host encargado de comunicar el sensor con el ordenador es la FPGA Basys~3 (Xilinx Artix-7 XC7A35T). Referencia en LM: \emph{TBD}.
+    \item[Tipo:]          Hardware
+    \item[Prioridad:]     Alta
+    \item[Verificación:]  La FPGA programa correctamente el bitstream generado por Vivado y opera de forma estable.
+\end{description}
+\end{requisito}
+
+\begin{requisito}{REQ-G2.3}{Ordenador}
+\begin{description}
+    \item[Descripción:]   El PC encargado de ejecutar el software de visualización opera bajo Windows~11 con un mínimo de 8~GB de RAM.
+    \item[Tipo:]          Hardware
+    \item[Prioridad:]     Media
+    \item[Verificación:]  El software \texttt{vicon\_view} se ejecuta sin errores en el PC especificado.
+\end{description}
+\end{requisito}
+
+\begin{requisito}{REQ-G2.4}{ConexionSensor}
+\begin{description}
+    \item[Descripción:]   La conexión del sensor MT9V111 con la Basys~3 se realiza de forma directa mediante el adaptador proporcionado en los conectores JA y JXADC, pin a pin. Referencia en LM: \emph{TBD}.
+    \item[Tipo:]          Hardware / Mecánico
+    \item[Prioridad:]     Alta
+    \item[Verificación:]  El sensor entrega señal de imagen válida (\texttt{FVALID}, \texttt{LVALID}, \texttt{DATA}) tras la conexión física.
+\end{description}
+\end{requisito}
+
+% ------------------------------------------------------------
+% GRUPO 3 — Conexión host–ordenador
+% ------------------------------------------------------------
+\subsection{Grupo 3 — Conexión host--ordenador}
+
+\begin{requisito}{REQ-G3.1}{ConexionHost}
+\begin{description}
+    \item[Descripción:]   La conexión de la Basys~3 con el ordenador para carga de bitstream y depuración se realiza mediante cable USB--microUSB.
+    \item[Tipo:]          Hardware
+    \item[Prioridad:]     Alta
+    \item[Verificación:]  Vivado reconoce el dispositivo y programa el bitstream satisfactoriamente.
+\end{description}
+\end{requisito}
+
+% ------------------------------------------------------------
+% GRUPO 4 — Rendimiento de imagen
+% ------------------------------------------------------------
+\subsection{Grupo 4 — Rendimiento de imagen}
+
+\begin{requisito}{REQ-G4.1}{FrecuenciaImagen}
+\begin{description}
+    \item[Descripción:]   La tasa mínima de imágenes procesadas y transmitidas al PC es de 10~fps.
+    \item[Tipo:]          Rendimiento
+    \item[Prioridad:]     Alta
+    \item[Verificación:]  Medición de la tasa de frames recibidos en \texttt{vicon\_view} durante 10~segundos en condiciones nominales de operación.
+\end{description}
+\end{requisito}
+
+\begin{requisito}{REQ-G4.2}{ResolucionMinima}
+\begin{description}
+    \item[Descripción:]   El sensor debe configurarse para capturar una resolución mínima de 640$\times$480 píxeles (VGA).
+    \item[Tipo:]          Rendimiento
+    \item[Prioridad:]     Alta
+    \item[Verificación:]  Los frames recibidos en \texttt{vicon\_view} tienen exactamente 640$\times$480 píxeles y se visualizan correctamente.
+\end{description}
+\end{requisito}
+
+% ------------------------------------------------------------
+% GRUPO 5 — Interfaz de alta velocidad
+% ------------------------------------------------------------
+\subsection{Grupo 5 — Interfaz de alta velocidad}
+
+\begin{requisito}{REQ-G5.1}{InterfazHostHS}
+\begin{description}
+    \item[Descripción:]   La interfaz del host con el PC se realizará mediante la tarjeta UM232H-B (chip FT232H de FTDI). Referencia en LM: \emph{TBD}. El modo de operación preferido es \textit{Synchronous FIFO}; el modo \textit{Asynchronous FIFO} es aceptable como alternativa si el primero no fuera viable.
+    \item[Tipo:]          Hardware / Interfaz
+    \item[Prioridad:]     Alta
+    \item[Verificación:]  \texttt{vicon\_view} recibe el flujo de imagen a través del FT232H en modo \textit{Synchronous FIFO} sin pérdida de frames.
+\end{description}
+\end{requisito}
+
+% ------------------------------------------------------------
+% GRUPO 6 — Interfaz gráfica
+% ------------------------------------------------------------
+\subsection{Grupo 6 — Interfaz gráfica}
+
+\begin{requisito}{REQ-G6.1}{VentanaGUI}
+\begin{description}
+    \item[Descripción:]   El software en el PC debe mostrar el flujo de vídeo en tiempo real en una ventana dedicada.
+    \item[Tipo:]          Funcional / Software
+    \item[Prioridad:]     Alta
+    \item[Verificación:]  La ventana muestra imagen continua y actualizada a la tasa especificada en REQ-G4.1.
+\end{description}
+\end{requisito}
+
+\begin{requisito}{REQ-G6.2}{BotonesGUI}
+\begin{description}
+    \item[Descripción:]   La ventana de visualización permitirá el control y configuración de los registros internos del sensor mediante una interfaz de comandos.
+    \item[Tipo:]          Funcional / Software
+    \item[Prioridad:]     Media
+    \item[Verificación:]  El usuario puede enviar al menos los comandos \texttt{led}, \texttt{cap}, \texttt{sim} e \texttt{i2c} desde la interfaz y la FPGA responde correctamente a cada uno.
+\end{description}
+\end{requisito}
+
+% ------------------------------------------------------------
+% GRUPO 7 — Software
+% ------------------------------------------------------------
+\subsection{Grupo 7 — Software}
+
+\begin{requisito}{REQ-G7.1}{LenguajeOpenCV}
+\begin{description}
+    \item[Descripción:]   El lenguaje de programación utilizado para el desarrollo del software de procesamiento de imagen y visualización es C++.
+    \item[Tipo:]          Software
+    \item[Prioridad:]     Alta
+    \item[Verificación:]  El código fuente de \texttt{vicon\_view} es C++ estándar (C++17) y compila sin errores con Qt~6 y OpenCV~4.
+\end{description}
+\end{requisito}
+
+\begin{requisito}{REQ-G7.2}{UsoOpenCV}
+\begin{description}
+    \item[Descripción:]   Se permite y se insta al uso de la biblioteca OpenCV para el procesamiento de imagen en el software de PC.
+    \item[Tipo:]          Software
+    \item[Prioridad:]     Media
+    \item[Verificación:]  El software utiliza al menos una función de OpenCV para el procesamiento o visualización de los frames recibidos.
+\end{description}
+\end{requisito}
+
+% ------------------------------------------------------------
+% GRUPO 8 — Configuración de la cámara
+% ------------------------------------------------------------
+\subsection{Grupo 8 — Configuración de la cámara}
+
+\begin{requisito}{REQ-G8.1}{ConfiguracionCamara}
+\begin{description}
+    \item[Descripción:]   La cámara MT9V111 será configurable mediante un controlador I2C implementado en la FPGA, sin necesidad de ningún componente externo adicional.
+    \item[Tipo:]          Funcional / Hardware
+    \item[Prioridad:]     Alta
+    \item[Verificación:]  La FSM de configuración del \texttt{TOP} completa las transacciones I2C de inicialización sin errores (estado \texttt{ST\_FINISH} alcanzado) tanto en simulación como en hardware real.
+\end{description}
+\end{requisito}
+
+\begin{requisito}{REQ-G8.2}{ParametrosConfiguracion}
+\begin{description}
+    \item[Descripción:]   Los parámetros de configuración de la cámara accesibles mediante el comando \texttt{CMD~0x03} (I2C) son: página del registro (\texttt{PAGE}), dirección del registro (\texttt{ADDR}) y valor a escribir (\texttt{DATA[15:0]}). Los parámetros específicos de la tabla de configuración inicial se definen en \texttt{config\_pkg.vhd}. \emph{(Lista completa: TBD)}
+    \item[Tipo:]          Funcional / Hardware
+    \item[Prioridad:]     Media
+    \item[Verificación:]  El envío del comando \texttt{i2c <page> <addr> <data>} desde \texttt{vicon\_view} produce la escritura correcta del registro correspondiente, verificable mediante el ILA o por efecto en la imagen.
+\end{description}
+\end{requisito}
+
+\section{Hardware}
+
+\subsection{FPGA Basys 3}
+
+La Basys~3 es una plataforma de desarrollo de Digilent basada en el dispositivo Xilinx XC7A35T-1CPG236C de la familia Artix-7. Dispone de 33.280 celdas lógicas, 1.800~Kb de BRAM, un oscilador de 100~MHz en placa, 16 \textit{switches}, 5 pulsadores, 16 LEDs, cuatro displays de 7~segmentos y cuatro conectores PMOD. Para este proyecto se utilizan los conectores PMOD para conectar el sensor MT9V111 y el chip FT232H.
+
+\subsection{Sensor CMOS MT9V111}
+
+El sensor MT9V111 de ON~Semiconductor es un sensor de imagen CMOS de resolución VGA (640$\times$480 píxeles). Sus características principales son:
+
+\begin{itemize}
+    \item Salida de datos en formato YCbCr~4:2:2 a 8~bits por ciclo de píxel.
+    \item Reloj de píxel (\texttt{PIXCLK}) generado por el propio sensor a partir del reloj maestro (\texttt{MCLK}) suministrado por la FPGA.
+    \item Señales de sincronismo de trama (\texttt{FVALID}) y de línea (\texttt{LVALID}).
+    \item Interfaz de configuración I2C a dirección \texttt{0x5C} (7~bits).
+    \item Registros organizados en dos páginas: página~0 (sensor core) y página~1 (IFP, \textit{Image Flow Processor}).
+\end{itemize}
+
+En la configuración actual, el sensor opera a 30~fps con resolución VGA entregando imágenes en escala de grises (componente Y del espacio YCbCr), dado que la crominancia se descarta en el módulo \texttt{frame\_capture}.
+
+\subsection{Chip FT232H}
+
+El FT232H de FTDI es un convertidor USB~2.0 a interfaz serie/paralela de alta velocidad. En este proyecto se configura en modo \textit{Synchronous FIFO} de 245, que proporciona:
+
+\begin{itemize}
+    \item Un bus de datos bidireccional de 8~bits (\texttt{ADBUS[7:0]}).
+    \item Un bus de control (\texttt{ACBUS}) que incluye las señales \texttt{RXF\#}, \texttt{TXE\#}, \texttt{RD\#}, \texttt{WR\#}, \texttt{OE\#} y \texttt{CLKOUT}.
+    \item Un reloj síncrono de 60~MHz generado internamente (\texttt{CLKOUT}).
+    \item Tasa de transferencia teórica de hasta 60~MB/s en modo ráfaga.
+\end{itemize}
+
+\section{Dominios de reloj}
+
+El diseño maneja tres dominios de reloj independientes, lo que constituye uno de los principales retos de diseño:
+
+\begin{itemize}
+    \item \textbf{Dominio \texttt{s\_mclk} (100~MHz)}: generado por el MMCM interno de la FPGA a partir del oscilador de 100~MHz de la Basys~3. Es el reloj principal de la lógica de control (\texttt{p\_fsm}, \texttt{i2c\_controller}, \texttt{cmd\_processor}).
+    \item \textbf{Dominio \texttt{mt\_pixclk\_i} (25~MHz)}: reloj de píxel generado por el sensor MT9V111 y entrado en la FPGA. Clockea los módulos \texttt{frame\_capture}, \texttt{mt9v111\_image} (\textit{cam\_sim}) y el puerto de escritura de la FIFO asíncrona.
+    \item \textbf{Dominio \texttt{ftdi\_clk} (60~MHz)}: reloj \texttt{CLKOUT} generado por el FT232H y entrado en la FPGA a través de un \texttt{BUFG}. Clockea el módulo \texttt{ftdi\_controller}.
+\end{itemize}
+
+La gestión de los cruces entre estos dominios se detalla en la sección~\ref{sec:cdc}.
+
+\section{Protocolo de comandos PC$\rightarrow$FPGA}
+
+El software de PC puede enviar comandos a la FPGA mediante una trama serializada sobre el bus de datos del FT232H. Cada comando tiene una longitud fija de 4~bytes (comandos generales) o 6~bytes (comandos I2C):
+
+\begin{table}[h]
+\centering
+\caption{Formato de tramas de comandos PC$\rightarrow$FPGA.}
+\label{tab:protocolo_comandos}
+\begin{tabular}{ccccccc}
+\rowcolor[HTML]{156082}
+{\color{white}\textbf{Tipo}} & {\color{white}\textbf{Byte~0}} & {\color{white}\textbf{Byte~1}} & {\color{white}\textbf{Byte~2}} & {\color{white}\textbf{Byte~3}} & {\color{white}\textbf{Byte~4}} & {\color{white}\textbf{Byte~5}} \\
+\rowcolor[HTML]{C0E6F5}
+General (4B) & \texttt{0xCC} & \texttt{CMD} & \texttt{DATA\_H} & \texttt{DATA\_L} & --- & --- \\
+I2C (6B)     & \texttt{0xCC} & \texttt{0x03} & \texttt{PAGE} & \texttt{ADDR} & \texttt{DATA\_H} & \texttt{DATA\_L} \\
+\end{tabular}
+\end{table}
+
+El byte \texttt{0xCC} actúa como marcador de sincronismo. Los comandos disponibles son:
+
+\begin{itemize}
+    \item \texttt{CMD 0x01} (LED): conmuta el estado de los LEDs de la Basys~3. \texttt{DATA[15:0]} es la máscara de 16~bits.
+    \item \texttt{CMD 0x02} (BCD): actualiza los displays de 7~segmentos. \texttt{DATA[15:0]} contiene cuatro dígitos BCD de 4~bits cada uno.
+    \item \texttt{CMD 0x03} (I2C): escribe un registro del sensor MT9V111 vía I2C.
+    \item \texttt{CMD 0x04} (CAP): activa o desactiva la captura de imagen. \texttt{DATA[0]=1} activa, \texttt{DATA[0]=0} desactiva.
+    \item \texttt{CMD 0x05} (SIM): selecciona la fuente de imagen. \texttt{DATA[0]=1} usa la imagen sintética (\textit{cam\_sim}); \texttt{DATA[0]=0} usa el sensor real.
+\end{itemize}
+
+El flujo de imagen FPGA$\rightarrow$PC utiliza marcadores de trama \texttt{AA 55 AA 55} para delimitar el inicio de cada frame, seguidos de los bytes de luminancia Y de los 307.200 píxeles VGA (640$\times$480).
+
+\end{document}

@@ -1,0 +1,44 @@
+% !TEX root = ../main.tex
+\documentclass[../main.tex]{subfiles}
+\begin{document}
+
+\chapter{Software de visualización PC}
+\label{chap:software}
+
+\section{Descripción general}
+
+La aplicación \texttt{vicon\_view} es un programa de escritorio desarrollado en C++ con las bibliotecas Qt~6 (interfaz gráfica) y OpenCV~4.5.5 (procesamiento de imagen). Se comunica con la FPGA a través del chip FT232H mediante la API de FTDI (\texttt{FTD2XX.dll}), recibiendo el flujo de imagen en escala de grises y permitiendo el envío de comandos de control.
+
+\section{Arquitectura}
+
+La aplicación utiliza una arquitectura multihilo para separar la lectura bloqueante del flujo de imagen del procesado de eventos de la interfaz gráfica:
+
+\begin{itemize}
+    \item \textbf{Hilo principal}: ejecuta el bucle de eventos de Qt (\texttt{QApplication::exec()}), renderiza los frames recibidos en un \texttt{QLabel} y gestiona las interacciones del usuario.
+    \item \textbf{Hilo de terminal}: lee comandos de texto introducidos por el usuario desde la consola y los envía a la FPGA mediante \texttt{FT\_Write}, protegido por un mutex (\texttt{g\_ftdi\_mtx}) compartido con el hilo principal.
+\end{itemize}
+
+\section{Protocolo de recepción de imagen}
+
+La función \texttt{find\_marker} busca en el flujo de bytes recibido la secuencia \texttt{AA 55 AA 55} que marca el inicio de cada frame. Una vez encontrado el marcador, se leen exactamente \texttt{FRAME\_BYTES = 640 $\times$ 480 = 307.200} bytes correspondientes a los píxeles de luminancia Y. La imagen se convierte a formato RGB replicando el valor de luminancia en los tres canales (R=G=B=Y) y se muestra en la ventana mediante un \texttt{QImage} con formato \texttt{RGB888}.
+
+\section{Comandos disponibles}
+
+La interfaz de línea de comandos soporta las siguientes instrucciones:
+
+\begin{itemize}
+    \item \texttt{led <mask\_hex>}: conmuta los LEDs de la Basys~3. Ejemplo: \texttt{led 0xFFFF}.
+    \item \texttt{bcd <value\_hex>}: actualiza los displays de 7~segmentos.
+    \item \texttt{i2c <page> <addr\_hex> <data\_hex>}: escribe un registro del sensor MT9V111 por I2C.
+    \item \texttt{cap <on|off>}: activa o desactiva la captura de imagen.
+    \item \texttt{sim <on|off>}: selecciona entre imagen real e imagen sintética.
+    \item \texttt{raw <b0> <b1> <b2> <b3>}: envío directo de 4 bytes en hexadecimal.
+\end{itemize}
+
+Todos los comandos se serializan en la trama de 4 o 6 bytes descrita en la sección~\ref{sec:ftdi_controller} y se envían mediante \texttt{FT\_Write}.
+
+\section{Gestión de errores y limitaciones}
+
+El principal punto de mejora identificado es que el hilo principal realiza la llamada \texttt{FT\_Read} de forma bloqueante sin ejecutar el bucle de eventos de Qt (\texttt{QApplication::processEvents()}) durante la espera. Esto hace que la ventana deje de responder visualmente mientras no llegan bytes de imagen, lo que ocurre cuando \texttt{CMD 0x04 off} desactiva la captura. Una solución futura consistiría en mover la lectura del flujo a un hilo dedicado y comunicar los frames al hilo principal mediante señales Qt (\textit{signal/slot}).
+
+\end{document}

@@ -1,0 +1,103 @@
+% !TEX root = ../main.tex
+\documentclass[../main.tex]{subfiles}
+\begin{document}
+
+\chapter{Implementación y resultados}
+\label{chap:implementacion}
+
+\section{Síntesis e implementación en Vivado}
+
+El proyecto se sintetiza e implementa con Vivado~2020.2 sobre el dispositivo XC7A35T-1CPG236C. Los parámetros de síntesis utilizados son los valores por defecto de Vivado (\textit{Vivado Synthesis Defaults}), y la estrategia de implementación es \textit{Performance\_ExplorePostRoutePhysOpt}.
+
+\subsection{Resultados de timing}
+
+El resultado de \texttt{report\_timing\_summary} tras la implementación completa muestra:
+
+\begin{table}[h]
+\centering
+\caption{Resumen de timing tras implementación.}
+\label{tab:timing}
+\begin{tabular}{lrrl}
+\rowcolor[HTML]{156082}
+{\color{white}\textbf{Métrica}} & {\color{white}\textbf{Valor}} & {\color{white}\textbf{Unidad}} & {\color{white}\textbf{Resultado}} \\
+\rowcolor[HTML]{C0E6F5}
+WNS (\textit{Worst Negative Slack}) & $+1{,}565$ & ns & \textbf{PASS} \\
+TNS (\textit{Total Negative Slack}) & $0{,}000$ & ns & \textbf{PASS} \\
+\rowcolor[HTML]{C0E6F5}
+WHS (\textit{Worst Hold Slack}) & $> 0$ & ns & \textbf{PASS} \\
+Restricciones de usuario & \multicolumn{2}{c}{todas satisfechas} & \textbf{PASS} \\
+\end{tabular}
+\end{table}
+
+El cierre de timing fue uno de los principales retos del diseño. Las 9 violaciones de timing iniciales se debían al uso erróneo de \texttt{falling\_edge} en el proceso de sincronización del FT232H, que Vivado interpretaba como rutas de reloj invertido y generaba restricciones imposibles de satisfacer. La corrección del flanco de muestreo y la adición de \texttt{set\_false\_path} para los registros de sincronización (\texttt{s\_cmd\_valid\_r\_reg}, \texttt{cmd\_type\_o\_reg}, \texttt{cmd\_data\_o\_reg}) resolvieron todas las violaciones.
+
+\subsection{Utilización de recursos}
+
+\begin{table}[h]
+\centering
+\caption{Utilización de recursos en XC7A35T.}
+\label{tab:recursos}
+\begin{tabular}{lrrl}
+\rowcolor[HTML]{156082}
+{\color{white}\textbf{Recurso}} & {\color{white}\textbf{Utilizado}} & {\color{white}\textbf{Disponible}} & {\color{white}\textbf{Porcentaje}} \\
+\rowcolor[HTML]{C0E6F5}
+LUT & \todohint[caption={Rellenar recursos}, inline]{Rellenar con datos reales de Vivado.} & 20.800 & --- \\
+FF & --- & 41.600 & --- \\
+\rowcolor[HTML]{C0E6F5}
+BRAM & 1 & 50 & 2\% \\
+MMCM & 1 & 5 & 20\% \\
+\rowcolor[HTML]{C0E6F5}
+BUFG & 3 & 32 & 9\% \\
+\end{tabular}
+\end{table}
+
+\section{Constraints XDC}
+
+El fichero de constraints \texttt{Basys3\_GPIO.xdc} define las siguientes restricciones de timing:
+
+\begin{itemize}
+    \item \textbf{Relojes}: \texttt{create\_clock} para \texttt{basys3\_clk\_i} (100~MHz), \texttt{ftdi\_clk} (60~MHz) y \texttt{mt\_pixclk\_i} (25~MHz).
+    \item \textbf{Aislamiento de dominios asíncronos}: \texttt{set\_clock\_groups -asynchronous} entre los grupos \{\texttt{clk\_out1\_clk\_wiz\_0}, \texttt{clk\_out3\_clk\_wiz\_0}\} y \{\texttt{ftdi\_clk}\}, y entre \{\texttt{clk\_out1}\} y \{\texttt{mt\_pixclk\_i}\}.
+    \item \textbf{False paths CDC}: \texttt{set\_false\_path} desde \texttt{ftdi\_clk} hacia los registros de sincronización \texttt{s\_cmd\_valid\_r\_reg}, \texttt{cmd\_type\_o\_reg} y \texttt{cmd\_data\_o\_reg}.
+    \item \textbf{Routing}: \texttt{CLOCK\_DEDICATED\_ROUTE FALSE} en el neto \texttt{mt\_pixclk\_i\_IBUF}, dado que el pin físico utilizado no es un pin de reloj dedicado (CCIO) de la Artix-7.
+\end{itemize}
+
+\section{Depuración en hardware con ILA}
+
+Se instanciaron dos cores ILA (\textit{Integrated Logic Analyzer}) de Vivado para la depuración en hardware:
+
+\begin{itemize}
+    \item \textbf{\texttt{ila\_0}} (dominio \texttt{s\_mclk}, 100~MHz): monitoriza el interior de \texttt{cmd\_processor}, incluyendo los registros de salida (\texttt{s\_led\_toggle\_r}, \texttt{s\_cap\_en\_r}, \texttt{s\_sim\_en\_r}), la cadena CDC (\texttt{s\_valid\_sync1}, \texttt{s\_valid\_sync2}, \texttt{s\_cmd\_pulse}) y el tipo de comando sincronizado (\texttt{s\_type\_sync1}).
+    \item \textbf{\texttt{ila\_3}} (dominio \texttt{s\_mclk}, 100~MHz): monitoriza las entradas de \texttt{cmd\_processor} y el estado de la FSM de ejecución I2C (\texttt{s\_exec\_state}).
+\end{itemize}
+
+\subsection{Diagnóstico del protocolo FT232H}
+
+El ILA \texttt{ila\_0} fue determinante para identificar el bug de decodificación de comandos. Con trigger en \texttt{s\_cmd\_pulse='1'}, se observó que \texttt{s\_type\_sync1} mostraba sistemáticamente el valor \texttt{0xCC} (marcador de sincronismo) en vez del tipo de comando real. Este patrón reveló que el módulo \texttt{ftdi\_controller} estaba leyendo el mismo byte dos veces consecutivas en vez de avanzar al siguiente.
+
+El análisis del timing del FT232H (Figure~4.4 del datasheet) mostró que el chip presenta los datos estables en el flanco de subida de \texttt{CLKOUT}, mientras que el diseño original muestreaba en \texttt{falling\_edge}. La solución definitiva consistió en:
+
+\begin{enumerate}
+    \item Separar TX (falling\_edge) y RX (rising\_edge) en dos procesos independientes.
+    \item Implementar el protocolo de ráfaga continua (\texttt{RD\#} mantenido bajo durante todos los bytes) en vez de toggle por byte.
+    \item Introducir un ciclo de pipeline vacío (\texttt{ST\_RD0}) para absorber el tiempo de presentación del primer byte.
+\end{enumerate}
+
+\section{Pruebas en hardware}
+
+\subsection{Transmisión de imagen}
+
+Con la FPGA programada y el sensor conectado, \texttt{vicon\_view} recibe y muestra correctamente el flujo de imagen en escala de grises a resolución VGA (640$\times$480) a la tasa objetivo de 15~fps (configurada en \texttt{config\_pkg.vhd} mediante \texttt{c\_MT9V111\_TARGET\_FPS}).
+
+\subsection{Comandos de control}
+
+Tras la corrección del protocolo FT232H, los comandos de control funcionan con un único envío:
+
+\begin{itemize}
+    \item \texttt{CMD 0x01} (LED): el LED seleccionado se conmuta instantáneamente y el streaming de imagen continúa sin interrupción.
+    \item \texttt{CMD 0x03} (I2C): la escritura de registros del sensor se ejecuta correctamente, verificable tanto por el ILA como por el efecto visual en la imagen.
+    \item \texttt{CMD 0x04} (CAP): la desactivación de la captura detiene el streaming; la reactivación lo reanuda.
+    \item \texttt{CMD 0x05} (SIM): la conmutación entre imagen real e imagen sintética funciona correctamente.
+\end{itemize}
+
+\end{document}
