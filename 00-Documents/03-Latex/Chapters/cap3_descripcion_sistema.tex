@@ -30,23 +30,14 @@ Los requisitos del sistema se organizan en ocho grupos temáticos. Cada ficha in
 
 \begin{requisito}{REQ-G1.1}{FechaEntregaOrd}
 \begin{description}
-    \item[Descripción:]   La fecha de entrega final para la convocatoria ordinaria será la establecida por la universidad. \emph{(TBD)}
+    \item[Descripción:]   La fecha de entrega final para las convocatorias ordinarias serán las establecidas por la universidad. Siendo el plazo de solicitud de la primera del 3/11/2025 hasta el 30/06/26 y el plazo de solicitud de la segunda del 27/08/26 hasta el 4/11/2026
     \item[Tipo:]          Organizativo
     \item[Prioridad:]     Alta
     \item[Verificación:]  Entrega del documento y defensa antes de la fecha límite de la convocatoria ordinaria.
 \end{description}
 \end{requisito}
 
-\begin{requisito}{REQ-G1.2}{FechaEntregaExt}
-\begin{description}
-    \item[Descripción:]   La fecha de entrega final para la convocatoria extraordinaria será la establecida por la universidad. \emph{(TBD)}
-    \item[Tipo:]          Organizativo
-    \item[Prioridad:]     Media
-    \item[Verificación:]  Entrega del documento y defensa antes de la fecha límite de la convocatoria extraordinaria.
-\end{description}
-\end{requisito}
-
-\begin{requisito}{REQ-G1.3}{FechaHito \emph{(TBC)}}
+\begin{requisito}{REQ-G1.2}{FechaHito \emph{(TBC)}}
 \begin{description}
     \item[Descripción:]   Se establecerá un hito previo a la entrega final con el objetivo de demostrar el correcto funcionamiento del sistema sobre hardware real.
     \item[Tipo:]          Organizativo
@@ -62,16 +53,16 @@ Los requisitos del sistema se organizan en ocho grupos temáticos. Cada ficha in
 
 \begin{requisito}{REQ-G2.1}{SensorCamara}
 \begin{description}
-    \item[Descripción:]   El sensor de imagen utilizado es el modelo MT9V111 de ON~Semiconductor. Referencia en Lista de Materiales (LM): \emph{TBD}.
+    \item[Descripción:]   El sensor de imagen utilizado es el modelo MT9V111 de ON~Semiconductor.
     \item[Tipo:]          Hardware
     \item[Prioridad:]     Alta
-    \item[Verificación:]  El sensor responde correctamente a las transacciones I2C de configuración y entrega flujo de imagen VGA.
+    \item[Verificación:]  El sensor responde correctamente a las transacciones I2C de configuración y entrega flujo de imagen.
 \end{description}
 \end{requisito}
 
 \begin{requisito}{REQ-G2.2}{HostCamara}
 \begin{description}
-    \item[Descripción:]   El host encargado de comunicar el sensor con el ordenador es la FPGA Basys~3 (Xilinx Artix-7 XC7A35T). Referencia en LM: \emph{TBD}.
+    \item[Descripción:]   El host encargado de comunicar el sensor con el ordenador es la FPGA Basys~3 (Xilinx Artix-7 XC7A35T).
     \item[Tipo:]          Hardware
     \item[Prioridad:]     Alta
     \item[Verificación:]  La FPGA programa correctamente el bitstream generado por Vivado y opera de forma estable.
@@ -83,13 +74,13 @@ Los requisitos del sistema se organizan en ocho grupos temáticos. Cada ficha in
     \item[Descripción:]   El PC encargado de ejecutar el software de visualización opera bajo Windows~11 con un mínimo de 8~GB de RAM.
     \item[Tipo:]          Hardware
     \item[Prioridad:]     Media
-    \item[Verificación:]  El software \texttt{vicon\_view} se ejecuta sin errores en el PC especificado.
+    \item[Verificación:]  El software \texttt{vicon\_view} se ejecuta sin errores en el PC.
 \end{description}
 \end{requisito}
 
 \begin{requisito}{REQ-G2.4}{ConexionSensor}
 \begin{description}
-    \item[Descripción:]   La conexión del sensor MT9V111 con la Basys~3 se realiza de forma directa mediante el adaptador proporcionado en los conectores JA y JXADC, pin a pin. Referencia en LM: \emph{TBD}.
+    \item[Descripción:]   La conexión del sensor MT9V111 con la Basys~3 se realiza de forma directa mediante el adaptador proporcionado en los conectores JA y JXADC, pin a pin.
     \item[Tipo:]          Hardware / Mecánico
     \item[Prioridad:]     Alta
     \item[Verificación:]  El sensor entrega señal de imagen válida (\texttt{FVALID}, \texttt{LVALID}, \texttt{DATA}) tras la conexión física.
@@ -120,16 +111,16 @@ Los requisitos del sistema se organizan en ocho grupos temáticos. Cada ficha in
     \item[Descripción:]   La tasa mínima de imágenes procesadas y transmitidas al PC es de 10~fps.
     \item[Tipo:]          Rendimiento
     \item[Prioridad:]     Alta
-    \item[Verificación:]  Medición de la tasa de frames recibidos en \texttt{vicon\_view} durante 10~segundos en condiciones nominales de operación.
+    \item[Verificación:]  Medición, por \ac{SW}, de la tasa de frames recibidos durante 10~segundos en condiciones nominales de operación.
 \end{description}
 \end{requisito}
 
 \begin{requisito}{REQ-G4.2}{ResolucionMinima}
 \begin{description}
-    \item[Descripción:]   El sensor debe configurarse para capturar una resolución mínima de 640$\times$480 píxeles (VGA).
+    \item[Descripción:]   El sensor debe configurarse para capturar una resolución mínima de 640$\times$480 píxeles (\ac{VGA}).
     \item[Tipo:]          Rendimiento
     \item[Prioridad:]     Alta
-    \item[Verificación:]  Los frames recibidos en \texttt{vicon\_view} tienen exactamente 640$\times$480 píxeles y se visualizan correctamente.
+    \item[Verificación:]  Los frames recibidos tienen exactamente 640$\times$480 píxeles y se visualizan correctamente.
 \end{description}
 \end{requisito}
 
@@ -140,7 +131,7 @@ Los requisitos del sistema se organizan en ocho grupos temáticos. Cada ficha in
 
 \begin{requisito}{REQ-G5.1}{InterfazHostHS}
 \begin{description}
-    \item[Descripción:]   La interfaz del host con el PC se realizará mediante la tarjeta UM232H-B (chip FT232H de FTDI). Referencia en LM: \emph{TBD}. El modo de operación preferido es \textit{Synchronous FIFO}; el modo \textit{Asynchronous FIFO} es aceptable como alternativa si el primero no fuera viable.
+    \item[Descripción:]   La interfaz del host con el PC se realizará mediante la tarjeta UM232H-B (chip FT232H de FTDI). El modo de operación preferido es \textit{Synchronous FIFO}; el modo \textit{Asynchronous FIFO} es aceptable como alternativa si el primero no fuera viable.
     \item[Tipo:]          Hardware / Interfaz
     \item[Prioridad:]     Alta
     \item[Verificación:]  \texttt{vicon\_view} recibe el flujo de imagen a través del FT232H en modo \textit{Synchronous FIFO} sin pérdida de frames.
@@ -203,7 +194,7 @@ Los requisitos del sistema se organizan en ocho grupos temáticos. Cada ficha in
     \item[Descripción:]   La cámara MT9V111 será configurable mediante un controlador I2C implementado en la FPGA, sin necesidad de ningún componente externo adicional.
     \item[Tipo:]          Funcional / Hardware
     \item[Prioridad:]     Alta
-    \item[Verificación:]  La FSM de configuración del \texttt{TOP} completa las transacciones I2C de inicialización sin errores (estado \texttt{ST\_FINISH} alcanzado) tanto en simulación como en hardware real.
+    \item[Verificación:]  Transacciones de i2c satisfactorias tanto en simulación como en hardware real.
 \end{description}
 \end{requisito}
 
@@ -220,7 +211,17 @@ Los requisitos del sistema se organizan en ocho grupos temáticos. Cada ficha in
 
 \subsection{FPGA Basys 3}
 
-La Basys~3 es una plataforma de desarrollo de Digilent basada en el dispositivo Xilinx XC7A35T-1CPG236C de la familia Artix-7. Dispone de 33.280 celdas lógicas, 1.800~Kb de BRAM, un oscilador de 100~MHz en placa, 16 \textit{switches}, 5 pulsadores, 16 LEDs, cuatro displays de 7~segmentos y cuatro conectores PMOD. Para este proyecto se utilizan los conectores PMOD para conectar el sensor MT9V111 y el chip FT232H.
+La Basys~3 es una plataforma de desarrollo de Digilent basada en el dispositivo Xilinx XC7A35T-1CPG236C de la familia Artix-7. Dispone de: 
+\begin{itemize}
+    \item 33.280 celdas lógicas
+    \item 1.800~Kb de BRAM
+    \item oscilador de 100~MHz en placa
+    \item 16 \textit{switches}
+    \item 5 pulsadores
+    \item 16 LEDs
+    \item 4 displays de 7~segmentos
+    \item 4 conectores PMOD. Para este proyecto se utilizan los conectores PMOD para conectar el sensor MT9V111 y el chip FT232H.
+\end{itemize}
 
 \subsection{Sensor CMOS MT9V111}
 
@@ -234,7 +235,7 @@ El sensor MT9V111 de ON~Semiconductor es un sensor de imagen CMOS de resolución
     \item Registros organizados en dos páginas: página~0 (sensor core) y página~1 (IFP, \textit{Image Flow Processor}).
 \end{itemize}
 
-En la configuración actual, el sensor opera a 30~fps con resolución VGA entregando imágenes en escala de grises (componente Y del espacio YCbCr), dado que la crominancia se descarta en el módulo \texttt{frame\_capture}.
+En la configuración actual, el sensor opera a 30~fps con resolución VGA entregando imágenes en escala de grises (componente Y del espacio YCbCr), dado que la los valores de Cb y Cr se descartan en el módulo \texttt{frame\_capture}.
 
 \subsection{Chip FT232H}
 
@@ -247,6 +248,54 @@ El FT232H de FTDI es un convertidor USB~2.0 a interfaz serie/paralela de alta ve
     \item Tasa de transferencia teórica de hasta 60~MB/s en modo ráfaga.
 \end{itemize}
 
+La conexión del sensor a la BASYS se realiza tal y como se muestra en la siguiente imagen
+\begin{figure}[htbp] 
+    \centering
+    \includegraphics[width=\textwidth]{gfx/camera_connection.pdf}
+    \caption{Conexión del sensor CMOS a la Basys 3.} 
+    \label{fig:camera_connection} 
+\end{figure}
+
+
+\section{Herramientas y entorno de desarrollo}
+\label{sec:herramientas}
+ 
+\subsection{Diseño e implementación en FPGA}
+ 
+El flujo de diseño hardware se realiza íntegramente con \textbf{Vivado 2020.2} de Xilinx. Esta herramienta cubre todas las etapas del flujo: síntesis, implementación, análisis de timing (\texttt{report\_timing\_summary}), generación de bitstream y depuración en hardware mediante el \textit{Integrated Logic Analyzer} (ILA). Las IPs del catálogo de Xilinx utilizadas en el proyecto son el \textit{Clock Wizard} (\texttt{clk\_wiz\_0}, para la generación del MMCM) y el \textit{FIFO Generator} (\texttt{fifo\_generator\_0}, para la FIFO asíncrona entre dominios de reloj).
+ 
+\subsection{Simulación y verificación}
+ 
+La simulación funcional se realiza con \textbf{ModelSim/QuestaSim} de Mentor Graphics, invocado mediante scripts \texttt{.do} que automatizan la compilación, optimización y ejecución del banco de pruebas. El script principal (\texttt{sim.do}) mapea las librerías de simulación de Vivado (compiladas previamente con \texttt{compile\_simlib}) y las librerías UVVM, y lanza la simulación con resolución temporal de 1~ps.
+ 
+La metodología de verificación empleada es \textbf{UVVM} (\textit{Universal VHDL Verification Methodology}), en su versión completa (no la versión Light). Las librerías utilizadas son:
+ 
+\begin{itemize}
+    \item \texttt{uvvm\_util}: utilidades de logging, gestión de alertas y funciones de comprobación (\texttt{check\_value}, \texttt{log}, \texttt{alert}).
+    \item \texttt{uvvm\_vvc\_framework}: framework de \textit{Verification Components}.
+    \item \texttt{bitvis\_vip\_i2c}: VIP (\textit{Verification IP}) para el bus I2C, mapeada en el entorno aunque el agente I2C del sensor MT9V111 se implementó de forma personalizada por las particularidades de su protocolo.
+\end{itemize}
+ 
+Las librerías UVVM se precompilan una única vez desde el directorio raíz de la instalación (\texttt{C:/UVVM}) ejecutando \texttt{compile\_all.do}, y se referencian en cada simulación mediante \texttt{vmap} en el script \texttt{sim.do}.
+ 
+\subsection{Control de versiones}
+ 
+El código fuente del proyecto (RTL, banco de pruebas, scripts y documentación) se gestiona con \textbf{Git}, con repositorio remoto alojado en \textbf{GitHub}. La estrategia de ramas sigue el modelo \textit{feature branching}: cada nueva funcionalidad o corrección se desarrolla en una rama independiente (\texttt{feature/<nombre>}) y se integra en \texttt{main} mediante \textit{pull request} una vez validada.
+ 
+\subsection{Software de PC}
+ 
+El software de visualización \texttt{vicon\_view} se desarrolla con las siguientes herramientas y bibliotecas:
+ 
+\begin{itemize}
+    \item \textbf{Qt Creator} como entorno de desarrollo integrado (IDE), con \textbf{Qt~6} para la interfaz gráfica (ventana de visualización, gestión de eventos, arquitectura multihilo mediante \texttt{QThread}).
+    \item \textbf{OpenCV~4.5.5} para el procesamiento y conversión de los frames de imagen recibidos.
+    \item \textbf{FTD2XX API} (biblioteca oficial de FTDI) para la comunicación con el chip FT232H a través de USB, incluyendo las funciones \texttt{FT\_OpenEx}, \texttt{FT\_Read} y \texttt{FT\_Write}.
+    \item \textbf{MinGW/GCC} como compilador C++ bajo Windows.
+\end{itemize}
+ 
+\subsection{Documentación}
+ 
+La presente memoria se redacta en \textbf{\LaTeX} con la distribución \textbf{MiKTeX~26.2} y la plantilla \textit{ClassicThesis}. Los diagramas de bloques, diagramas de estados y figuras de arquitectura se crean con \textbf{draw.io}. Las formas de onda de simulación para la documentación se capturan desde el visor de waves de QuestaSim y se exportan en formato PDF.
 \section{Dominios de reloj}
 
 El diseño maneja tres dominios de reloj independientes, lo que constituye uno de los principales retos de diseño:

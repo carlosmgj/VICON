@@ -20,17 +20,17 @@
                 "-synctex=1",
                 "-interaction=nonstopmode",
                 "-file-line-error",
-                "-output-directory=%WORKSPACE_FOLDER%/report/build",
-                "-aux-directory=%WORKSPACE_FOLDER%/report/build",
+                "-output-directory=%DIR%/report/build",
+                "-aux-directory=%DIR%/report/build",
                 "%DOC%"
             ]
         },
         {
-            "name": "bibtex",
+            "name": "bibtex-vicon",
             "command": "powershell",
             "args": [
                 "-Command",
-                "Push-Location '%OUTDIR%'; bibtex main; Pop-Location"
+                "$env:BIBINPUTS='%DIR%'; Push-Location '%DIR%/report/build'; bibtex main; Pop-Location"
             ]
         }
     ],
@@ -39,16 +39,15 @@
             "name": "Compilar con Bibliografía",
             "tools": [
             "pdflatex",
-            "bibtex",
+            "bibtex-vicon",
             "pdflatex",
             "pdflatex"
             ]
         }
     ],
+"latex-workshop.latex.outDir": "%DIR%/report/build",
 "latex-workshop.latex.autoClean.run": "never",
 "latex-workshop.latex.autoBuild.run": "never",
 "latex-workshop.latex.clean.method": "glob",
 "latex-workshop.latex.clean.fileTypes": [],
-"latex-workshop.latex.rootFile.useSubFileAsRoot": false,
-"latex-workshop.latex.outDir": "%WORKSPACE_FOLDER%/report/build",
 }
