@@ -233,8 +233,102 @@ set_property IOSTANDARD LVCMOS33 [get_ports {ftdi_acbus_io[6]}]
 set_property PACKAGE_PIN R18 [get_ports {ftdi_acbus_io[7]}]
 set_property IOSTANDARD LVCMOS33 [get_ports {ftdi_acbus_io[7]}]
 
+#==========================================================================
+# FT232H (UM232H-B) - reloj CLKOUT y timing del bus (modo FT245 Sync FIFO)
+#==========================================================================
+# CLKOUT lo genera el FT232H y entra por ftdi_acbus_io[5] (ACBUS5, pin P17).
+# P17 NO es clock-capable -> CLOCK_DEDICATED_ROUTE FALSE (lo enruta por
+# fabric hasta un BUFG; anade skew/jitter, aceptable a 60 MHz).
+#
+# AVISO SI: a 60 MHz por PMOD con cables sueltos el presupuesto de timing
+# es muy ajustado. El skew entre CLKOUT y los bits de datos, la longitud
+# de los cables y las posibles resistencias serie del PMOD se comen los
+# 7.5 ns de setup. Cables cortos y de igual longitud; si falla timing o da
+# errores de datos, considera bajar la frecuencia o cablear mejor.
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {ftdi_acbus_io_IBUF[5]}]
 create_clock -period 16.667 -name ftdi_clk [get_ports {ftdi_acbus_io[5]}]
+
+#--------------------------------------------------------------------------
+# Mapeo ACBUS (estandar FT232H 245 Sync FIFO; CONFIRMAR con config_pkg):
+#   [0]=RXF#(in)  [1]=TXE#(in)  [2]=RD#(out)  [3]=WR#(out)
+#   [4]=SIWU#(out, normalmente fijo) [5]=CLKOUT(in)  [6]=OE#(out)
+#--------------------------------------------------------------------------
+
+# SKEW de placa (cable CLKOUT vs cables de datos). En system-synchronous el
+# retardo absoluto de pista de CLKOUT y datos se cancela en gran parte; lo que
+# queda es el DESAJUSTE entre ellos. Por eso aqui va el skew, no el retardo
+# absoluto. VALOR PARA OPCION A: cables CORTOS e IGUALADOS (~0.15 ns). Si tus
+# cables son largos o desiguales, SUBELO (y wr_n/rd_n/oe_n se iran a negativo).
+set tpcb_skew_max 0.15
+set tpcb_skew_min 0.0
+
+# --- ENTRADAS (FT232H -> FPGA) respecto a ftdi_clk ---------------------
+# Tabla 4.1: t5 (CLKOUT->read DATA), t4 (CLKOUT->RXF#), t11 (CLKOUT->TXE#).
+# El dato se captura en el SIGUIENTE flanco (pipeline 1 ciclo) -> el setup
+# sobra; lo critico es el HOLD (ver nota abajo).
+# OJO HOLD: con la inserccion de reloj actual el WHS del bus FTDI queda en
+# ~+0.025 ns (al limite). Depende de t_co_in_min real y del skew. Si bajas la
+# inserccion de reloj (pin CC), el hold se reduce: re-verifica SIEMPRE.
+set t_co_in_max 9.0
+set t_co_in_min 1.0
+set ftdi_in [get_ports {ftdi_adbus_io[*] ftdi_acbus_io[0] ftdi_acbus_io[1]}]
+set_input_delay -clock ftdi_clk -max [expr {$t_co_in_max + $tpcb_skew_max}] $ftdi_in
+set_input_delay -clock ftdi_clk -min [expr {$t_co_in_min - $tpcb_skew_max}] $ftdi_in
+
+# --- SALIDAS (FPGA -> FT232H) respecto a ftdi_clk ----------------------
+# Tabla 4.1: setup t12/t14 = 7.5 ns ; hold t13/t15 ~ 0 ns.
+set t_su_ext 7.5
+set t_h_ext  0.0
+set ftdi_out [get_ports {ftdi_adbus_io[*] ftdi_acbus_io[2] ftdi_acbus_io[3] ftdi_acbus_io[6]}]
+set_output_delay -clock ftdi_clk -max [expr {$t_su_ext + $tpcb_skew_max}] $ftdi_out
+set_output_delay -clock ftdi_clk -min [expr {-$t_h_ext - $tpcb_skew_max}] $ftdi_out
+
+# SIWU# (acbus[4]) suele ir fijo; si lo conmutas, restringelo como salida:
+# set_output_delay -clock ftdi_clk -max [expr {$t_su_ext + $tpcb_skew_max}] [get_ports {ftdi_acbus_io[4]}]
+
+# --- Empaquetar en IOB los registros de SALIDA del bus FTDI ----------------
+# IMPORTANTE: NO pongas IOB TRUE sobre puertos de ENTRADA (RXF#/TXE#) ni sobre
+# el puerto inout del bus. IOB sobre un puerto exige un flop pegado a ESE
+# terminal; las entradas van a logica combinacional (FSM), no a un registro,
+# y Vivado da [Place 30-722]. Marca IOB en las CELDAS de los flops de salida.
+#
+# Patrones por nombre de registro del controlador (ftdi_controller):
+#   s_data_r  -> dato TX (adbus_o)      s_adbus_t -> tristate (adbus_t_o)
+#   s_wr_n / s_rd_n / s_oe_n -> control
+# Si alguno no empaqueta, revisa el nombre exacto en el log de sintesis.
+set_property IOB TRUE [get_cells -hier -filter {NAME =~ *s_data_r_reg*}]
+set_property IOB TRUE [get_cells -hier -filter {NAME =~ *s_adbus_t_reg*}]
+set_property IOB TRUE [get_cells -hier -filter {NAME =~ *s_wr_n_reg*}]
+set_property IOB TRUE [get_cells -hier -filter {NAME =~ *s_rd_n_reg*}]
+set_property IOB TRUE [get_cells -hier -filter {NAME =~ *s_oe_n_reg*}]
+# (Las entradas RXF#/TXE# y el dato de lectura NO se empaquetan: van
+#  combinacionales y su timing ya cumple. Si quisieras empaquetarlas habria que
+#  registrarlas explicitamente, lo cual no hace falta en la opcion A.)
+
+# --- Slew/drive de salida: reduce el retardo del OBUF(T) (~3.5 -> ~2.5 ns) --
+set_property SLEW FAST  [get_ports {ftdi_adbus_io[*] ftdi_acbus_io[2] ftdi_acbus_io[3] ftdi_acbus_io[6]}]
+set_property DRIVE 12   [get_ports {ftdi_adbus_io[*] ftdi_acbus_io[2] ftdi_acbus_io[3] ftdi_acbus_io[6]}]
+
+# --- MULTICYCLE del tristate del bus (opcion A) ----------------------------
+# El enable del tristate (s_adbus_t) cambia UNA VEZ POR RAFAGA (Hi-Z<->conduce),
+# con ciclos muertos (PRE/PRE2 al entrar, RELEASE/RELEASE2 al salir), NO cada
+# ciclo. Cronometrarlo a 1 ciclo es pesimista (falso fallo ~-2 ns); el DATO
+# (adbus_o), que es lo que el FT232H muestrea cada flanco, si cumple. El par
+# setup-2 / hold-1 refleja la realidad sin tapar nada del camino de dato.
+# REQUISITO: que esos ciclos muertos existan en toda la secuencia -> confirmalo
+# re-lanzando la sim UVVM (el agente marca contension como 'X').
+set_multicycle_path 2 -setup -from [get_cells -hier -filter {NAME =~ *s_adbus_t_reg*}] \
+                             -to   [get_ports {ftdi_adbus_io[*]}]
+set_multicycle_path 1 -hold  -from [get_cells -hier -filter {NAME =~ *s_adbus_t_reg*}] \
+                             -to   [get_ports {ftdi_adbus_io[*]}]
+
+# --- LIMITE DE LA PLACA: inserccion de reloj de CLKOUT ---------------------
+# CLKOUT en P17 (NO clock-capable) -> ~5.6 ns de inserccion via BUFG. En la
+# Basys3 NINGUN pin de Pmod es clock-capable (solo W5, el oscilador), asi que
+# esto no se puede bajar sin cambiar de placa o de modo (async). Por eso, tras
+# el multicycle y el empaquetado, lo unico que queda al limite son wr_n/rd_n/
+# oe_n (~-0.1 ns): es la holgura que se acepta en la opcion A. Validar en HW
+# con cables CORTOS e IGUALADOS (CLKOUT y datos misma longitud).
 
 ###########################################################
 # CDC False Path - ftdi_clk -> s_mclk
@@ -250,3 +344,13 @@ create_clock -period 16.667 -name ftdi_clk [get_ports {ftdi_acbus_io[5]}]
 #  netlist.)
 set_false_path -from [get_clocks ftdi_clk] \
     -to [get_cells -hierarchical -filter {NAME =~ "*u_cmd_processor/s_*_sync0_reg*"}]
+
+###########################################################
+# (OPCIONAL) Agrupar relojes asincronos en vez de false_path sueltos.
+# Solo si TODOS los cruces entre dominios estan sincronizados (2FF/FIFO).
+# Si lo activas, puedes retirar el set_false_path de arriba.
+# set_clock_groups -asynchronous \
+#   -group [get_clocks sys_clk_pin] \
+#   -group [get_clocks ftdi_clk] \
+#   -group [get_clocks mt_pixclk_i]
+###########################################################

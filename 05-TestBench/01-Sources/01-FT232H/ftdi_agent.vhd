@@ -32,7 +32,12 @@ ENTITY ftdi_agent IS
         g_TXE_BUSY_THRESHOLD      : INTEGER := 480;
         g_TXE_BUSY_CYCLES         : INTEGER := 1;
         g_PC_READ_START_THRESHOLD : INTEGER := 100;
-        g_PC_READ_PERIOD          : TIME    := 100 ns
+        g_PC_READ_PERIOD          : TIME    := 100 ns;
+        --! Retardo CLKOUT->dato valido en lectura (Tabla 4.1, t5 "CLKOUT to
+        --! read DATA valid"). Modela el clock-to-out del FT232H para que el
+        --! dato no este disponible en el mismo flanco, sino t_CO despues.
+        --! Debe ser < periodo de CLKOUT (16.67 ns).
+        g_FTDI_TCO                : TIME    := 9 ns
     );
     PORT (
         acbus_io : INOUT STD_LOGIC_VECTOR(c_FTDI_CONTROLBUS_W-1 DOWNTO 0);
@@ -61,15 +66,6 @@ ARCHITECTURE sim OF ftdi_agent IS
     -- TABLA DE COMANDOS A INYECTAR (PC -> FPGA)
     --
     -- Cada fila es un comando ya serializado en bytes (longitud VARIABLE).
-    -- Edita esta tabla para configurar los comandos del test:
-    --
-    -- Ejemplos:
-    --   Toggle LED 15 (CMD 0x01, dato indiferente):
-    --     (4, (CC, 01, 00, 00, 00, 00))
-    --
-    --   Escribir reg I2C: page=Core(0), addr=0x05, data=0x0084:
-    --     (6, (CC, 03, 00, 05, 00, 84))
-    --
     -- El primer campo es la longitud real (4 o 6); el resto del ARRAY
     -- se rellena con ceros y se ignora.
     ---------------------------------------------------------------------------
@@ -80,17 +76,14 @@ ARCHITECTURE sim OF ftdi_agent IS
     TYPE t_cmd_table IS ARRAY (NATURAL RANGE <>) OF t_cmd_entry;
 
     CONSTANT c_CMD_TABLE : t_cmd_table := (
-        -- Comando 0: Toggle LED 15
-        0 => (len => 6, bytes => (x"CC", x"01", x"00", x"00", x"00", x"00")),
-        1 => (len => 6, bytes => (x"CC", x"01", x"00", x"00", x"00", x"00")),
-        2 => (len => 6, bytes => (x"CC", x"01", x"00", x"00", x"00", x"00")),
-        3 => (len => 6, bytes => (x"CC", x"03", x"01", x"37", x"00", x"80")),
-        4 => (len => 6, bytes => (x"CC", x"04", OTHERS => x"00")),
-        5 => (len => 6, bytes => (x"CC", x"04", x"00", x"01", OTHERS => x"00")),
-        6 => (len => 6, bytes => (x"CC", x"05", x"00", OTHERS => x"00")),
-        7 => (len => 6, bytes => (x"CC", x"05", x"00", x"01", OTHERS => x"00"))
-        -- Descomenta y ajusta para mas comandos:
-        --,1 => (len => 6, bytes => (x"CC", x"03", x"00", x"05", x"00", x"84"))
+        0 => (len => 4, bytes => (x"CC", x"01", x"00", x"00", x"00", x"00")),  -- LED toggle
+        1 => (len => 4, bytes => (x"CC", x"01", x"00", x"00", x"00", x"00")),  -- LED toggle
+        2 => (len => 4, bytes => (x"CC", x"01", x"00", x"00", x"00", x"00")),  -- LED toggle
+        3 => (len => 6, bytes => (x"CC", x"03", x"01", x"37", x"00", x"80")),  -- I2C write
+        4 => (len => 4, bytes => (x"CC", x"04", x"00", x"00", x"00", x"00")),  -- CAP off
+        5 => (len => 4, bytes => (x"CC", x"04", x"00", x"01", x"00", x"00")),  -- CAP on
+        6 => (len => 4, bytes => (x"CC", x"05", x"00", x"00", x"00", x"00")),  -- SIM off
+        7 => (len => 4, bytes => (x"CC", x"05", x"00", x"01", x"00", x"00"))   -- SIM on
     );
 
     CONSTANT c_CMD_START_DELAY : TIME := 350 us;  --! Espera antes del primer comando
@@ -121,6 +114,7 @@ BEGIN
     acbus_io(c_FTDI_ACBUS_TXE_N)  <= s_txe_n;
     acbus_io(c_FTDI_ACBUS_RXF_N)  <= s_rxf_n;
 
+    -- El FT232H conduce el bus de datos solo con OE#='0' y RXF#='0' (hay dato).
     adbus_io <= s_tx_fifo_dout
                 WHEN (To_X01(acbus_io(c_FTDI_ACBUS_OE_N))  = '0' AND
                       To_X01(acbus_io(c_FTDI_ACBUS_RXF_N)) = '0')
@@ -132,31 +126,41 @@ BEGIN
 
     ---------------------------------------------------------------------------
     -- p_rx_fifo_ctrl: gestiona punteros y nivel de la FIFO RX (FPGA->PC)
+    --
+    -- (CORREGIDO: el contador de nivel ahora trata correctamente el caso de
+    --  push y pop simultaneos -> el nivel queda IGUAL, no incrementado.)
     ---------------------------------------------------------------------------
     p_rx_fifo_ctrl : PROCESS
+        VARIABLE v_push : BOOLEAN;
+        VARIABLE v_pop  : BOOLEAN;
     BEGIN
         LOOP
             WAIT UNTIL rising_edge(s_clkout);
-            IF s_rx_fifo_push = '1' AND s_rx_fifo_full = '0' THEN
+
+            v_push := (s_rx_fifo_push = '1' AND s_rx_fifo_full  = '0');
+            v_pop  := (s_rx_fifo_pop  = '1' AND s_rx_fifo_empty = '0');
+
+            IF v_push THEN
                 s_rx_fifo(s_rx_fifo_wr) <= s_rx_fifo_din;
                 IF s_rx_fifo_wr = g_TX_FIFO_DEPTH-1 THEN
                     s_rx_fifo_wr <= 0;
                 ELSE
                     s_rx_fifo_wr <= s_rx_fifo_wr + 1;
                 END IF;
-                s_rx_fifo_level <= s_rx_fifo_level + 1;
             END IF;
-            IF s_rx_fifo_pop = '1' AND s_rx_fifo_empty = '0' THEN
+
+            IF v_pop THEN
                 IF s_rx_fifo_rd = g_TX_FIFO_DEPTH-1 THEN
                     s_rx_fifo_rd <= 0;
                 ELSE
                     s_rx_fifo_rd <= s_rx_fifo_rd + 1;
                 END IF;
-                IF s_rx_fifo_push = '1' AND s_rx_fifo_full = '0' THEN
-                    null;
-                ELSE
-                    s_rx_fifo_level <= s_rx_fifo_level - 1;
-                END IF;
+            END IF;
+
+            IF v_push AND NOT v_pop THEN
+                s_rx_fifo_level <= s_rx_fifo_level + 1;
+            ELSIF v_pop AND NOT v_push THEN
+                s_rx_fifo_level <= s_rx_fifo_level - 1;
             END IF;
         END LOOP;
     END PROCESS p_rx_fifo_ctrl;
@@ -198,22 +202,26 @@ BEGIN
 
     ---------------------------------------------------------------------------
     -- p_rx: Captura bytes FPGA->PC y los mete en la FIFO RX
+    --
+    -- (CORREGIDO: FT245-Sync captura un byte en CADA rising_edge con WR#='0'
+    --  y TXE#='0'. La version anterior exigia WR#='0' en dos flancos
+    --  consecutivos (v_wrn_prev), lo que perdia el PRIMER byte de cada rafaga.)
     ---------------------------------------------------------------------------
     p_rx : PROCESS
-        VARIABLE v_wrn_prev : STD_LOGIC := '1';
     BEGIN
         s_rx_fifo_push <= '0';
         s_rx_fifo_din  <= (OTHERS => '0');
         LOOP
             WAIT UNTIL rising_edge(s_clkout);
-            s_rx_fifo_push <= '0';
             IF To_X01(acbus_io(c_FTDI_ACBUS_WR_N)) = '0' AND
-               v_wrn_prev = '0' AND
                To_X01(s_txe_n) = '0' THEN
-                s_rx_fifo_din  <= adbus_io;
+                -- El dato lo lanza la FPGA en el falling_edge previo, por lo que
+                -- esta estable ~media periodo antes de este rising_edge.
+                s_rx_fifo_din  <= To_X01(adbus_io);
                 s_rx_fifo_push <= '1';
+            ELSE
+                s_rx_fifo_push <= '0';
             END IF;
-            v_wrn_prev := To_X01(acbus_io(c_FTDI_ACBUS_WR_N));
         END LOOP;
     END PROCESS p_rx;
 
@@ -307,10 +315,17 @@ BEGIN
 
     ---------------------------------------------------------------------------
     -- p_tx_inject: Inyeccion de comandos PC->FPGA segun c_CMD_TABLE
+    --
+    -- Protocolo rafaga continua:
+    --   RXF#='0' indica que hay datos. En cuanto OE#='0' el agente conduce el
+    --   byte actual. En CADA rising_edge con OE#='0' Y RD#='0' el byte actual
+    --   se consume y el agente presenta el siguiente t_CO despues del flanco
+    --   (modela t5 "CLKOUT to read DATA valid"). RXF# sube cuando se han
+    --   consumido los 'len' bytes del comando.
     ---------------------------------------------------------------------------
     p_tx_inject : PROCESS
-        VARIABLE v_idx      : INTEGER;
-        VARIABLE v_rdn_prev : STD_LOGIC := '1';
+        VARIABLE v_idx   : INTEGER;
+        VARIABLE v_first : BOOLEAN;   --! salta el 1er flanco RD# (pipeline t5+insercion)
     BEGIN
         s_rxf_n        <= '1';
         s_tx_fifo_dout <= (OTHERS => '0');
@@ -324,38 +339,54 @@ BEGIN
 
         FOR c IN c_CMD_TABLE'RANGE LOOP
 
-            log(ID_SEQUENCER, "TX inject: comando " & to_string(c) &
-                " (" & to_string(c_CMD_TABLE(c).len) & " bytes) -> 0x" &
+            log(ID_SEQUENCER, "TX inject: enviando comando " & to_string(c) &
+                " (" & to_string(c_CMD_TABLE(c).len) & " bytes) CMD=0x" &
                 int_to_hex_str(to_integer(unsigned(c_CMD_TABLE(c).bytes(1))), 2),
                 "FTDI_TX");
 
-            v_idx := 0;
+            -- Preparar byte[0] (ya conducido en cuanto OE#='0') y activar RXF#.
+            v_idx          := 0;
+            v_first        := true;
             s_tx_fifo_dout <= c_CMD_TABLE(c).bytes(0);
             s_rxf_n        <= '0';
-            v_rdn_prev     := '1';
 
+            -- El FT232H real entrega el dato un ciclo mas tarde (t5 ~9 ns +
+            -- insercion de reloj): el controlador descarta el PRIMER flanco con
+            -- RD#='0' (estado ST_RD0) y lee byte[0]=SYNC en el SEGUNDO (ST_RD1).
+            -- Por eso aqui mantenemos byte[0] en el primer flanco y empezamos a
+            -- avanzar a partir del segundo. (Sin esto, sim y hardware no
+            -- coinciden: en sim se leeria CMD donde el HW lee SYNC.)
             WHILE v_idx < c_CMD_TABLE(c).len LOOP
                 WAIT UNTIL rising_edge(s_clkout);
 
                 IF To_X01(acbus_io(c_FTDI_ACBUS_OE_N)) = '0' AND
-                   To_X01(acbus_io(c_FTDI_ACBUS_RD_N)) = '0' AND
-                   v_rdn_prev = '1' THEN
+                   To_X01(acbus_io(c_FTDI_ACBUS_RD_N)) = '0' THEN
 
-                    log(ID_SEQUENCER, "TX inject: byte enviado #" & to_string(v_idx) &
-                        " = 0x" & int_to_hex_str(
-                            to_integer(unsigned(c_CMD_TABLE(c).bytes(v_idx))), 2),
-                        "FTDI_TX");
-
-                    v_idx := v_idx + 1;
-                    IF v_idx < c_CMD_TABLE(c).len THEN
-                        s_tx_fifo_dout <= c_CMD_TABLE(c).bytes(v_idx);
+                    IF v_first THEN
+                        -- Primer flanco RD#='0' = ciclo de pipeline (ST_RD0).
+                        -- No avanzar: byte[0] sigue en el bus para que el
+                        -- controlador lo lea en el proximo flanco (ST_RD1).
+                        v_first := false;
                     ELSE
-                        s_tx_fifo_dout <= (OTHERS => '0');
-                        s_rxf_n        <= '1';
+                        log(ID_SEQUENCER, "TX inject: byte[" & to_string(v_idx) &
+                            "] = 0x" & int_to_hex_str(
+                                to_integer(unsigned(c_CMD_TABLE(c).bytes(v_idx))), 2),
+                            "FTDI_TX");
+
+                        v_idx := v_idx + 1;
+                        IF v_idx < c_CMD_TABLE(c).len THEN
+                            -- Presentar siguiente byte t_CO despues del flanco;
+                            -- el controlador lo capturara en el proximo rising_edge.
+                            s_tx_fifo_dout <= c_CMD_TABLE(c).bytes(v_idx) AFTER g_FTDI_TCO;
+                        ELSE
+                            -- Ultimo byte consumido: subir RXF# para que el
+                            -- controlador no intente leer mas.
+                            s_rxf_n        <= '1';
+                            s_tx_fifo_dout <= (OTHERS => '0');
+                        END IF;
                     END IF;
                 END IF;
 
-                v_rdn_prev := To_X01(acbus_io(c_FTDI_ACBUS_RD_N));
             END LOOP;
 
             log(ID_SEQUENCER, "TX inject: comando " & to_string(c) & " completado", "FTDI_TX");
