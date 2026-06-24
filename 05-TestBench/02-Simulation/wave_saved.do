@@ -92,24 +92,24 @@ add wave -noupdate -group image_agent /testbench/u_dut/u_cam_sim/s_pix_num
 add wave -noupdate -group image_agent /testbench/u_dut/u_cam_sim/clkin_i
 add wave -noupdate -group image_agent /testbench/u_dut/s_mclk_div_cnt
 add wave -noupdate -divider -height 25 <NULL>
-add wave -noupdate -expand -group {frame capture} /testbench/u_dut/s_cap_en
-add wave -noupdate -expand -group {frame capture} /testbench/u_dut/u_cmd_processor/cap_en_cmd_o
-add wave -noupdate -expand -group {frame capture} -label PIXLCLK /testbench/u_dut/u_frame_capture/pixclk_i
-add wave -noupdate -expand -group {frame capture} -label RESET /testbench/u_dut/u_frame_capture/reset_i
-add wave -noupdate -expand -group {frame capture} -label {FRAME VALID} /testbench/u_dut/u_frame_capture/fvalid_i
-add wave -noupdate -expand -group {frame capture} -label {LINE VALID} /testbench/u_dut/u_frame_capture/lvalid_i
-add wave -noupdate -expand -group {frame capture} -label DATA /testbench/u_dut/u_frame_capture/data_i
-add wave -noupdate -expand -group {frame capture} -label {CAPTURE EN} /testbench/u_dut/u_frame_capture/capture_en_i
-add wave -noupdate -expand -group {frame capture} -label {FIFO DATA} /testbench/u_dut/u_frame_capture/fifo_data_o
-add wave -noupdate -expand -group {frame capture} -label {FIFO WR} /testbench/u_dut/u_frame_capture/fifo_wr_o
-add wave -noupdate -expand -group {frame capture} -label {FIFO FULL} /testbench/u_dut/u_frame_capture/fifo_full_i
-add wave -noupdate -expand -group {frame capture} -label {FRAME DONE} /testbench/u_dut/u_frame_capture/frame_done_o
-add wave -noupdate -expand -group {frame capture} -label OVERFLOW /testbench/u_dut/u_frame_capture/overflow_o
-add wave -noupdate -expand -group {frame capture} -label {FSM STATE} /testbench/u_dut/u_frame_capture/s_state
-add wave -noupdate -expand -group {frame capture} -label {BYTE CNT} /testbench/u_dut/u_frame_capture/s_byte_cnt
-add wave -noupdate -expand -group {frame capture} -label {COL CNT} /testbench/u_dut/u_frame_capture/s_col_cnt
-add wave -noupdate -expand -group {frame capture} -label {ROW CNT} /testbench/u_dut/u_frame_capture/s_row_cnt
-add wave -noupdate -expand -group {frame capture} -label OVERFLOW /testbench/u_dut/u_frame_capture/overflow_r
+add wave -noupdate -group {frame capture} /testbench/u_dut/s_cap_en
+add wave -noupdate -group {frame capture} /testbench/u_dut/u_cmd_processor/cap_en_cmd_o
+add wave -noupdate -group {frame capture} -label PIXLCLK /testbench/u_dut/u_frame_capture/pixclk_i
+add wave -noupdate -group {frame capture} -label RESET /testbench/u_dut/u_frame_capture/reset_i
+add wave -noupdate -group {frame capture} -label {FRAME VALID} /testbench/u_dut/u_frame_capture/fvalid_i
+add wave -noupdate -group {frame capture} -label {LINE VALID} /testbench/u_dut/u_frame_capture/lvalid_i
+add wave -noupdate -group {frame capture} -label DATA /testbench/u_dut/u_frame_capture/data_i
+add wave -noupdate -group {frame capture} -label {CAPTURE EN} /testbench/u_dut/u_frame_capture/capture_en_i
+add wave -noupdate -group {frame capture} -label {FIFO DATA} /testbench/u_dut/u_frame_capture/fifo_data_o
+add wave -noupdate -group {frame capture} -label {FIFO WR} /testbench/u_dut/u_frame_capture/fifo_wr_o
+add wave -noupdate -group {frame capture} -label {FIFO FULL} /testbench/u_dut/u_frame_capture/fifo_full_i
+add wave -noupdate -group {frame capture} -label {FRAME DONE} /testbench/u_dut/u_frame_capture/frame_done_o
+add wave -noupdate -group {frame capture} -label OVERFLOW /testbench/u_dut/u_frame_capture/overflow_o
+add wave -noupdate -group {frame capture} -label {FSM STATE} /testbench/u_dut/u_frame_capture/s_state
+add wave -noupdate -group {frame capture} -label {BYTE CNT} /testbench/u_dut/u_frame_capture/s_byte_cnt
+add wave -noupdate -group {frame capture} -label {COL CNT} /testbench/u_dut/u_frame_capture/s_col_cnt
+add wave -noupdate -group {frame capture} -label {ROW CNT} /testbench/u_dut/u_frame_capture/s_row_cnt
+add wave -noupdate -group {frame capture} -label OVERFLOW /testbench/u_dut/u_frame_capture/overflow_r
 add wave -noupdate -divider -height 25 <NULL>
 add wave -noupdate -group ASYNC_FIFO /testbench/u_dut/u_async_fifo/rst
 add wave -noupdate -group ASYNC_FIFO /testbench/u_dut/u_async_fifo/wr_clk
@@ -132,23 +132,14 @@ add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/txe_n_i
 add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/wr_n_o
 add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/adbus_o
 add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/tx_active_o
-add wave -noupdate -group FTDI_CTRL -radix symbolic -radixenum symbolic /testbench/u_dut/u_ftdi_ctrl/s_state
-add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/data_r
-add wave -noupdate -group FTDI_CTRL /testbench/u_dut/u_ftdi_ctrl/fifo_rd_r
 add wave -noupdate /testbench/u_dut/u_ftdi_ctrl/rxf_n_i
-add wave -noupdate /testbench/u_dut/u_ftdi_ctrl/s_oe_n
 add wave -noupdate /testbench/u_dut/u_ftdi_ctrl/adbus_oe
+add wave -noupdate /testbench/u_dut/u_ftdi_ctrl/s_oe_n
 add wave -noupdate /testbench/u_dut/u_ftdi_ctrl/s_rd_n
-add wave -noupdate /testbench/u_dut/u_ftdi_ctrl/s_rx_byte
 add wave -noupdate /testbench/u_dut/u_ftdi_ctrl/adbus_i
 add wave -noupdate /testbench/u_dut/u_ftdi_ctrl/s_cmd_valid_r
+add wave -noupdate /testbench/u_dut/u_ftdi_ctrl/s_rx_state
 add wave -noupdate -divider -height 25 <NULL>
-add wave -noupdate -expand -group CMD /testbench/u_dut/s_cmd_valid_sync1
-add wave -noupdate -expand -group CMD /testbench/u_dut/s_cmd_type_sync1
-add wave -noupdate -expand -group CMD /testbench/u_dut/s_cmd_data_sync1
-add wave -noupdate /testbench/u_dut/s_cmdproc_src_sel
-add wave -noupdate /testbench/u_dut/u_cmd_processor/src_sel_o
-add wave -noupdate /testbench/u_dut/u_cmd_processor/s_src_sel_r
 add wave -noupdate /testbench/u_dut/u_cmd_processor/s_data_sync1
 add wave -noupdate -divider -height 25 <NULL>
 add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/acbus_io
@@ -156,10 +147,24 @@ add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/adbus_io
 add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/s_clkout
 add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/s_txe_n
 add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/s_rxf_n
+add wave -noupdate -expand -group ftdi_agent -label OE# /testbench/u_ftdi_agent/acbus_io(6)
 add wave -noupdate -expand -group ftdi_agent -radix unsigned /testbench/u_ftdi_agent/s_rx_fifo_level
 add wave -noupdate -expand -group ftdi_agent /testbench/u_ftdi_agent/s_tx_fifo_dout
+add wave -noupdate -expand -group {CMD PROCESSOR} /testbench/u_dut/u_cmd_processor/s_valid_sync0
+add wave -noupdate -expand -group {CMD PROCESSOR} /testbench/u_dut/u_cmd_processor/s_valid_sync1
+add wave -noupdate -expand -group {CMD PROCESSOR} /testbench/u_dut/u_cmd_processor/s_valid_sync2
+add wave -noupdate -expand -group {CMD PROCESSOR} /testbench/u_dut/u_cmd_processor/s_type_sync0
+add wave -noupdate -expand -group {CMD PROCESSOR} /testbench/u_dut/u_cmd_processor/s_type_sync1
+add wave -noupdate -expand -group {CMD PROCESSOR} /testbench/u_dut/u_cmd_processor/s_data_sync0
+add wave -noupdate -expand -group {CMD PROCESSOR} /testbench/u_dut/u_cmd_processor/s_data_sync1
+add wave -noupdate -expand -group {CMD PROCESSOR} /testbench/u_dut/u_cmd_processor/s_page_sync0
+add wave -noupdate -expand -group {CMD PROCESSOR} /testbench/u_dut/u_cmd_processor/s_page_sync1
+add wave -noupdate -expand -group {CMD PROCESSOR} /testbench/u_dut/u_cmd_processor/s_addr_sync0
+add wave -noupdate -expand -group {CMD PROCESSOR} /testbench/u_dut/u_cmd_processor/s_addr_sync1
+add wave -noupdate -expand -group {CMD PROCESSOR} /testbench/u_dut/u_cmd_processor/s_cmd_pulse
+add wave -noupdate -expand -group {CMD PROCESSOR} /testbench/u_dut/u_cmd_processor/s_exec_state
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {1152053500 ps} 0} {{Cursor 2} {1359561180 ps} 0}
+WaveRestoreCursors {{Cursor 1} {550452981 ps} 0} {{Cursor 2} {2433833651 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 553
 configure wave -valuecolwidth 100
@@ -175,4 +180,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits us
 update
-WaveRestoreZoom {0 ps} {100 us}
+WaveRestoreZoom {550234960 ps} {550535526 ps}
